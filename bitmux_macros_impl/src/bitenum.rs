@@ -1,5 +1,6 @@
 use unsynn::*;
 
+use crate::error_handling::*;
 use crate::grammar_common::*;
 
 unsynn! {
@@ -37,7 +38,10 @@ unsynn! {
 }
 
 pub fn do_bitenum(_attr: TokenStream, inp: TokenStream) -> TokenStream {
-    let inp: BitEnum = inp.to_token_iter().parse_all().unwrap();
+    let inp: BitEnum = match inp.to_token_iter().parse_all() {
+        Ok(x) => x,
+        Err(e) => return unsynn_err_to_lower_error(&e),
+    };
     dbg!(&inp);
 
     let enum_attr = &inp.attr;
