@@ -134,7 +134,7 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
             Either::First(def) => {
                 if !default_code.is_empty() {
                     return err_with_span(
-                        "cannot have multiple default blocks",
+                        "cannot have multiple err blocks",
                         tokeniter_to_span(def.to_token_iter()),
                     );
                 }

@@ -182,18 +182,18 @@ mod tests {
 
         #[test]
         fn test() {
-            let mut x = 0x1234u32;
+            let mut x = 0x5234u32;
             assert_eq!(TestEnum::get(EnumRef { b: &x, idx: 0 }), TestEnum::ValA);
             assert_eq!(TestEnum::get(EnumRef { b: &x, idx: 1 }), TestEnum::ValC);
             assert_eq!(TestEnum::get(EnumRef { b: &x, idx: 2 }), TestEnum::ValC);
             assert_eq!(TestEnum::get(EnumRef { b: &x, idx: 3 }), TestEnum::ValB);
 
             TestEnum::ValC.set(EnumRef { b: &mut x, idx: 0 });
-            assert_eq!(x, 0x1237);
+            assert_eq!(x, 0x5237);
             TestEnum::ValA.set(EnumRef { b: &mut x, idx: 1 });
-            assert_eq!(x, 0x1207);
+            assert_eq!(x, 0x5207);
             TestEnum::ValB.set(EnumRef { b: &mut x, idx: 2 });
-            assert_eq!(x, 0x1107);
+            assert_eq!(x, 0x5107);
         }
     }
 }
