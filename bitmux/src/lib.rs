@@ -26,7 +26,7 @@
 //!   that external implementation will handle mapping "this thingy"-relative bit coordinates
 //!   to tile-relative and global coordinates within the bitstream,
 //!   but the details are no longer exposed to _this_ crate.
-//! - this code now uses [bitvec] to pre-collect the field's bits into a primitive integer,
+//! - this code now uses [mod@bitvec] to pre-collect the field's bits into a primitive integer,
 //!   so that matching will _always_ be done using bit masking. this does end up enforcing an
 //!   (acceptable) upper limit on the size of each bitfield.
 //! - invalid values will now panic, rather than attempting to capture or represent invalid states.
@@ -112,6 +112,16 @@ pub trait BitEnum {
     fn get(b: impl BitGetter) -> Self;
     /// Write ourself into a [BitSetter] handle
     fn set(&self, b: impl BitSetter);
+}
+
+pub use bitmux_macros::bitenum;
+
+#[bitenum]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum TestEnum2 {
+    ValA = "00",
+    ValB = "01",
+    ValC = "1X",
 }
 
 /// TODO: This will be replaced with a proc macro

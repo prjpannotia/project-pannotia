@@ -1,0 +1,7 @@
+[package]
+name = "bitmux_macros_impl"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+unsynn = "0.3"

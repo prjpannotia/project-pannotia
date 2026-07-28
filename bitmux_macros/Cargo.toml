@@ -1,0 +1,10 @@
+[package]
+name = "bitmux_macros"
+version = "0.0.0"
+edition = "2024"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+bitmux_macros_impl = { path = "../bitmux_macros_impl" }
