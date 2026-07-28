@@ -116,7 +116,6 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
         Ok(x) => x,
         Err(e) => return unsynn_err_to_lower_error(&e),
     };
-    dbg!(&inp);
 
     let enum_attr = &inp.attr;
     let enum_vis = &inp.vis;
@@ -222,7 +221,7 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
     let nbits = nbits.unwrap();
 
     let default_handling = if default_code.is_empty() {
-        quote! { _ => unreachable!("invalid bit pattern {bits:0width$b}", width = #nbits) }
+        quote! { _ => panic!("invalid bit pattern {bits:0width$b}", width = #nbits) }
     } else {
         quote! { _ => #default_code }
     };
@@ -268,7 +267,6 @@ mod tests {
         .to_token_stream();
 
         let outp = do_bitenum(TokenStream::new(), inp);
-        dbg!(&outp);
         assert_tokens_eq!(
             outp,
             r#"
@@ -287,7 +285,7 @@ mod tests {
                         0 => Self::VarA,
                         1 => Self::VarB,
                         _ if bits & 2 == 2 => Self::VarC,
-                        _ => unreachable!("invalid bit pattern {bits:0width$b}", width = 2)
+                        _ => panic!("invalid bit pattern {bits:0width$b}", width = 2)
                     }
                 }
                 fn set(&self, mut s: impl ::bitmux::BitSetter) {
