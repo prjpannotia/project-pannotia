@@ -124,7 +124,10 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
 
     // This will go inside the generated output enum
     let mut enum_variants = TokenStream::new();
+    let mut enum_get_match_arms = TokenStream::new();
+    let mut enum_set_match_arms = TokenStream::new();
     let mut default_code = TokenStream::new();
+    let mut nbits = None;
 
     for var in inp.inner.content {
         let var = &var.value;
@@ -142,14 +145,82 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
                 let var_attr = &var.attr;
                 let var_ident = &var.ident;
                 let var_value = var.value.as_str();
+                let var_value_span = var.value.clone().into_inner().span();
 
+                // Validate the bit length
+                match nbits {
+                    Some(nbits) => {
+                        if nbits != var_value.len() {
+                            return err_with_span(
+                                &format!("wrong number of bits (expected {})", nbits),
+                                var_value_span,
+                            );
+                        }
+                    }
+                    None => nbits = Some(var_value.len()),
+                }
+
+                // Store the ident
                 enum_variants.extend(quote! {
                     #var_attr #var_ident ,
+                });
+
+                // process the bit pattern
+                let mut match_val = 0u32;
+                let mut write_val = 0u32;
+                let mut has_dont_care = false;
+                for b in var_value.chars() {
+                    match_val <<= 1;
+                    write_val <<= 1;
+                    match b {
+                        '0' => {}
+                        '1' => {
+                            match_val |= 1;
+                            write_val |= 1;
+                        }
+                        'x' => {
+                            // Write as 0, read as don't care
+                            has_dont_care = true;
+                        }
+                        'X' => {
+                            // Write as 1, read as don't care
+                            has_dont_care = true;
+                            write_val |= 1;
+                        }
+                        _ => return err_with_span(&format!("invalid bit '{}'", b), var_value_span),
+                    }
+                }
+
+                // generate "get" code
+                if !has_dont_care {
+                    enum_get_match_arms.extend(quote! {
+                        #match_val => Self::#var_ident,
+                    });
+                } else {
+                    enum_get_match_arms.extend(quote! {
+                        _ if bits & #match_val == #match_val => Self::#var_ident,
+                    });
+                }
+
+                // generate "set" code
+                enum_set_match_arms.extend(quote! {
+                    Self::#var_ident => #crate_path::BitSetter::set_bits::<#nbits>(&mut s, #write_val),
                 });
             }
             _ => unreachable!(),
         }
     }
+
+    if nbits.is_none() {
+        return err_with_span("cannot have zero variants", enum_ident.span());
+    }
+    let nbits = nbits.unwrap();
+
+    let default_handling = if default_code.is_empty() {
+        quote! { _ => unreachable!("invalid bit pattern {bits:0width$b}", width = #nbits) }
+    } else {
+        quote! { _ => #default_code }
+    };
 
     quote! {
         #enum_attr
@@ -157,13 +228,18 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
             #enum_variants
         }
 
-        // FIXME crate path
         impl #crate_path::BitEnum for #enum_ident {
             fn get(g: impl #crate_path::BitGetter) -> Self {
-                todo!()
+                let bits = #crate_path::BitGetter::get_bits::<#nbits>(&g);
+                match bits {
+                    #enum_get_match_arms
+                    #default_handling
+                }
             }
             fn set(&self, mut s: impl #crate_path::BitSetter) {
-                todo!()
+                match self {
+                    #enum_set_match_arms
+                }
             }
         }
     }
@@ -182,7 +258,6 @@ mod tests {
                 VarA = "00",
                 VarB = "01",
                 VarC = "1x",
-                err = foo,
             }
         "#
         .to_token_stream();
@@ -202,10 +277,20 @@ mod tests {
 
             impl ::bitmux::BitEnum for TestEnum {
                 fn get(g: impl ::bitmux::BitGetter) -> Self {
-                    todo!()
+                    let bits = ::bitmux::BitGetter::get_bits:: <2>(&g);
+                    match bits {
+                        0 => Self::VarA,
+                        1 => Self::VarB,
+                        _ if bits & 2 == 2 => Self::VarC,
+                        _ => unreachable!("invalid bit pattern {bits:0width$b}", width = 2)
+                    }
                 }
                 fn set(&self, mut s: impl ::bitmux::BitSetter) {
-                    todo!()
+                    match self {
+                        Self::VarA => ::bitmux::BitSetter::set_bits:: <2>(&mut s, 0),
+                        Self::VarB => ::bitmux::BitSetter::set_bits:: <2>(&mut s, 1),
+                        Self::VarC => ::bitmux::BitSetter::set_bits:: <2>(&mut s, 2),
+                    }
                 }
             }
             "#

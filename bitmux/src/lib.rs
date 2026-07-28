@@ -116,43 +116,6 @@ pub trait BitEnum {
 
 pub use bitmux_macros::bitenum;
 
-#[bitenum(crate = crate)]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-enum TestEnum2 {
-    ValA = "00",
-    ValB = "01",
-    ValC = "1X",
-    err = { foo },
-}
-
-/// TODO: This will be replaced with a proc macro
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-enum TestEnum {
-    ValA, // = 0b00
-    ValB, // = 0b01
-    ValC, // = 0b1X
-          // _ = panic!("unknown value!") TODO
-}
-impl BitEnum for TestEnum {
-    fn get(g: impl BitGetter) -> Self {
-        let bits = g.get_bits::<2>();
-        match bits {
-            0b00 => Self::ValA,
-            0b01 => Self::ValB,
-            _ if bits & 0b10 == 0b10 => Self::ValC,
-            _ => unreachable!(),
-        }
-    }
-
-    fn set(&self, mut s: impl BitSetter) {
-        match self {
-            TestEnum::ValA => s.set_bits::<2>(0b00),
-            TestEnum::ValB => s.set_bits::<2>(0b01),
-            TestEnum::ValC => s.set_bits::<2>(0b11),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     mod test_bit_getter_setter {
@@ -188,6 +151,14 @@ mod tests {
     mod test_enum {
         use super::super::*;
         use core::borrow::{Borrow, BorrowMut};
+
+        #[bitenum(crate = crate)]
+        #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+        enum TestEnum {
+            ValA = "00",
+            ValB = "01",
+            ValC = "1X",
+        }
 
         struct EnumRef<B: Borrow<u32>> {
             b: B,
