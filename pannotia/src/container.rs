@@ -196,6 +196,9 @@ impl From<io::Error> for BitstreamContainerError {
 /// Represents an in-memory FPGA bitstream
 #[derive(Debug)]
 pub struct Bitstream {
+    family: crate::chips::Family,
+    /// User ID value to identify the bitstream design
+    pub user_id: u32,
     config_arrays: Vec<Vec<Vec<u8>>>,
 }
 impl Bitstream {
@@ -242,6 +245,8 @@ impl Bitstream {
 
         // Pre-fill config array vecs with empty vecs
         let mut ret = Self {
+            family,
+            user_id,
             config_arrays: Vec::with_capacity(array_sizes.len()),
         };
         for szs in array_sizes {
@@ -334,5 +339,74 @@ impl Bitstream {
         }
 
         Ok(ret)
+    }
+
+    pub fn save<W: io::Write>(&self, w: W) -> io::Result<()> {
+        // Wrap the write into something that _also_ updates CRC along the way
+        struct CRCWriter<'a, W: io::Write> {
+            w: W,
+            crc: crc::Digest<'a, u32>,
+        }
+        impl<'a, W: io::Write> CRCWriter<'a, W> {
+            /// Write a block of data, updating the CRC
+            fn put_data(&mut self, x: &[u8]) -> io::Result<()> {
+                self.crc.update(x);
+                self.w.write_all(x)?;
+                Ok(())
+            }
+
+            /// Put a *big* endian u32, update the CRC
+            fn put_u32(&mut self, x: u32) -> io::Result<()> {
+                self.put_data(&x.to_be_bytes())
+            }
+        }
+        let mut w = CRCWriter {
+            w,
+            crc: BITSTREAM_CRC.digest(),
+        };
+
+        // IDs
+        w.put_u32(self.family.device_id())?;
+        w.put_u32(self.user_id)?;
+
+        // XXX maybe generalize this later?
+        let array_sizes = self.family.config_bits();
+        let mut put_cfg_array = |group, chain| -> io::Result<()> {
+            log::debug!("writing config group {group} chain {chain}");
+            let hdr = HeaderWord::make_config_hdr(false, group, chain);
+            w.put_u32(hdr.0)?;
+            let cfgw =
+                ConfigWord::make_config_word(array_sizes[group as usize][chain as usize] as u32);
+            w.put_u32(cfgw.0)?;
+            w.put_data(&self.config_arrays[group as usize][chain as usize])?;
+            Ok(())
+        };
+        match self.family {
+            crate::chips::Family::AGRV2K => {
+                // IO
+                put_cfg_array(1, 0)?;
+
+                // PLLs
+                put_cfg_array(1, 1)?;
+            }
+        }
+
+        // main logic array
+        put_cfg_array(0, 0)?;
+
+        // TODO: DEV_OE etc
+        let hdr = HeaderWord::make_reg_write_hdr(true, 2);
+        w.put_u32(hdr.0)?;
+        w.put_u32(0xf8f)?;
+
+        // CRC
+        let crc = w.crc.finalize().to_be_bytes();
+        w.w.write_all(&crc)?;
+
+        Ok(())
+    }
+
+    pub const fn family(&self) -> crate::chips::Family {
+        self.family
     }
 }

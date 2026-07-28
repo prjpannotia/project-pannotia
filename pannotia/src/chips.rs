@@ -37,6 +37,13 @@ impl Family {
             ],
         }
     }
+
+    /// Returns the size of the main logic array in bits, `(W, H)`
+    pub const fn main_logic_bits(self) -> (u32, u32) {
+        match self {
+            Family::AGRV2K => (928, 860),
+        }
+    }
 }
 /// Try converting a device ID to a chip family
 impl TryFrom<u32> for Family {

@@ -1,12 +1,13 @@
 use std::error;
 use std::fmt::Display;
 use std::fs::File;
-use std::io::{self, BufReader};
+use std::io::{self, BufReader, BufWriter};
 use std::process::ExitCode;
 
 #[derive(Debug)]
 pub enum Error {
     WrongArgs,
+    InvalidMode,
     IoError(io::Error),
     BitstreamContainerError(pannotia::container::BitstreamContainerError),
 }
@@ -14,6 +15,7 @@ impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::WrongArgs => write!(f, "wrong number of arguments"),
+            Self::InvalidMode => write!(f, "invalid dump mode"),
             Self::IoError(e) => e.fmt(f),
             Self::BitstreamContainerError(e) => e.fmt(f),
         }
@@ -43,14 +45,23 @@ fn main() -> Result<ExitCode, Error> {
     env_logger::init();
     let args = std::env::args_os().collect::<Vec<_>>();
 
-    if args.len() < 2 {
-        println!("Usage: {} file.bin", args[0].to_string_lossy());
+    if args.len() < 3 {
+        println!("Usage: {} dump_mode file.bin", args[0].to_string_lossy());
         return Err(Error::WrongArgs);
     }
 
-    let f = BufReader::new(File::open(&args[1])?);
+    let f = BufReader::new(File::open(&args[2])?);
     let b = pannotia::container::Bitstream::read(f)?;
     // dbg!(b);
+
+    if args[1].eq_ignore_ascii_case("bits") {
+        // TODO
+    } else {
+        return Err(Error::InvalidMode);
+    }
+
+    let f = BufWriter::new(File::create("dump.bin")?);
+    b.save(f)?;
 
     Ok(ExitCode::SUCCESS)
 }
