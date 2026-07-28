@@ -1,7 +1,7 @@
 use std::error;
 use std::fmt::Display;
 use std::fs::File;
-use std::io::{self, BufReader, BufWriter};
+use std::io::{self, BufReader};
 use std::process::ExitCode;
 
 #[derive(Debug)]
@@ -55,13 +55,46 @@ fn main() -> Result<ExitCode, Error> {
     // dbg!(b);
 
     if args[1].eq_ignore_ascii_case("bits") {
-        // TODO
+        let config_bits = b.family().config_bits();
+        for (group, chains) in config_bits.iter().enumerate() {
+            for (chain, &chain_bits) in chains.iter().enumerate() {
+                println!("// group {group} chain {chain}");
+
+                if (group, chain) != (0, 0) {
+                    for biti in 0..chain_bits {
+                        print!(
+                            "{}",
+                            if b.get_aux_array_bit(group as u32, chain as u32, biti) {
+                                "1"
+                            } else {
+                                "0"
+                            }
+                        );
+                    }
+                    println!();
+                } else {
+                    let (w, h) = b.family().main_logic_bits();
+                    for y in 0..h {
+                        for x in 0..w {
+                            print!(
+                                "{}",
+                                if b.get_logic_array_bit(x, y) {
+                                    "1"
+                                } else {
+                                    "0"
+                                }
+                            );
+                        }
+                        println!();
+                    }
+                }
+
+                println!("");
+            }
+        }
     } else {
         return Err(Error::InvalidMode);
     }
-
-    let f = BufWriter::new(File::create("dump.bin")?);
-    b.save(f)?;
 
     Ok(ExitCode::SUCCESS)
 }

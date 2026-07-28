@@ -41,7 +41,8 @@ impl Family {
     /// Returns the size of the main logic array in bits, `(W, H)`
     pub const fn main_logic_bits(self) -> (u32, u32) {
         match self {
-            Family::AGRV2K => (928, 860),
+            // NOTE: we lose 8 unused bits from the end of each row
+            Family::AGRV2K => (920, 860),
         }
     }
 }

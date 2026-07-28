@@ -44,7 +44,11 @@
 //!
 //! The "actual logic" is stored as one extremely-large array in group 0 chain 0.
 
-use std::{error, fmt::Display, io};
+use std::error;
+use std::fmt::Display;
+use std::io;
+
+use bitvec::prelude::*;
 
 /// A bitstream control word, describing how to process the data that follows
 ///
@@ -199,7 +203,7 @@ pub struct Bitstream {
     family: crate::chips::Family,
     /// User ID value to identify the bitstream design
     pub user_id: u32,
-    config_arrays: Vec<Vec<Vec<u8>>>,
+    config_arrays: Vec<Vec<BitVec<u8, Msb0>>>,
 }
 impl Bitstream {
     pub fn read<R: io::Read>(r: R) -> Result<Self, BitstreamContainerError> {
@@ -254,7 +258,7 @@ impl Bitstream {
         }
         for (i, szs) in array_sizes.iter().enumerate() {
             for _ in szs.iter() {
-                ret.config_arrays[i].push(Vec::new());
+                ret.config_arrays[i].push(BitVec::new());
             }
         }
 
@@ -299,7 +303,7 @@ impl Bitstream {
                     }
 
                     let len_in_bytes = crate::divroundup(len_in_bits, 32) as usize * 4;
-                    let array_data = r.get_vec(len_in_bytes)?;
+                    let array_data = BitVec::try_from_vec(r.get_vec(len_in_bytes)?).unwrap();
                     let _ = std::mem::replace(
                         &mut ret.config_arrays[config_group as usize][config_chain as usize],
                         array_data,
@@ -378,7 +382,7 @@ impl Bitstream {
             let cfgw =
                 ConfigWord::make_config_word(array_sizes[group as usize][chain as usize] as u32);
             w.put_u32(cfgw.0)?;
-            w.put_data(&self.config_arrays[group as usize][chain as usize])?;
+            w.put_data(self.config_arrays[group as usize][chain as usize].as_raw_slice())?;
             Ok(())
         };
         match self.family {
@@ -408,5 +412,28 @@ impl Bitstream {
 
     pub const fn family(&self) -> crate::chips::Family {
         self.family
+    }
+
+    pub fn get_aux_array_bit(&self, group: u32, chain: u32, biti: usize) -> bool {
+        self.config_arrays[group as usize][chain as usize][biti]
+    }
+    pub fn set_aux_array_bit(&mut self, group: u32, chain: u32, biti: usize, val: bool) {
+        self.config_arrays[group as usize][chain as usize].set(biti, val);
+    }
+
+    pub fn get_logic_array_bit(&self, x: u32, y: u32) -> bool {
+        let (w, h) = self.family.main_logic_bits();
+        assert!(x < w && y < h);
+        let real_w = crate::divroundup(w, 32) * 32;
+        self.config_arrays[0][0][y as usize * real_w as usize + (w as usize - 1 - x as usize)]
+    }
+    pub fn set_logic_array_bit(&mut self, x: u32, y: u32, val: bool) {
+        let (w, h) = self.family.main_logic_bits();
+        assert!(x < w && y < h);
+        let real_w = crate::divroundup(w, 32) * 32;
+        self.config_arrays[0][0].set(
+            y as usize * real_w as usize + (w as usize - 1 - x as usize),
+            val,
+        );
     }
 }
