@@ -166,15 +166,20 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
                 });
 
                 // process the bit pattern
+                let mut match_mask = 0u32;
                 let mut match_val = 0u32;
                 let mut write_val = 0u32;
                 let mut has_dont_care = false;
                 for b in var_value.chars() {
+                    match_mask <<= 1;
                     match_val <<= 1;
                     write_val <<= 1;
                     match b {
-                        '0' => {}
+                        '0' => {
+                            match_mask |= 1;
+                        }
                         '1' => {
+                            match_mask |= 1;
                             match_val |= 1;
                             write_val |= 1;
                         }
@@ -198,7 +203,7 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
                     });
                 } else {
                     enum_get_match_arms.extend(quote! {
-                        _ if bits & #match_val == #match_val => Self::#var_ident,
+                        _ if bits & #match_mask == #match_val => Self::#var_ident,
                     });
                 }
 

@@ -155,9 +155,9 @@ mod tests {
         #[bitenum(crate = crate)]
         #[derive(Clone, Copy, PartialEq, Eq, Debug)]
         enum TestEnum {
-            ValA = "00",
-            ValB = "01",
-            ValC = "1X",
+            ValA = "x00",
+            ValB = "x01",
+            ValC = "X1X",
         }
 
         struct EnumRef<B: Borrow<u32>> {
