@@ -71,6 +71,18 @@ type FieldPackedBitsTy = u32;
 ///     }
 /// }
 /// ```
+///
+/// In most cases, there will be a _unique_ pairing between
+/// each wrapper type which implements `BitGetter`
+/// (e.g. a hypothetical `struct LutCarryRef`) and
+/// each field (e.g. a hypothetical `enum LutCarryInput`).
+/// However, because FPGAs always end up with exceptions,
+/// this isn't encoded into the macro-based code generation
+/// and must be dealt with _manually_ (by "just" calling with
+/// the correct types and never calling with the wrong types).
+/// Previous attempts to check this within the Rust type system
+/// resulted in _more_ unmaintainable complexity, and
+/// this pairing does not ever need to change once it works.
 pub trait BitGetter {
     /// Return the `biti`-th bit in the encoding of this field
     fn get_bit(&self, biti: usize) -> bool;
