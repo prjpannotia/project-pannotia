@@ -2,6 +2,7 @@
 
 pub mod chips;
 pub mod container;
+pub mod tiles;
 
 #[inline]
 pub(crate) const fn divroundup(x: u32, divisor: u32) -> u32 {

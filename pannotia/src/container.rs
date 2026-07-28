@@ -436,4 +436,11 @@ impl Bitstream {
             val,
         );
     }
+
+    pub fn tile(&self, x: u32, y: u32) -> crate::tiles::TileRef<&Self> {
+        crate::tiles::TileRef::new(self, crate::tiles::TilePos { x, y })
+    }
+    pub fn tile_mut(&mut self, x: u32, y: u32) -> crate::tiles::TileRef<&mut Self> {
+        crate::tiles::TileRef::new(self, crate::tiles::TilePos { x, y })
+    }
 }

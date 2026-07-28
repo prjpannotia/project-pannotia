@@ -51,7 +51,7 @@ fn main() -> Result<ExitCode, Error> {
     }
 
     let f = BufReader::new(File::open(&args[2])?);
-    let b = pannotia::container::Bitstream::read(f)?;
+    let mut b = pannotia::container::Bitstream::read(f)?;
     // dbg!(b);
 
     if args[1].eq_ignore_ascii_case("bits") {
@@ -92,6 +92,9 @@ fn main() -> Result<ExitCode, Error> {
                 println!("");
             }
         }
+    } else if args[1].eq_ignore_ascii_case("test") {
+        b.tile(123, 456).as_logic_tile().lut();
+        b.tile_mut(123, 456).as_logic_tile().set_lut(123);
     } else {
         return Err(Error::InvalidMode);
     }
