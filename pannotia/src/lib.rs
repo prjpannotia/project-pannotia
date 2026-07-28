@@ -3,17 +3,7 @@
 pub mod chips;
 pub mod container;
 
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[inline]
+pub(crate) const fn divroundup(x: u32, divisor: u32) -> u32 {
+    (x + divisor - 1) / divisor
 }

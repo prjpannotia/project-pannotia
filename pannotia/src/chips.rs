@@ -24,6 +24,19 @@ impl Family {
             Family::AGRV2K => 0x40200001,
         }
     }
+
+    /// Return the sizes of all the configuration arrays
+    pub const fn config_bits(self) -> &'static [&'static [usize]] {
+        match self {
+            Family::AGRV2K => &[
+                &[860 * 928], // group 0 chain 0 (main array)
+                &[
+                    834, // group 1 chain 0 (IO)
+                    239, // group 1 chain 1 (PLL)
+                ],
+            ],
+        }
+    }
 }
 /// Try converting a device ID to a chip family
 impl TryFrom<u32> for Family {

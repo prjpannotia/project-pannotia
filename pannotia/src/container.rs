@@ -44,6 +44,8 @@
 //!
 //! The "actual logic" is stored as one extremely-large array in group 0 chain 0.
 
+use std::{error, fmt::Display, io};
+
 /// A bitstream control word, describing how to process the data that follows
 ///
 /// The format of the control word is as follows:
@@ -116,3 +118,221 @@ impl ConfigWord {
 }
 
 pub(crate) const BITSTREAM_CRC: crc::Crc<u32> = crc::Crc::<u32>::new(&crc::CRC_32_BZIP2);
+
+/// Errors that can arise while parsing a bitstream container
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum BitstreamContainerError {
+    IoError(io::Error),
+    InvalidDeviceID(u32),
+    InvalidHeaderWord(u32),
+    UnexpectedConfigData {
+        group: u32,
+        chain: u32,
+    },
+    UnexpectedConfigSize {
+        group: u32,
+        chain: u32,
+        expected_bits: u32,
+        have_bits: u32,
+    },
+    InvalidCRC {
+        expected: u32,
+        calculated: u32,
+    },
+}
+impl Display for BitstreamContainerError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::IoError(e) => e.fmt(f),
+            Self::InvalidDeviceID(x) => {
+                write!(f, "invalid or unsupported device ID 0x{:08x}", x)
+            }
+            Self::InvalidHeaderWord(x) => {
+                write!(f, "header word 0x{:08x} is of invalid type", x)
+            }
+            Self::UnexpectedConfigData { group, chain } => {
+                write!(f, "not expecting config group {} chain {}", group, chain)
+            }
+            Self::UnexpectedConfigSize {
+                group,
+                chain,
+                expected_bits,
+                have_bits,
+            } => {
+                write!(
+                    f,
+                    "wrong size for config group {} chain {}, expecting {} bits but got {} bits",
+                    group, chain, expected_bits, have_bits
+                )
+            }
+            BitstreamContainerError::InvalidCRC {
+                expected,
+                calculated,
+            } => {
+                write!(
+                    f,
+                    "invalid CRC, expecting 0x{:08x} but calculated 0x{:08x}",
+                    expected, calculated
+                )
+            }
+        }
+    }
+}
+impl error::Error for BitstreamContainerError {
+    fn cause(&self) -> Option<&dyn error::Error> {
+        match self {
+            Self::IoError(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+impl From<io::Error> for BitstreamContainerError {
+    fn from(value: io::Error) -> Self {
+        Self::IoError(value)
+    }
+}
+
+/// Represents an in-memory FPGA bitstream
+#[derive(Debug)]
+pub struct Bitstream {
+    config_arrays: Vec<Vec<Vec<u8>>>,
+}
+impl Bitstream {
+    pub fn read<R: io::Read>(r: R) -> Result<Self, BitstreamContainerError> {
+        // Wrap the reader into something that _also_ updates CRC along the way
+        struct CRCReader<'a, R: io::Read> {
+            r: R,
+            crc: crc::Digest<'a, u32>,
+        }
+        impl<'a, R: io::Read> CRCReader<'a, R> {
+            /// Read a block of data, updating the CRC
+            fn get_data(&mut self, x: &mut [u8]) -> io::Result<()> {
+                self.r.read_exact(x)?;
+                self.crc.update(x);
+                Ok(())
+            }
+
+            /// Read a block of data into a Vec
+            fn get_vec(&mut self, l: usize) -> io::Result<Vec<u8>> {
+                let mut ret = vec![0; l];
+                self.get_data(&mut ret)?;
+                Ok(ret)
+            }
+
+            /// Read a *big* endian u32, update the CRC
+            fn get_u32(&mut self) -> io::Result<u32> {
+                let mut ret = [0; 4];
+                self.get_data(&mut ret)?;
+                Ok(u32::from_be_bytes(ret))
+            }
+        }
+        let mut r = CRCReader {
+            r,
+            crc: BITSTREAM_CRC.digest(),
+        };
+
+        let device_id = r.get_u32()?;
+        let user_id = r.get_u32()?;
+        log::debug!("device id 0x{device_id:08x}, user id 0x{user_id:08x}");
+
+        let family = crate::chips::Family::try_from(device_id)
+            .map_err(|_| BitstreamContainerError::InvalidDeviceID(device_id))?;
+        let array_sizes = family.config_bits();
+
+        // Pre-fill config array vecs with empty vecs
+        let mut ret = Self {
+            config_arrays: Vec::with_capacity(array_sizes.len()),
+        };
+        for szs in array_sizes {
+            ret.config_arrays.push(Vec::with_capacity(szs.len()));
+        }
+        for (i, szs) in array_sizes.iter().enumerate() {
+            for _ in szs.iter() {
+                ret.config_arrays[i].push(Vec::new());
+            }
+        }
+
+        loop {
+            let hdr = HeaderWord(r.get_u32()?);
+            log::debug!("got header word 0x{:08x}", hdr.0);
+
+            match hdr.hdr_type() {
+                0b101 => {
+                    let config_group = hdr.config_group();
+                    let config_chain = hdr.config_chain();
+                    let config_word = ConfigWord(r.get_u32()?);
+                    let len_in_bits = config_word.bits();
+                    log::debug!(
+                        "{} bits for config group {} chain {}",
+                        len_in_bits,
+                        config_group,
+                        config_chain
+                    );
+
+                    // Validate that this config group/chain are as expected
+                    if config_group as usize >= array_sizes.len() {
+                        return Err(BitstreamContainerError::UnexpectedConfigData {
+                            group: config_group,
+                            chain: config_chain,
+                        });
+                    }
+                    if config_chain as usize >= array_sizes[config_group as usize].len() {
+                        return Err(BitstreamContainerError::UnexpectedConfigData {
+                            group: config_group,
+                            chain: config_chain,
+                        });
+                    }
+                    let expected_bits = array_sizes[config_group as usize][config_chain as usize];
+                    if len_in_bits as usize != expected_bits {
+                        return Err(BitstreamContainerError::UnexpectedConfigSize {
+                            group: config_group,
+                            chain: config_chain,
+                            expected_bits: expected_bits as u32,
+                            have_bits: len_in_bits,
+                        });
+                    }
+
+                    let len_in_bytes = crate::divroundup(len_in_bits, 32) as usize * 4;
+                    let array_data = r.get_vec(len_in_bytes)?;
+                    let _ = std::mem::replace(
+                        &mut ret.config_arrays[config_group as usize][config_chain as usize],
+                        array_data,
+                    );
+                }
+                0b001 => {
+                    let register = hdr.register();
+                    let reg_value = r.get_u32()?;
+                    log::debug!("reg 0x{:x} = 0x{:08x}", register, reg_value);
+
+                    // TODO: DEV_CLRn and DEV_OE functionality exists here, tbd
+                    if register != 2 || (register == 2 && reg_value != 0xf8f) {
+                        log::warn!(
+                            "Unknown register write 0x{:x} = 0x{:08x}",
+                            register,
+                            reg_value
+                        );
+                    }
+                }
+                _ => return Err(BitstreamContainerError::InvalidHeaderWord(hdr.0)),
+            }
+
+            if hdr.last_frame() {
+                break;
+            }
+        }
+
+        let crc_computed = r.crc.finalize();
+        let mut crc_expected = [0; 4];
+        r.r.read_exact(&mut crc_expected)?;
+        let crc_expected = u32::from_be_bytes(crc_expected);
+        if crc_computed != crc_expected {
+            return Err(BitstreamContainerError::InvalidCRC {
+                expected: crc_expected,
+                calculated: crc_computed,
+            });
+        }
+
+        Ok(ret)
+    }
+}

@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 env_logger = { version = "0.11" }
+pannotia = { path = "../pannotia" }
