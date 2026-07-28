@@ -2,6 +2,14 @@
 
 use unsynn::*;
 
+pub fn tokeniter_to_span(mut tok_iter: TokenIter) -> Span {
+    let span0 = match tok_iter.next() {
+        Some(t) => t.span(),
+        None => Span::call_site(),
+    };
+    tok_iter.fold(span0, |s, t| s.join(t.span()).unwrap_or(s))
+}
+
 pub fn err_with_span(err: &str, span: Span) -> TokenStream {
     let err_lit = Literal::string(err);
     let mut ret = quote! {

@@ -116,12 +116,13 @@ pub trait BitEnum {
 
 pub use bitmux_macros::bitenum;
 
-#[bitenum]
+#[bitenum(crate = crate)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 enum TestEnum2 {
     ValA = "00",
     ValB = "01",
     ValC = "1X",
+    err = { foo },
 }
 
 /// TODO: This will be replaced with a proc macro
