@@ -1,3 +1,5 @@
+//! Handle `#[bitenum]` macro
+
 use unsynn::*;
 
 use crate::error_handling::*;

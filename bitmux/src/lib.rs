@@ -114,6 +114,90 @@ pub trait BitEnum {
     fn set(&self, b: impl BitSetter);
 }
 
+/// Macro to generate enum field
+///
+/// This accepts input like the following:
+///
+/// ```
+/// # use bitmux::bitenum;
+/// #[bitenum]
+/// #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+/// enum HypotheticalFPGASetting {
+///     UseSuperFastPath = "x00",
+///     UseNormalPath = "x01",
+///     DontUseAnyPaths = "X1X",
+/// }
+/// ```
+///
+/// The result will be an automagic implementation of the [BitEnum] trait.
+///
+/// ## Bit patterns
+///
+/// Bit patterns are strings specifying how to encode a given setting in the bitstream.
+/// Each character corresponds to a single bit.
+///
+/// The valid characters for the string are `0`, `1`, `x`, and `X`.
+/// - `0` and `1` correspond to a `0` or `1` bit (obviously).
+/// - `x` is a don't-care while reading but will be written as `0` when writing.
+/// - `X` is a don't-care while reading but will be written as `1` when writing.
+///
+/// All bit patterns must be the same length, and this length must be &leq; 32 bits.
+///
+/// ## Bit ordering
+///
+/// The rightmost bit in the string literal is numbered `0`.
+///
+/// With an example:
+/// ```text
+/// "x01"
+///  ^ ^
+///  | |
+///  | +- bit 0
+///  +--- bit 2
+/// ```
+///
+/// ## Customizing error handling
+///
+/// By default, the macro will generate the following default match arm:
+///
+/// ```ignore
+/// _ => panic!("invalid bit pattern {bits:0width$b}", width = 3 /* or appropriate width */)
+/// ```
+///
+/// In the unlikely event that this is not sufficient, it is possible to
+/// customize this by using a special identifier of `err`:
+///
+/// ```
+/// # use bitmux::bitenum;
+/// #[bitenum]
+/// enum ErrExample {
+///     SomeSetting = "x00",
+///     err = {
+///         // do something else?
+///         panic!("my custom error")
+///     }
+/// }
+/// ```
+///
+/// ## Full syntax
+///
+/// The full syntax accepted by this macro is as follows:
+/// ```
+/// # use bitmux::bitenum;
+/// #[bitenum(
+///     crate = ::bitmux,   // It is possible to customize the path to the `bitmux` crate
+/// )]
+/// /// Doc comments will be propagated, as will other attributes
+/// pub(crate) // A visibility specifier is permitted
+/// enum FullExample {
+///     /// Doc comments and attributes here will propagate as well
+///     VariantA = "0000",
+///     /// This will be written as "0011"
+///     VariantB = "xxX1",
+///     // err = /* This space can be either an expression or a block */ Self::VariantA
+///     err = { Self::VariantA } // ... but only _one_, not multiple `err`
+/// }
+/// ```
 pub use bitmux_macros::bitenum;
 
 #[cfg(test)]
