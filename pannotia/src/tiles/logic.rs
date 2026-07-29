@@ -25,6 +25,7 @@ struct LogicLUT(u8);
 impl FieldPositionCalculator for LogicLUT {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "LUT index out of range");
         bitmux::bittable!(
             TileRelativeBitPos {
                 x: 27 + #x,

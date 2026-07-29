@@ -107,6 +107,22 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
         }
     }
 
+    /// Coerce to a reference to a generic routing tile
+    #[inline]
+    pub fn as_generic_routing_tile(self) -> generic_routing::GenericRoutingRef<D, Ref> {
+        let tile_type = self.tile_type();
+        assert!(
+            tile_type == TileType::Logic
+                || tile_type == TileType::RoutingOnly
+                || tile_type == TileType::BRAM
+        );
+        generic_routing::GenericRoutingRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
+
     /// Coerce to a reference to a logic tile
     #[inline]
     pub fn as_logic_tile(self) -> logic::LogicTileRef<D, Ref> {

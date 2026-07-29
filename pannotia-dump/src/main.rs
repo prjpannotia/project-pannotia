@@ -6,6 +6,7 @@ use std::io::{self, BufReader};
 use std::process::ExitCode;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
+use pannotia::tiles::generic_routing::RMUX;
 use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]
@@ -155,8 +156,24 @@ fn main() -> Result<ExitCode, Error> {
                     y: tile_y,
                 };
                 if let Some(tile) = b.tile(tile_pos) {
-                    let tile_type = tile.tile_type();
-                    match tile_type {
+                    // print generic routing
+                    match tile.tile_type() {
+                        TileType::Logic | TileType::RoutingOnly | TileType::BRAM => {
+                            let tile = tile.as_generic_routing_tile();
+                            for rmux_i in 0..96 {
+                                let rmux = tile.rmux(rmux_i);
+                                if rmux != RMUX::None {
+                                    println!("tile[{}].rmux[{}] = {}", tile_pos, rmux_i, rmux);
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+
+                if let Some(tile) = b.tile(tile_pos) {
+                    // print tile-specific stuff
+                    match tile.tile_type() {
                         TileType::Logic => {
                             let tile = tile.as_logic_tile();
                             for lut_i in 0..16 {
