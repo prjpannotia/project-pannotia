@@ -1,7 +1,18 @@
-use std::borrow::{Borrow, BorrowMut};
+//! Code for accessing every kind of FPGA tile
+//!
+//! In order to allow API users to refer to a specific tile
+//! as a first-class object (rather than passing in coordinates every time),
+//! every kind of tile has its own `SomeKindOfTileRef` struct
+//! containing a reference to the bitstream itself plus the tile's coordinate.
+//! This is abstracted over mutability by using the [Borrow]/[BorrowMut](std::borrow::BorrowMut) traits.
+//!
+//! The "generic" tile reference is [TileRef], and it is constructed by calling
+//! [Bitstream::tile{_mut}](Bitstream::tile)
 
-use bitmux::{BitGetter, BitSetter};
+use std::borrow::Borrow;
+use std::marker::PhantomData;
 
+use crate::container::{Bitstream, DebugTracer};
 use crate::coordinates::*;
 
 /// The kind of tile that exists at a given position
@@ -57,17 +68,27 @@ pub enum TileType {
     GCLKSW,
 }
 
+/// Functions common to all tile references
 pub trait TileRefTrait {
+    /// Get the type of the current tile
     fn tile_type(&self) -> TileType;
+    /// Get the position of the current tile
     fn pos(&self) -> TilePos;
 }
 
+/// Generic reference to a tile
+///
+/// This can be coerced to a more-specific reference type
+/// using the `as_*` functions. These functions all panic if the
+/// tile type is not as expected. The tile type can be validated
+/// by first calling [tile_type](Self::tile_type).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct TileRef<Ref: Borrow<crate::container::Bitstream>> {
+pub struct TileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     r: Ref,
     p: TilePos,
+    _d: PhantomData<D>,
 }
-impl<Ref: Borrow<crate::container::Bitstream>> TileRefTrait for TileRef<Ref> {
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait for TileRef<D, Ref> {
     fn tile_type(&self) -> TileType {
         let family = self.r.borrow().family();
         family.get_tile_type(self.p)
@@ -77,68 +98,26 @@ impl<Ref: Borrow<crate::container::Bitstream>> TileRefTrait for TileRef<Ref> {
     }
 }
 
-impl<Ref: Borrow<crate::container::Bitstream>> TileRef<Ref> {
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
     pub(crate) fn new(r: Ref, p: TilePos) -> Self {
-        Self { r, p }
+        Self {
+            r,
+            p,
+            _d: PhantomData,
+        }
     }
 
+    /// Coerce to a reference to a logic tile
     #[inline]
-    pub fn as_logic_tile(self) -> LogicTileRef<Ref> {
+    pub fn as_logic_tile(self) -> logic::LogicTileRef<D, Ref> {
         assert!(self.tile_type() == TileType::Logic);
-        LogicTileRef {
+        logic::LogicTileRef {
             r: self.r,
             p: self.p,
+            _d: PhantomData,
         }
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct LogicTileRef<Ref: Borrow<crate::container::Bitstream>> {
-    r: Ref,
-    p: TilePos,
-}
-impl<Ref: Borrow<crate::container::Bitstream>> TileRefTrait for LogicTileRef<Ref> {
-    fn tile_type(&self) -> TileType {
-        TileType::Logic
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-}
-
-struct LogicLUT(u8);
-impl FieldPositionCalculator for LogicLUT {
-    #[inline]
-    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
-        bitmux::bittable!(
-            TileRelativeBitPos {
-                x: 27 + #x,
-                y: #y + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 }
-            },
-            1   3   2   0,
-            7   5   4   6,
-            9   11  10  8,
-            15   13  12  14
-        )[biti]
-    }
-}
-impl<Ref: Borrow<crate::container::Bitstream>> LogicTileRef<Ref> {
-    pub fn lut(&self, lut_idx: u8) -> u16 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicLUT(lut_idx),
-        };
-        ref_.get_bits::<16>() as u16
-    }
-}
-impl<Ref: BorrowMut<crate::container::Bitstream>> LogicTileRef<Ref> {
-    pub fn set_lut(&mut self, lut_idx: u8, val: u16) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicLUT(lut_idx),
-        };
-        ref_.set_bits::<16>(val as u32)
-    }
-}
+pub mod generic_routing;
+pub mod logic;

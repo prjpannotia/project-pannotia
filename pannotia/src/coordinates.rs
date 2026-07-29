@@ -2,8 +2,10 @@
 
 use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use crate::chips::Family;
+use crate::container::DebugTracer;
 
 /// The location of a tile within the array
 ///
@@ -84,19 +86,23 @@ impl From<(Family, TilePos, TileRelativeBitPos)> for GlobalBitPos {
     }
 }
 
+/// Internal trait which returns tile-relative bit positions for a given field
 pub(crate) trait FieldPositionCalculator {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos;
 }
+/// Internal helper to convert tile-relative bit positions into something [bitmux] can use.
 pub(crate) struct GenericFieldRef<
-    Ref: Borrow<crate::container::Bitstream>,
+    D: DebugTracer,
+    Ref: Borrow<crate::container::Bitstream<D>>,
     F: FieldPositionCalculator,
 > {
     pub(crate) bitstream: Ref,
     pub(crate) tile_pos: TilePos,
     pub(crate) field_pos: F,
+    pub(crate) _d: PhantomData<D>,
 }
-impl<Ref: Borrow<crate::container::Bitstream>, F: FieldPositionCalculator> bitmux::BitGetter
-    for GenericFieldRef<Ref, F>
+impl<D: DebugTracer, Ref: Borrow<crate::container::Bitstream<D>>, F: FieldPositionCalculator>
+    bitmux::BitGetter for GenericFieldRef<D, Ref, F>
 {
     #[inline]
     fn get_bit(&self, biti: usize) -> bool {
@@ -104,11 +110,12 @@ impl<Ref: Borrow<crate::container::Bitstream>, F: FieldPositionCalculator> bitmu
         let bitstream = self.bitstream.borrow();
         let family = bitstream.family();
         let global_bit_pos: GlobalBitPos = (family, self.tile_pos, tile_relative_pos).into();
+        bitstream.debug_log_access(global_bit_pos, self.tile_pos, tile_relative_pos);
         bitstream.get_logic_array_bit(global_bit_pos)
     }
 }
-impl<Ref: BorrowMut<crate::container::Bitstream>, F: FieldPositionCalculator> bitmux::BitSetter
-    for GenericFieldRef<Ref, F>
+impl<D: DebugTracer, Ref: BorrowMut<crate::container::Bitstream<D>>, F: FieldPositionCalculator>
+    bitmux::BitSetter for GenericFieldRef<D, Ref, F>
 {
     #[inline]
     fn set_bit(&mut self, biti: usize, val: bool) {

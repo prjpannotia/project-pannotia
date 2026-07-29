@@ -48,7 +48,7 @@ use std::error;
 use std::fmt::Display;
 use std::io;
 
-use crate::coordinates::{GlobalBitPos, TilePos};
+use crate::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use crate::tiles::{TileRef, TileType};
 
 use bitvec::prelude::*;
@@ -202,14 +202,25 @@ impl From<io::Error> for BitstreamContainerError {
 
 /// Represents an in-memory FPGA bitstream
 #[derive(Debug)]
-pub struct Bitstream {
+pub struct Bitstream<D: DebugTracer = DummyDebugTracer> {
     family: crate::chips::Family,
     /// User ID value to identify the bitstream design
     pub user_id: u32,
     config_arrays: Vec<Vec<BitVec<u8, Msb0>>>,
+    /// The debug tracer, if one has been provided
+    pub debug_tracer: D,
 }
 impl Bitstream {
     pub fn read<R: io::Read>(r: R) -> Result<Self, BitstreamContainerError> {
+        Self::read_with_debug(r, DummyDebugTracer {})
+    }
+}
+
+impl<D: DebugTracer> Bitstream<D> {
+    pub fn read_with_debug<R: io::Read>(
+        r: R,
+        debug_tracer: D,
+    ) -> Result<Self, BitstreamContainerError> {
         // Wrap the reader into something that _also_ updates CRC along the way
         struct CRCReader<'a, R: io::Read> {
             r: R,
@@ -255,6 +266,7 @@ impl Bitstream {
             family,
             user_id,
             config_arrays: Vec::with_capacity(array_sizes.len()),
+            debug_tracer,
         };
         for szs in array_sizes {
             ret.config_arrays.push(Vec::with_capacity(szs.len()));
@@ -435,6 +447,16 @@ impl Bitstream {
             [bit.y as usize * real_w as usize + (w as usize - 1 - bit.x as usize)]
     }
     #[inline]
+    pub(crate) fn debug_log_access(
+        &self,
+        global_bit_pos: GlobalBitPos,
+        tile_pos: TilePos,
+        tile_relative_pos: TileRelativeBitPos,
+    ) {
+        self.debug_tracer
+            .log_coordinate_access(global_bit_pos, tile_pos, tile_relative_pos);
+    }
+    #[inline]
     pub fn set_logic_array_bit(&mut self, bit: GlobalBitPos, val: bool) {
         let (w, h) = self.family.main_logic_bits();
         assert!(bit.x < w && bit.y < h);
@@ -446,17 +468,37 @@ impl Bitstream {
     }
 
     #[inline]
-    pub fn tile(&self, pos: TilePos) -> Option<TileRef<&Self>> {
+    pub fn tile(&self, pos: TilePos) -> Option<TileRef<D, &Self>> {
         if self.family.get_tile_type(pos) == TileType::None {
             return None;
         }
         Some(TileRef::new(self, pos))
     }
     #[inline]
-    pub fn tile_mut(&mut self, pos: TilePos) -> Option<TileRef<&mut Self>> {
+    pub fn tile_mut(&mut self, pos: TilePos) -> Option<TileRef<D, &mut Self>> {
         if self.family.get_tile_type(pos) == TileType::None {
             return None;
         }
         Some(TileRef::new(self, pos))
     }
+}
+
+/// Trait which logs accesses to bitstream bits
+///
+/// This can be used to help verify that all bits are actually being read,
+/// no duplicate bits are being hit, or to generate pretty tables.
+pub trait DebugTracer {
+    fn log_coordinate_access(
+        &self,
+        global_bit_pos: GlobalBitPos,
+        tile_pos: TilePos,
+        tile_relative_pos: TileRelativeBitPos,
+    );
+}
+
+/// Default debug tracer which doesn't do anything
+pub struct DummyDebugTracer {}
+impl DebugTracer for DummyDebugTracer {
+    #[inline(always)]
+    fn log_coordinate_access(&self, _: GlobalBitPos, _: TilePos, _: TileRelativeBitPos) {}
 }

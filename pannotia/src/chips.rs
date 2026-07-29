@@ -59,6 +59,7 @@ impl Family {
         }
     }
 
+    /// Returns the type of tile that exists at the specified position
     pub const fn get_tile_type(self, pos: TilePos) -> TileType {
         let (w, h) = self.tile_dims();
         if pos.x >= w || pos.y >= h {

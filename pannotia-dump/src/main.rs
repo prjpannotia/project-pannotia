@@ -1,10 +1,11 @@
+use std::cell::RefCell;
 use std::error;
 use std::fmt::Display;
 use std::fs::File;
 use std::io::{self, BufReader};
 use std::process::ExitCode;
 
-use pannotia::coordinates::TilePos;
+use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]
@@ -54,7 +55,44 @@ fn main() -> Result<ExitCode, Error> {
     }
 
     let f = BufReader::new(File::open(&args[2])?);
-    let mut b = pannotia::container::Bitstream::read(f)?;
+    struct BitstreamDebugTracer {
+        bit_w: usize,
+        accesses: RefCell<Vec<Option<(TilePos, TileRelativeBitPos)>>>,
+    }
+    impl pannotia::container::DebugTracer for BitstreamDebugTracer {
+        fn log_coordinate_access(
+            &self,
+            global_bit_pos: GlobalBitPos,
+            tile_pos: TilePos,
+            tile_relative_pos: TileRelativeBitPos,
+        ) {
+            let mut accesses = self.accesses.borrow_mut();
+
+            if let Some((orig_tile_pos, orig_rel_pos)) =
+                accesses[global_bit_pos.y as usize * self.bit_w + global_bit_pos.x as usize]
+            {
+                assert!(orig_tile_pos == tile_pos);
+                assert!(orig_rel_pos == tile_relative_pos)
+            }
+            accesses[global_bit_pos.y as usize * self.bit_w + global_bit_pos.x as usize] =
+                Some((tile_pos, tile_relative_pos));
+        }
+    }
+    impl BitstreamDebugTracer {
+        fn new() -> Self {
+            Self {
+                bit_w: 0,
+                accesses: RefCell::new(Vec::new()),
+            }
+        }
+    }
+    let mut b = pannotia::container::Bitstream::read_with_debug(f, BitstreamDebugTracer::new())?;
+    let (bit_w, bit_h) = b.family().main_logic_bits();
+    b.debug_tracer.bit_w = bit_w as usize;
+    b.debug_tracer
+        .accesses
+        .borrow_mut()
+        .resize(bit_w as usize * bit_h as usize, None);
 
     if args[1].eq_ignore_ascii_case("bits") {
         let config_bits = b.family().config_bits();
@@ -140,6 +178,20 @@ fn main() -> Result<ExitCode, Error> {
                     }
                 }
             }
+        }
+
+        println!("\n// access mask");
+        let (bit_w, bit_h) = b.family().main_logic_bits();
+        let accesses = b.debug_tracer.accesses.borrow();
+        for y in 0..bit_h {
+            for x in 0..bit_w {
+                if accesses[y as usize * bit_w as usize + x as usize].is_some() {
+                    print!("*");
+                } else {
+                    print!(" ");
+                }
+            }
+            println!();
         }
         // b.tile(123, 456).unwrap().as_logic_tile().lut();
         // b.tile_mut(123, 456).unwrap().as_logic_tile().set_lut(123);
