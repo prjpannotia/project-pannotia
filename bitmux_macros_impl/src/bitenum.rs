@@ -234,7 +234,7 @@ pub fn do_bitenum(attr: TokenStream, inp: TokenStream) -> TokenStream {
             #enum_variants
         }
 
-        impl #crate_path::BitEnum for #enum_ident {
+        impl #crate_path::BitstreamField for #enum_ident {
             fn get(g: impl #crate_path::BitGetter) -> Self {
                 let bits = #crate_path::BitGetter::get_bits::<#nbits>(&g);
                 match bits {
@@ -280,7 +280,7 @@ mod tests {
                 VarC,
             }
 
-            impl ::bitmux::BitEnum for TestEnum {
+            impl ::bitmux::BitstreamField for TestEnum {
                 fn get(g: impl ::bitmux::BitGetter) -> Self {
                     let bits = ::bitmux::BitGetter::get_bits:: <2>(&g);
                     match bits {
