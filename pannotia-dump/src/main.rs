@@ -5,7 +5,7 @@ use std::io::{self, BufReader};
 use std::process::ExitCode;
 
 use pannotia::coordinates::TilePos;
-use pannotia::tiles::TileRefTrait;
+use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]
 pub enum Error {
@@ -105,6 +105,39 @@ fn main() -> Result<ExitCode, Error> {
                 };
                 if let Some(tile) = b.tile(tile_pos) {
                     println!("tile {}: {:?}", tile_pos, tile.tile_type());
+                }
+            }
+        }
+    } else if args[1].eq_ignore_ascii_case("dump") {
+        let (tile_w, tile_h) = b.family().tile_dims();
+        for tile_y in 0..tile_h {
+            for tile_x in 0..tile_w {
+                let tile_pos = TilePos {
+                    x: tile_x,
+                    y: tile_y,
+                };
+                if let Some(tile) = b.tile(tile_pos) {
+                    let tile_type = tile.tile_type();
+                    match tile_type {
+                        TileType::Logic => {
+                            let tile = tile.as_logic_tile();
+                            for lut_i in 0..16 {
+                                let lut = tile.lut(lut_i);
+                                if lut != 0 {
+                                    println!("tile[{}].lut[{}] = 0x{:04x}", tile_pos, lut_i, lut);
+                                }
+                            }
+                        }
+                        // TileType::RoutingOnly => todo!(),
+                        // TileType::BRAM => todo!(),
+                        // TileType::TopBottomIO => todo!(),
+                        // TileType::LeftRightIO => todo!(),
+                        // TileType::TopBottomIP => todo!(),
+                        // TileType::LeftRightIP => todo!(),
+                        // TileType::PLL => todo!(),
+                        // TileType::GCLKSW => todo!(),
+                        _ => {}
+                    }
                 }
             }
         }

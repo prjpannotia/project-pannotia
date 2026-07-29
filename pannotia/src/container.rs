@@ -417,13 +417,16 @@ impl Bitstream {
         self.family
     }
 
+    #[inline]
     pub fn get_aux_array_bit(&self, group: u32, chain: u32, biti: usize) -> bool {
         self.config_arrays[group as usize][chain as usize][biti]
     }
+    #[inline]
     pub fn set_aux_array_bit(&mut self, group: u32, chain: u32, biti: usize, val: bool) {
         self.config_arrays[group as usize][chain as usize].set(biti, val);
     }
 
+    #[inline]
     pub fn get_logic_array_bit(&self, bit: GlobalBitPos) -> bool {
         let (w, h) = self.family.main_logic_bits();
         assert!(bit.x < w && bit.y < h);
@@ -431,6 +434,7 @@ impl Bitstream {
         self.config_arrays[0][0]
             [bit.y as usize * real_w as usize + (w as usize - 1 - bit.x as usize)]
     }
+    #[inline]
     pub fn set_logic_array_bit(&mut self, bit: GlobalBitPos, val: bool) {
         let (w, h) = self.family.main_logic_bits();
         assert!(bit.x < w && bit.y < h);
@@ -441,12 +445,14 @@ impl Bitstream {
         );
     }
 
+    #[inline]
     pub fn tile(&self, pos: TilePos) -> Option<TileRef<&Self>> {
         if self.family.get_tile_type(pos) == TileType::None {
             return None;
         }
         Some(TileRef::new(self, pos))
     }
+    #[inline]
     pub fn tile_mut(&mut self, pos: TilePos) -> Option<TileRef<&mut Self>> {
         if self.family.get_tile_type(pos) == TileType::None {
             return None;

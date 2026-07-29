@@ -7,3 +7,4 @@ edition = "2024"
 crc = "3.4"
 log = "0.4"
 bitvec = "1"
+bitmux = { path = "../bitmux" }

@@ -1,6 +1,8 @@
 use std::borrow::{Borrow, BorrowMut};
 
-use crate::coordinates::TilePos;
+use bitmux::{BitGetter, BitSetter};
+
+use crate::coordinates::*;
 
 /// The kind of tile that exists at a given position
 ///
@@ -57,8 +59,10 @@ pub enum TileType {
 
 pub trait TileRefTrait {
     fn tile_type(&self) -> TileType;
+    fn pos(&self) -> TilePos;
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TileRef<Ref: Borrow<crate::container::Bitstream>> {
     r: Ref,
     p: TilePos,
@@ -68,13 +72,19 @@ impl<Ref: Borrow<crate::container::Bitstream>> TileRefTrait for TileRef<Ref> {
         let family = self.r.borrow().family();
         family.get_tile_type(self.p)
     }
+    fn pos(&self) -> TilePos {
+        self.p
+    }
 }
+
 impl<Ref: Borrow<crate::container::Bitstream>> TileRef<Ref> {
     pub(crate) fn new(r: Ref, p: TilePos) -> Self {
         Self { r, p }
     }
 
+    #[inline]
     pub fn as_logic_tile(self) -> LogicTileRef<Ref> {
+        assert!(self.tile_type() == TileType::Logic);
         LogicTileRef {
             r: self.r,
             p: self.p,
@@ -82,20 +92,53 @@ impl<Ref: Borrow<crate::container::Bitstream>> TileRef<Ref> {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct LogicTileRef<Ref: Borrow<crate::container::Bitstream>> {
     r: Ref,
     p: TilePos,
 }
+impl<Ref: Borrow<crate::container::Bitstream>> TileRefTrait for LogicTileRef<Ref> {
+    fn tile_type(&self) -> TileType {
+        TileType::Logic
+    }
+    fn pos(&self) -> TilePos {
+        self.p
+    }
+}
+
+struct LogicLUT(u8);
+impl FieldPositionCalculator for LogicLUT {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        bitmux::bittable!(
+            TileRelativeBitPos {
+                x: 27 + #x,
+                y: #y + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 }
+            },
+            1   3   2   0,
+            7   5   4   6,
+            9   11  10  8,
+            15   13  12  14
+        )[biti]
+    }
+}
 impl<Ref: Borrow<crate::container::Bitstream>> LogicTileRef<Ref> {
-    pub fn lut(&self) -> u16 {
-        let bits = self.r.borrow();
-        // bits.get_logic_array_bit(123, 456);
-        12345
+    pub fn lut(&self, lut_idx: u8) -> u16 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicLUT(lut_idx),
+        };
+        ref_.get_bits::<16>() as u16
     }
 }
 impl<Ref: BorrowMut<crate::container::Bitstream>> LogicTileRef<Ref> {
-    pub fn set_lut(&mut self, val: u16) {
-        let bits = self.r.borrow_mut();
-        // bits.set_logic_array_bit(123, 456, val == 12345);
+    pub fn set_lut(&mut self, lut_idx: u8, val: u16) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicLUT(lut_idx),
+        };
+        ref_.set_bits::<16>(val as u32)
     }
 }

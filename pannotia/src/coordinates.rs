@@ -1,5 +1,6 @@
 //! Coordinates (i.e. `(x, y)` pairs) needed for accessing bitstreams
 
+use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
 
 use crate::chips::Family;
@@ -80,6 +81,42 @@ impl From<(Family, TilePos, TileRelativeBitPos)> for GlobalBitPos {
                 GlobalBitPos { y: y_out, x: x_out }
             }
         }
+    }
+}
+
+pub(crate) trait FieldPositionCalculator {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos;
+}
+pub(crate) struct GenericFieldRef<
+    Ref: Borrow<crate::container::Bitstream>,
+    F: FieldPositionCalculator,
+> {
+    pub(crate) bitstream: Ref,
+    pub(crate) tile_pos: TilePos,
+    pub(crate) field_pos: F,
+}
+impl<Ref: Borrow<crate::container::Bitstream>, F: FieldPositionCalculator> bitmux::BitGetter
+    for GenericFieldRef<Ref, F>
+{
+    #[inline]
+    fn get_bit(&self, biti: usize) -> bool {
+        let tile_relative_pos = self.field_pos.get_bit_pos(biti);
+        let bitstream = self.bitstream.borrow();
+        let family = bitstream.family();
+        let global_bit_pos: GlobalBitPos = (family, self.tile_pos, tile_relative_pos).into();
+        bitstream.get_logic_array_bit(global_bit_pos)
+    }
+}
+impl<Ref: BorrowMut<crate::container::Bitstream>, F: FieldPositionCalculator> bitmux::BitSetter
+    for GenericFieldRef<Ref, F>
+{
+    #[inline]
+    fn set_bit(&mut self, biti: usize, val: bool) {
+        let tile_relative_pos = self.field_pos.get_bit_pos(biti);
+        let bitstream = self.bitstream.borrow_mut();
+        let family = bitstream.family();
+        let global_bit_pos: GlobalBitPos = (family, self.tile_pos, tile_relative_pos).into();
+        bitstream.set_logic_array_bit(global_bit_pos, val);
     }
 }
 
