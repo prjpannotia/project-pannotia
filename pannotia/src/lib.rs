@@ -2,6 +2,7 @@
 
 pub mod chips;
 pub mod container;
+pub mod coordinates;
 pub mod tiles;
 
 #[inline]

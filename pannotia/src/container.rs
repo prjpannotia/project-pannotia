@@ -48,6 +48,9 @@ use std::error;
 use std::fmt::Display;
 use std::io;
 
+use crate::coordinates::{GlobalBitPos, TilePos};
+use crate::tiles::{TileRef, TileType};
+
 use bitvec::prelude::*;
 
 /// A bitstream control word, describing how to process the data that follows
@@ -421,26 +424,33 @@ impl Bitstream {
         self.config_arrays[group as usize][chain as usize].set(biti, val);
     }
 
-    pub fn get_logic_array_bit(&self, x: u32, y: u32) -> bool {
+    pub fn get_logic_array_bit(&self, bit: GlobalBitPos) -> bool {
         let (w, h) = self.family.main_logic_bits();
-        assert!(x < w && y < h);
+        assert!(bit.x < w && bit.y < h);
         let real_w = crate::divroundup(w, 32) * 32;
-        self.config_arrays[0][0][y as usize * real_w as usize + (w as usize - 1 - x as usize)]
+        self.config_arrays[0][0]
+            [bit.y as usize * real_w as usize + (w as usize - 1 - bit.x as usize)]
     }
-    pub fn set_logic_array_bit(&mut self, x: u32, y: u32, val: bool) {
+    pub fn set_logic_array_bit(&mut self, bit: GlobalBitPos, val: bool) {
         let (w, h) = self.family.main_logic_bits();
-        assert!(x < w && y < h);
+        assert!(bit.x < w && bit.y < h);
         let real_w = crate::divroundup(w, 32) * 32;
         self.config_arrays[0][0].set(
-            y as usize * real_w as usize + (w as usize - 1 - x as usize),
+            bit.y as usize * real_w as usize + (w as usize - 1 - bit.x as usize),
             val,
         );
     }
 
-    pub fn tile(&self, x: u32, y: u32) -> crate::tiles::TileRef<&Self> {
-        crate::tiles::TileRef::new(self, crate::tiles::TilePos { x, y })
+    pub fn tile(&self, pos: TilePos) -> Option<TileRef<&Self>> {
+        if self.family.get_tile_type(pos) == TileType::None {
+            return None;
+        }
+        Some(TileRef::new(self, pos))
     }
-    pub fn tile_mut(&mut self, x: u32, y: u32) -> crate::tiles::TileRef<&mut Self> {
-        crate::tiles::TileRef::new(self, crate::tiles::TilePos { x, y })
+    pub fn tile_mut(&mut self, pos: TilePos) -> Option<TileRef<&mut Self>> {
+        if self.family.get_tile_type(pos) == TileType::None {
+            return None;
+        }
+        Some(TileRef::new(self, pos))
     }
 }
