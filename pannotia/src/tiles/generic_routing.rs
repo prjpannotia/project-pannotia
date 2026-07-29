@@ -19,7 +19,7 @@ pub struct GenericRoutingRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) p: TilePos,
     pub(super) _d: PhantomData<D>,
 }
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait for GenericRoutingRef<D, Ref> {
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for GenericRoutingRef<D, Ref> {
     fn tile_type(&self) -> TileType {
         let family = self.r.borrow().family();
         family.get_tile_type(self.p)
@@ -27,11 +27,18 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait for GenericRoutingR
     fn pos(&self) -> TilePos {
         self.p
     }
+    fn as_base_tile(self) -> TileRef<D, Ref> {
+        TileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
 }
 
-struct RMUXRef {
-    is_bram: bool,
-    i: u8,
+pub(crate) struct RMUXRef {
+    pub(crate) is_bram: bool,
+    pub(crate) i: u8,
 }
 impl FieldPositionCalculator for RMUXRef {
     #[inline]
@@ -105,8 +112,35 @@ impl Display for RMUX {
         }
     }
 }
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRef<D, Ref> {
-    pub fn rmux(&self, rmux_idx: u8) -> RMUX {
+impl RMUX {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        bitmux::twohot!(3, 7, match bits {
+            #bits => RMUX::I(#val),
+            0 => RMUX::None,
+            _ => panic!("invalid RMUX {bits:010b}"),
+        })
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        bitmux::twohot!(3, 7, match self {
+            RMUX::I(#val) => #bits,
+            RMUX::None => 0,
+            _ => panic!("invalid RMUX {}", self),
+        })
+    }
+}
+
+pub trait GenericRoutingRefTrait {
+    fn rmux(&self, rmux_idx: u8) -> RMUX;
+}
+pub trait GenericRoutingRefMutTrait: GenericRoutingRefTrait {
+    fn set_rmux(&mut self, rmux_idx: u8, val: RMUX);
+}
+
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRefTrait
+    for GenericRoutingRef<D, Ref>
+{
+    fn rmux(&self, rmux_idx: u8) -> RMUX {
         let is_bram = self.tile_type() == TileType::BRAM;
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -117,16 +151,13 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRef<D, Ref> {
             },
             _d: PhantomData,
         };
-        let bits = ref_.get_bits::<10>();
-        bitmux::twohot!(3, 7, match bits {
-            #bits => RMUX::I(#val),
-            0 => RMUX::None,
-            _ => panic!("invalid RMUX {bits:010b}"),
-        })
+        RMUX::from_bits(ref_.get_bits::<10>())
     }
 }
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRef<D, Ref> {
-    pub fn set_rmux(&mut self, rmux_idx: u8, val: RMUX) {
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
+    for GenericRoutingRef<D, Ref>
+{
+    fn set_rmux(&mut self, rmux_idx: u8, val: RMUX) {
         let is_bram = self.tile_type() == TileType::BRAM;
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
@@ -137,11 +168,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRef<D, Ref> {
             },
             _d: PhantomData,
         };
-        let bits = bitmux::twohot!(3, 7, match val {
-            RMUX::I(#val) => #bits,
-            RMUX::None => 0,
-            _ => panic!("invalid RMUX {}", val),
-        });
-        ref_.set_bits::<10>(bits);
+        ref_.set_bits::<10>(val.to_bits());
     }
 }

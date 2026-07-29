@@ -69,11 +69,13 @@ pub enum TileType {
 }
 
 /// Functions common to all tile references
-pub trait TileRefTrait {
+pub trait TileRefTrait<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     /// Get the type of the current tile
     fn tile_type(&self) -> TileType;
     /// Get the position of the current tile
     fn pos(&self) -> TilePos;
+    /// Downcast this back to a generic tile reference
+    fn as_base_tile(self) -> TileRef<D, Ref>;
 }
 
 /// Generic reference to a tile
@@ -88,13 +90,16 @@ pub struct TileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     p: TilePos,
     _d: PhantomData<D>,
 }
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait for TileRef<D, Ref> {
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for TileRef<D, Ref> {
     fn tile_type(&self) -> TileType {
         let family = self.r.borrow().family();
         family.get_tile_type(self.p)
     }
     fn pos(&self) -> TilePos {
         self.p
+    }
+    fn as_base_tile(self) -> TileRef<D, Ref> {
+        self
     }
 }
 

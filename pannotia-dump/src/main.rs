@@ -6,7 +6,7 @@ use std::io::{self, BufReader};
 use std::process::ExitCode;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
-use pannotia::tiles::generic_routing::RMUX;
+use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
 use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]
