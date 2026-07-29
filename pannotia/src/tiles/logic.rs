@@ -3,6 +3,7 @@
 use std::borrow::{Borrow, BorrowMut};
 
 use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, RMUX, RMUXRef};
+use super::local_lines::{IMUX, IMUXRef};
 use super::*;
 
 use bitmux::{BitGetter, BitSetter};
@@ -56,6 +57,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
         };
         ref_.get_bits::<16>() as u16
     }
+
+    pub fn lut_input(&self, lut_idx: u8, inp_idx: u8) -> IMUX {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: IMUXRef {
+                is_bram: false,
+                i: lut_idx * 4 + inp_idx,
+            },
+            _d: PhantomData,
+        };
+        IMUX::from_bits(ref_.get_bits::<12>())
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
     pub fn set_lut(&mut self, lut_idx: u8, val: u16) {
@@ -66,6 +80,19 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bits::<16>(val as u32)
+    }
+
+    pub fn set_lut_input(&mut self, lut_idx: u8, inp_idx: u8, val: IMUX) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: IMUXRef {
+                is_bram: false,
+                i: lut_idx * 4 + inp_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bits::<16>(val.to_bits());
     }
 }
 

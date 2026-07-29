@@ -141,4 +141,5 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
 }
 
 pub mod generic_routing;
+pub mod local_lines;
 pub mod logic;

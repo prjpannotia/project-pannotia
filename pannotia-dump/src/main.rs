@@ -7,6 +7,7 @@ use std::process::ExitCode;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
+use pannotia::tiles::local_lines::IMUX;
 use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]
@@ -181,6 +182,19 @@ fn main() -> Result<ExitCode, Error> {
                                 if lut != 0 {
                                     println!("tile[{}].lut[{}] = 0x{:04x}", tile_pos, lut_i, lut);
                                 }
+
+                                for lut_inp_i in 0..4 {
+                                    let lut_inp = tile.lut_input(lut_i, lut_inp_i);
+                                    if lut_inp != IMUX::default() {
+                                        println!(
+                                            "tile[{}].lut_{}[{}] = {}",
+                                            tile_pos,
+                                            ["A", "B", "C", "D"][lut_inp_i as usize],
+                                            lut_i,
+                                            lut_inp
+                                        );
+                                    }
+                                }
                             }
                         }
                         // TileType::RoutingOnly => todo!(),
@@ -201,6 +215,7 @@ fn main() -> Result<ExitCode, Error> {
         let (bit_w, bit_h) = b.family().main_logic_bits();
         let accesses = b.debug_tracer.accesses.borrow();
         for y in 0..bit_h {
+            print!("// ");
             for x in 0..bit_w {
                 if accesses[y as usize * bit_w as usize + x as usize].is_some() {
                     print!("*");
