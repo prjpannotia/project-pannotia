@@ -3,7 +3,6 @@
 use unsynn::*;
 
 use crate::error_handling::*;
-// use crate::grammar_common::*;
 
 unsynn! {
     keyword KwMatch = "match";

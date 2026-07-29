@@ -357,6 +357,62 @@ pub use bitmux_macros::bitenum;
 /// ```
 pub use bitmux_macros::twohot;
 
+/// Macro to reformat a 2-D list of coordinates
+///
+/// Example:
+///
+/// ```
+/// # use bitmux::bittable;
+/// const EXAMPLE_FIELD_BITS: &'static [(u8, u8)] = &bittable!(
+///     (#x, #y),
+///     0 1 2,
+///     . 3 .,
+/// );
+/// ```
+///
+/// This will generate the following output:
+/// ```
+/// # use bitmux::bittable;
+/// # const EXAMPLE_FIELD_BITS: &'static [(u8, u8)] = &bittable!(
+/// #     (#x, #y),
+/// #     0 1 2,
+/// #     . 3 .,
+/// # );
+/// # assert_eq!(EXAMPLE_FIELD_BITS,
+/// [
+///     (0, 0),
+///     (1, 0),
+///     (2, 0),
+///     (1, 1),
+/// ]
+/// # );
+/// ```
+///
+/// The purpose of this macro is to help express the bit positions that encode
+/// each value in a bitstream. These bit positions often correspond to 2-D regions
+/// of the bitstream (and associated physical locations on the die), so a table
+/// representation may be more readable than a flattened list of (x, y) coordinates.
+///
+/// ## Full syntax
+///
+/// ```ignore
+/// bittable!(
+///     // This expression is a template.
+///     // Within it, `#x` and `#y` will be replaced with numbers.
+///     expression,
+///     // After the comma, the 2-D table begins.
+///     // Each row ends with a comma.
+///     // The origin (0, 0) is at the upper-left,
+///     // x increases moving right,
+///     // y increases moving down
+///     0 1 2,
+///     // A . dot represents a dummy position,
+///     // where the coordinate will increase but no output bit will be generated
+///     . 3 .,
+/// )
+/// ```
+pub use bitmux_macros::bittable;
+
 #[cfg(test)]
 mod tests {
     mod test_bit_getter_setter {
