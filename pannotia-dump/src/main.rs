@@ -303,7 +303,72 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
                         }
-                        // TileType::BRAM => todo!(),
+                        TileType::BRAM => {
+                            let tile = tile.as_bram9k_tile();
+
+                            for glb2loc_i in 0..6 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
+
+                            for ctrl_i in 0..4 {
+                                let ctrl_mux = tile.control_signal_preselect(ctrl_i);
+                                if ctrl_mux != Default::default() {
+                                    println!("tile[{}].ctrl[{}] = {}", tile_pos, ctrl_i, ctrl_mux);
+                                }
+                            }
+
+                            for addr_biti in 0..13 {
+                                let addr_mux = tile.addr_a(addr_biti);
+                                if addr_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].addr_a[{}] = {}",
+                                        tile_pos, addr_biti, addr_mux
+                                    );
+                                }
+                            }
+                            for addr_biti in 0..13 {
+                                let addr_mux = tile.addr_b(addr_biti);
+                                if addr_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].addr_b[{}] = {}",
+                                        tile_pos, addr_biti, addr_mux
+                                    );
+                                }
+                            }
+                            for data_biti in 0..18 {
+                                let data_mux = tile.data_in_a(data_biti);
+                                if data_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].data_in_a[{}] = {}",
+                                        tile_pos, data_biti, data_mux
+                                    );
+                                }
+                            }
+                            for data_biti in 0..18 {
+                                let data_mux = tile.data_in_b(data_biti);
+                                if data_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].data_in_b[{}] = {}",
+                                        tile_pos, data_biti, data_mux
+                                    );
+                                }
+                            }
+                            for imux_xtra_i in 0..2 {
+                                let imux_xtra = tile.imux_xtra(imux_xtra_i);
+                                if imux_xtra != Default::default() {
+                                    println!(
+                                        "tile[{}].imux_xtra[{}] = {}",
+                                        tile_pos, imux_xtra_i, imux_xtra
+                                    );
+                                }
+                            }
+                        }
                         // TileType::TopBottomIO => todo!(),
                         // TileType::LeftRightIO => todo!(),
                         // TileType::TopBottomIP => todo!(),

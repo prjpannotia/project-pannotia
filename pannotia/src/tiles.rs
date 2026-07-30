@@ -150,6 +150,17 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
             _d: PhantomData,
         }
     }
+
+    /// Coerce to a reference to a block RAM (9216 bits) tile
+    #[inline]
+    pub fn as_bram9k_tile(self) -> bram9k::BRAMTileRef<D, Ref> {
+        assert!(self.tile_type() == TileType::BRAM);
+        bram9k::BRAMTileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
 }
 
 /// A generic 2-choice mux
@@ -410,6 +421,7 @@ impl Mux3Inv {
     }
 }
 
+pub mod bram9k;
 pub mod generic_routing;
 pub mod local_lines;
 pub mod logic;
