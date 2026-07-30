@@ -184,6 +184,39 @@ impl FieldPositionCalculator for LeftRightIOLocalLine {
     }
 }
 
+struct TopBottoomIOGlobal2Local {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottoomIOGlobal2Local {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 8, "GlobalToLocalMux index out of range");
+
+        // these muxes are permuted in the following order
+        let (xbase, mut y) = [
+            (15, 10),
+            (15, 13),
+            (15, 11),
+            (15, 12),
+            (23, 10),
+            (23, 13),
+            (23, 11),
+            (23, 12),
+        ][self.i as usize];
+
+        // bits are otherwise just linear
+        let x = xbase + biti as u32;
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -221,6 +254,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         };
         TopBottomIOLocalMux::get(ref_)
     }
+
+    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottoomIOGlobal2Local {
+                is_bottom: self.p.y == 0,
+                i: idx,
+            },
+            _d: PhantomData,
+        };
+        GlobalToLocalMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -228,6 +274,19 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TopBottomIOLocalLine {
+                is_bottom: self.p.y == 0,
+                i: idx,
+            },
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottoomIOGlobal2Local {
                 is_bottom: self.p.y == 0,
                 i: idx,
             },

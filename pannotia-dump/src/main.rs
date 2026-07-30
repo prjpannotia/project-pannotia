@@ -613,6 +613,16 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                             }
+
+                            for glb2loc_i in 0..8 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
                         }
                         TileType::LeftRightIO => {
                             let tile = tile.as_leftright_io_tile();

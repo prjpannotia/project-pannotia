@@ -190,7 +190,7 @@ impl FieldPositionCalculator for TopIPGlobal2Local {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 12, "GlobalToLocalMux index out of range");
 
-        // The 12 BBMUXes group into 2 columns of 6,
+        // The 12 SeamMUXes group into 2 columns of 6,
         // where the second column has its bits mirrored horizontally.
         let is_second_col = self.0 >= 6;
         let inst_within_col = self.0 % 6;
