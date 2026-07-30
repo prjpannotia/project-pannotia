@@ -36,7 +36,7 @@ struct OMUXRef(u8);
 impl FieldPositionCalculator for OMUXRef {
     #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
-        assert!(self.0 < 16, "(virtual) LUT index out of range");
+        assert!(self.0 < 16, "output index out of range");
         TileRelativeBitPos {
             x: 15,
             y: self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
