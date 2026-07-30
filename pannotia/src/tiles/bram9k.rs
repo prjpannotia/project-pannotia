@@ -67,7 +67,7 @@ impl FieldPositionCalculator for TMUXRef {
         let y_base =
             [0, 16, 32 + 4, 48 + 4][group_of_4 as usize] + [2, 6, 8, 12][within_group_4 as usize];
 
-        // Now we can look up the main 4x2 bloc
+        // Now we can look up the main 4x2 block
         bitmux::bittable!(
             TileRelativeBitPos { x: 28 + #x, y: y_base + #y },
             0   2   4   5,
@@ -117,6 +117,96 @@ impl TMUX {
             Self::None => 0,
             _ => panic!("invalid TMUX {}", self),
         })
+    }
+}
+
+struct KMUXRef(u8);
+impl FieldPositionCalculator for KMUXRef {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "KMUX index out of range");
+
+        // the KMUX vertical position pattern repeats in groups of 4,
+        // slotting "in between" the TMUX.
+        // except, for some reason, number 0 is at the very bottom!
+        let remapped_idx = match self.0 {
+            0 => 15,
+            _ => self.0 - 1,
+        };
+
+        let group_of_4 = remapped_idx / 4;
+        let within_group_4 = remapped_idx % 4;
+        let y_base =
+            [0, 16, 32 + 4, 48 + 4][group_of_4 as usize] + [0, 4, 10, 14][within_group_4 as usize];
+
+        // Now we can look up the main 4x2 block ( + 1 extra invert bit)
+        bitmux::bittable!(
+            TileRelativeBitPos { x: 28 + #x, y: y_base + #y },
+            .   .   .   .   5   4   2   0,
+            .   8   .   .   6   7   3   1,
+        )[biti]
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum KMUX {
+    VCC,
+    GND,
+    I { invert: bool, i: u8 },
+}
+impl Default for KMUX {
+    fn default() -> Self {
+        Self::VCC
+    }
+}
+impl Display for KMUX {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VCC => write!(f, "VCC"),
+            Self::GND => write!(f, "GND"),
+            Self::I { invert, i } => {
+                if *invert {
+                    write!(f, "!")?;
+                }
+                write!(f, "#{i}")
+            }
+        }
+    }
+}
+impl bitmux::BitstreamField for KMUX {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<9>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<9>(self.to_bits());
+    }
+}
+impl KMUX {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        let invert = bits & 0b1_00000000 != 0;
+        bitmux::twohot!(3, 5, match bits & 0b1111_1111 {
+            #bits => Self::I { invert, i: #val },
+            0 if invert => Self::GND,
+            0 if !invert => Self::VCC,
+            _ => panic!("invalid KMUX {bits:09b}"),
+        })
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        let mut bits = bitmux::twohot!(
+            3,
+            5,
+            match self {
+                Self::I { i: #val, .. } => #bits,
+                Self::GND => 0b1_00000000,
+                Self::VCC => 0,
+                _ => panic!("invalid KMUX {}", self),
+            }
+        );
+        if let Self::I { invert: true, .. } = self {
+            bits |= 0b1_00000000;
+        }
+        bits
     }
 }
 
@@ -198,6 +288,15 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         };
         TMUX::get(ref_)
     }
+    pub fn kmux(&self, i: u8) -> KMUX {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: KMUXRef(i),
+            _d: PhantomData,
+        };
+        KMUX::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn set_global_to_local(&mut self, inp_idx: u8, val: GlobalToLocalMux) {
@@ -273,6 +372,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TMUXRef(i),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_kmux(&mut self, i: u8, val: KMUX) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: KMUXRef(i),
             _d: PhantomData,
         };
         val.set(ref_);

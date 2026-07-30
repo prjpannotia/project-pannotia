@@ -378,6 +378,12 @@ fn main() -> Result<ExitCode, Error> {
                                     println!("tile[{}].tmux[{}] = {}", tile_pos, tmux_i, tmux);
                                 }
                             }
+                            for kmux_i in 0..16 {
+                                let kmux = tile.kmux(kmux_i);
+                                if kmux != Default::default() {
+                                    println!("tile[{}].kmux[{}] = {}", tile_pos, kmux_i, kmux);
+                                }
+                            }
 
                             let mut init_val: BitArr!(for 9216, in u8, Lsb0) = BitArray::ZERO;
                             tile.init_data(&mut init_val.as_mut_bitslice());
