@@ -458,6 +458,22 @@ fn main() -> Result<ExitCode, Error> {
                             if cfg_setting {
                                 println!("tile[{}].use_output_register_b = 1", tile_pos);
                             }
+                            let cfg_setting = tile.use_rst_in_a();
+                            if cfg_setting {
+                                println!("tile[{}].use_rst_in_a = 1", tile_pos);
+                            }
+                            let cfg_setting = tile.use_rst_in_b();
+                            if cfg_setting {
+                                println!("tile[{}].use_rst_in_b = 1", tile_pos);
+                            }
+                            let cfg_setting = tile.use_rst_out_a();
+                            if cfg_setting {
+                                println!("tile[{}].use_rst_out_a = 1", tile_pos);
+                            }
+                            let cfg_setting = tile.use_rst_out_b();
+                            if cfg_setting {
+                                println!("tile[{}].use_rst_out_b = 1", tile_pos);
+                            }
                             let cfg_setting = tile.write_thru_a();
                             if cfg_setting {
                                 println!("tile[{}].write_thru_a = 1", tile_pos);
