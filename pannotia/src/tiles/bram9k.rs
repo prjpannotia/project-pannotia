@@ -280,12 +280,12 @@ impl Default for PortWidth {
 impl Display for PortWidth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PortWidth::X36 => write!(f, "36"),
-            PortWidth::X18 => write!(f, "18"),
-            PortWidth::X9 => write!(f, "9"),
-            PortWidth::X4 => write!(f, "4"),
-            PortWidth::X2 => write!(f, "2"),
-            PortWidth::X1 => write!(f, "1"),
+            Self::X36 => write!(f, "36"),
+            Self::X18 => write!(f, "18"),
+            Self::X9 => write!(f, "9"),
+            Self::X4 => write!(f, "4"),
+            Self::X2 => write!(f, "2"),
+            Self::X1 => write!(f, "1"),
         }
     }
 }
@@ -538,6 +538,44 @@ impl FieldPositionCalculator for DlyTime {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[bitmux::bitenum]
+pub enum ClockMode {
+    /// Port A uses clock 0, port B uses clock 1
+    Independent = "00",
+    /// Input registers use clock 0, output registers use clock 1
+    InputOutput = "01",
+    /// Input data uses clock 0, output data uses clock 1, input address port A/B uses clock 0/1
+    ///
+    /// It appears that the intended use case for this might be that
+    /// port A only performs writes (using clock 0),
+    /// and port B only performs reads (using clock 1).
+    ReadWrite = "1x",
+}
+impl Default for ClockMode {
+    fn default() -> Self {
+        Self::Independent
+    }
+}
+impl Display for ClockMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Independent => write!(f, "independent"),
+            Self::InputOutput => write!(f, "input_output"),
+            Self::ReadWrite => write!(f, "read_write"),
+        }
+    }
+}
+struct ClkModeRef {}
+impl FieldPositionCalculator for ClkModeRef {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        [
+            TileRelativeBitPos { x: 35, y: 49 },
+            TileRelativeBitPos { x: 34, y: 49 },
+        ][biti]
+    }
+}
+
 struct PackedModeAddressOverride {}
 impl FieldPositionCalculator for PackedModeAddressOverride {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
@@ -695,6 +733,15 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.get_bit(0)
+    }
+    pub fn clock_choices_mode(&self) -> ClockMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: ClkModeRef {},
+            _d: PhantomData,
+        };
+        ClockMode::get(ref_)
     }
 
     pub fn width_a(&self) -> PortWidth {
@@ -997,6 +1044,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bit(0, val);
+    }
+    pub fn set_clock_choices_mode(&mut self, val: ClockMode) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: ClkModeRef {},
+            _d: PhantomData,
+        };
+        val.set(ref_)
     }
 
     pub fn set_width_a(&mut self, val: PortWidth) {

@@ -445,6 +445,10 @@ fn main() -> Result<ExitCode, Error> {
                             if cfg_setting {
                                 println!("tile[{}].use_packed_mode_address_override = 1", tile_pos);
                             }
+                            let cfg_setting = tile.clock_choices_mode();
+                            if cfg_setting != Default::default() {
+                                println!("tile[{}].clock_choices_mode = {}", tile_pos, cfg_setting);
+                            }
 
                             let cfg_setting = tile.width_a();
                             if cfg_setting != Default::default() {
