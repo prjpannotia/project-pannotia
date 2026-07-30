@@ -358,6 +358,27 @@ impl FieldPositionCalculator for LeftRightIPFromExtMux {
     }
 }
 
+pub(crate) struct LeftRightIPGlobal2Local(u8);
+impl FieldPositionCalculator for LeftRightIPGlobal2Local {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 20, "GlobalToLocalMux index out of range");
+
+        // This is the "baseline" shape
+        let x = 19 - biti as u32;
+
+        let y = if self.0 <= 9 {
+            // These 10 are in a regular pattern
+            12 + self.0 as u32 * 2
+        } else {
+            // These are scattered around
+            [36, 38, 40, 45, 46, 51, 52, 57, 58, 63][self.0 as usize - 10]
+        };
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct LeftRightIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -411,6 +432,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
         };
         Mux2::from(ref_.get_bit(0))
     }
+
+    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPGlobal2Local(idx),
+            _d: PhantomData,
+        };
+        GlobalToLocalMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
     pub fn set_to_ip_13(&mut self, idx: u8, val: Mux13Inv) {
@@ -440,5 +471,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bit(0, val.into());
+    }
+
+    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPGlobal2Local(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
     }
 }
