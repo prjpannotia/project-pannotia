@@ -7,7 +7,6 @@ use std::process::ExitCode;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
-use pannotia::tiles::local_lines::IMUX;
 use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]
@@ -185,7 +184,7 @@ fn main() -> Result<ExitCode, Error> {
 
                                 for lut_inp_i in 0..4 {
                                     let lut_inp = tile.lut_input(lut_i, lut_inp_i);
-                                    if lut_inp != IMUX::default() {
+                                    if lut_inp != Default::default() {
                                         println!(
                                             "tile[{}].lut_{}[{}] = {}",
                                             tile_pos,
@@ -194,6 +193,26 @@ fn main() -> Result<ExitCode, Error> {
                                             lut_inp
                                         );
                                     }
+                                }
+
+                                let lc_clk = tile.lc_clk_choice(lut_i);
+                                if lc_clk != Default::default() {
+                                    println!("tile[{}].lc_clk[{}] = {}", tile_pos, lut_i, lc_clk);
+                                }
+                                let lc_async = tile.lc_async_choice(lut_i);
+                                if lc_async != Default::default() {
+                                    println!(
+                                        "tile[{}].lc_async[{}] = {}",
+                                        tile_pos, lut_i, lc_async
+                                    );
+                                }
+                                let lc_shift = tile.lc_shift_reg_mode(lut_i);
+                                if lc_shift {
+                                    println!("tile[{}].lc_shift[{}] = 1", tile_pos, lut_i);
+                                }
+                                let lc_bypass = tile.lc_input_c_bypass_mode(lut_i);
+                                if lc_bypass {
+                                    println!("tile[{}].lc_bypass[{}] = 1", tile_pos, lut_i);
                                 }
                             }
                         }

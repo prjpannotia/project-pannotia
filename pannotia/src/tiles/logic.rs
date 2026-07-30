@@ -47,52 +47,172 @@ impl FieldPositionCalculator for LogicLUT {
         )[biti]
     }
 }
+
+struct LogicAsyncMux(u8);
+impl FieldPositionCalculator for LogicAsyncMux {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "LUT index out of range");
+        TileRelativeBitPos {
+            x: 32,
+            y: self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+        }
+    }
+}
+struct LogicClkMux(u8);
+impl FieldPositionCalculator for LogicClkMux {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "LUT index out of range");
+        TileRelativeBitPos {
+            x: 32,
+            y: 1 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+        }
+    }
+}
+struct LogicShiftMode(u8);
+impl FieldPositionCalculator for LogicShiftMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "LUT index out of range");
+        TileRelativeBitPos {
+            x: 32,
+            y: 2 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+        }
+    }
+}
+struct LogicBypassMode(u8);
+impl FieldPositionCalculator for LogicBypassMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "LUT index out of range");
+        TileRelativeBitPos {
+            x: 32,
+            y: 3 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+        }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn lut(&self, lut_idx: u8) -> u16 {
+    pub fn lut(&self, lc_idx: u8) -> u16 {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
-            field_pos: LogicLUT(lut_idx),
+            field_pos: LogicLUT(lc_idx),
             _d: PhantomData,
         };
         ref_.get_bits::<16>() as u16
     }
 
-    pub fn lut_input(&self, lut_idx: u8, inp_idx: u8) -> IMUX {
+    pub fn lut_input(&self, lc_idx: u8, inp_idx: u8) -> IMUX {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
             field_pos: IMUXRef {
                 is_bram: false,
-                i: lut_idx * 4 + inp_idx,
+                i: lc_idx * 4 + inp_idx,
             },
             _d: PhantomData,
         };
         IMUX::from_bits(ref_.get_bits::<12>())
     }
+
+    pub fn lc_async_choice(&self, lc_idx: u8) -> Mux2 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicAsyncMux(lc_idx),
+            _d: PhantomData,
+        };
+        Mux2::from(ref_.get_bit(0))
+    }
+    pub fn lc_clk_choice(&self, lc_idx: u8) -> Mux2 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicClkMux(lc_idx),
+            _d: PhantomData,
+        };
+        Mux2::from(ref_.get_bit(0))
+    }
+    pub fn lc_shift_reg_mode(&self, lc_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicShiftMode(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    pub fn lc_input_c_bypass_mode(&self, lc_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicBypassMode(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn set_lut(&mut self, lut_idx: u8, val: u16) {
+    pub fn set_lut(&mut self, lc_idx: u8, val: u16) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
-            field_pos: LogicLUT(lut_idx),
+            field_pos: LogicLUT(lc_idx),
             _d: PhantomData,
         };
         ref_.set_bits::<16>(val as u32)
     }
 
-    pub fn set_lut_input(&mut self, lut_idx: u8, inp_idx: u8, val: IMUX) {
+    pub fn set_lut_input(&mut self, lc_idx: u8, inp_idx: u8, val: IMUX) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: IMUXRef {
                 is_bram: false,
-                i: lut_idx * 4 + inp_idx,
+                i: lc_idx * 4 + inp_idx,
             },
             _d: PhantomData,
         };
         ref_.set_bits::<16>(val.to_bits());
+    }
+
+    pub fn set_lc_async_choice(&mut self, lc_idx: u8, val: Mux2) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicAsyncMux(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    pub fn set_lc_clk_choice(&mut self, lc_idx: u8, val: Mux2) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicClkMux(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    pub fn set_lc_shift_reg_mode(&mut self, lc_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicShiftMode(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    pub fn set_lc_input_c_bypass_mode(&mut self, lc_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicBypassMode(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
     }
 }
 

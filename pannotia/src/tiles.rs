@@ -10,6 +10,7 @@
 //! [Bitstream::tile{_mut}](Bitstream::tile)
 
 use std::borrow::Borrow;
+use std::fmt::Display;
 use std::marker::PhantomData;
 
 use crate::container::{Bitstream, DebugTracer};
@@ -136,6 +137,42 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
             r: self.r,
             p: self.p,
             _d: PhantomData,
+        }
+    }
+}
+
+/// A generic 2-choice mux
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum Mux2 {
+    _0,
+    _1,
+}
+impl Display for Mux2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::_0 => write!(f, "0"),
+            Self::_1 => write!(f, "1"),
+        }
+    }
+}
+impl Default for Mux2 {
+    fn default() -> Self {
+        Self::_0
+    }
+}
+impl From<bool> for Mux2 {
+    fn from(value: bool) -> Self {
+        match value {
+            false => Self::_0,
+            true => Self::_1,
+        }
+    }
+}
+impl From<Mux2> for bool {
+    fn from(value: Mux2) -> Self {
+        match value {
+            Mux2::_0 => false,
+            Mux2::_1 => true,
         }
     }
 }
