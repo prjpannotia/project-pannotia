@@ -66,10 +66,19 @@ impl From<(Family, TilePos, TileRelativeBitPos)> for GlobalBitPos {
                 let x_out = match tile_pos.x {
                     0 => tile_bit_pos.x,                                     // left-side IO
                     1..=12 => tile_bit_pos.x + 20 + ((tile_pos.x - 1) * 36), // tiles left of BRAM
-                    13 => tile_bit_pos.x + 20 + 12 * 36,                     // BRAM column
+                    13 => {
+                        // BRAM column
+                        if (5..=12).contains(&tile_pos.y) {
+                            // a hard-IP tile, which is *right* aligned
+                            tile_bit_pos.x + 20 + 12 * 36 + 180 - 20
+                        } else {
+                            // normal BRAM
+                            tile_bit_pos.x + 20 + 12 * 36
+                        }
+                    }
                     14..=20 => tile_bit_pos.x + 20 + 12 * 36 + 180 + ((tile_pos.x - 14) * 36), // tiles right of BRAM
                     21 => tile_bit_pos.x + 20 + 12 * 36 + 180 + 7 * 36, // routing-only column
-                    22 => tile_bit_pos.x + 20 + 12 * 36 + 180 + 7 * 36 + 20, // right-side IO
+                    22 => tile_bit_pos.x + 20 + 12 * 36 + 180 + 7 * 36 + 16, // right-side IO
                     _ => unreachable!(),
                 };
                 // NOTE: the tile position's y-axis and the bit coordinate y-axis go in opposite directions

@@ -298,3 +298,72 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopIPTileRef<D, Ref> {
         val.set(ref_);
     }
 }
+
+pub(crate) struct LeftRightIPToExtMux13(u8);
+impl FieldPositionCalculator for LeftRightIPToExtMux13 {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "BBMUX index out of range");
+
+        // This is the "baseline" shape
+        let (x, mut y) = bitmux::bittable!(
+            (9 + #x, 12 + self.0 as u32 * 2 + #y),
+            8   6   4   2   0,
+            .   7   5   3   1,
+        )[biti];
+
+        // These two exist after the mid-tile gap
+        if self.0 >= 10 {
+            y += 4;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub struct LeftRightIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+    pub(super) r: Ref,
+    pub(super) p: TilePos,
+    pub(super) _d: PhantomData<D>,
+}
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
+    for LeftRightIPTileRef<D, Ref>
+{
+    fn tile_type(&self) -> TileType {
+        TileType::LeftRightIP
+    }
+    fn pos(&self) -> TilePos {
+        self.p
+    }
+    fn as_base_tile(self) -> TileRef<D, Ref> {
+        TileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
+}
+
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
+    pub fn to_ip_13(&self, idx: u8) -> Mux13Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPToExtMux13(idx),
+            _d: PhantomData,
+        };
+        Mux13Inv::get(ref_)
+    }
+}
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
+    pub fn set_to_ip_13(&mut self, idx: u8, val: Mux13Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPToExtMux13(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+}
