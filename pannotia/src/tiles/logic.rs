@@ -6,7 +6,7 @@ use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, 
 use super::local_lines::{IMUX, IMUXRef};
 use super::*;
 
-use bitmux::{BitGetter, BitSetter};
+use bitmux::{BitGetter, BitSetter, BitstreamField};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct LogicTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
@@ -45,6 +45,44 @@ impl FieldPositionCalculator for LogicLUT {
             9   11  10  8,
             15   13  12  14
         )[biti]
+    }
+}
+
+// FIXME: This needs to be RE'd, cannot figure out how to get vendor tools to generate it
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[bitmux::bitenum]
+pub enum InputCMode {
+    _00 = "00",
+    _01 = "01",
+    _10 = "10",
+    _11 = "11",
+}
+impl Default for InputCMode {
+    fn default() -> Self {
+        Self::_00
+    }
+}
+
+struct LogicInputC(u8);
+impl FieldPositionCalculator for LogicInputC {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "LUT index out of range");
+        TileRelativeBitPos {
+            x: 31,
+            y: [3, 0][biti] + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+        }
+    }
+}
+struct LogicCarryEn(u8);
+impl FieldPositionCalculator for LogicCarryEn {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "LUT index out of range");
+        TileRelativeBitPos {
+            x: 31,
+            y: 2 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+        }
     }
 }
 
@@ -117,6 +155,25 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
         IMUX::from_bits(ref_.get_bits::<12>())
     }
 
+    pub fn lc_input_c_mode(&self, lc_idx: u8) -> InputCMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicInputC(lc_idx),
+            _d: PhantomData,
+        };
+        InputCMode::get(ref_)
+    }
+    pub fn lc_carry_en(&self, lc_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicCarryEn(lc_idx),
+            _d: PhantomData,
+        };
+        !ref_.get_bit(0)
+    }
+
     pub fn lc_async_choice(&self, lc_idx: u8) -> Mux2 {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -176,6 +233,25 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bits::<16>(val.to_bits());
+    }
+
+    pub fn set_lc_input_c_mode(&mut self, lc_idx: u8, val: InputCMode) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicInputC(lc_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_)
+    }
+    pub fn set_lc_carry_en(&mut self, lc_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicCarryEn(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, !val);
     }
 
     pub fn set_lc_async_choice(&mut self, lc_idx: u8, val: Mux2) {

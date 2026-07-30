@@ -195,6 +195,18 @@ fn main() -> Result<ExitCode, Error> {
                                     }
                                 }
 
+                                let lc_inp_c = tile.lc_input_c_mode(lut_i);
+                                if lc_inp_c != Default::default() {
+                                    println!(
+                                        "tile[{}].inp_c[{}] = {:?}",
+                                        tile_pos, lut_i, lc_inp_c
+                                    );
+                                }
+                                let lc_carry_en = tile.lc_carry_en(lut_i);
+                                if !lc_carry_en {
+                                    println!("tile[{}].carry_en[{}] = 0", tile_pos, lut_i);
+                                }
+
                                 let lc_clk = tile.lc_clk_choice(lut_i);
                                 if lc_clk != Default::default() {
                                     println!("tile[{}].lc_clk[{}] = {}", tile_pos, lut_i, lc_clk);
