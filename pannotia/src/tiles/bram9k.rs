@@ -316,9 +316,11 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         self.kmux(5)
     }
     pub fn byte_en_a(&self, bit: u8) -> KMUX {
+        assert!(bit < 2, "invalid byte enable bit index");
         self.kmux(1 + bit)
     }
     pub fn byte_en_b(&self, bit: u8) -> KMUX {
+        assert!(bit < 2, "invalid byte enable bit index");
         self.kmux(8 + bit)
     }
 }
@@ -428,9 +430,11 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
         self.set_kmux(5, val);
     }
     pub fn set_byte_en_a(&mut self, bit: u8, val: KMUX) {
+        assert!(bit < 2, "invalid byte enable bit index");
         self.set_kmux(1 + bit, val)
     }
     pub fn set_byte_en_b(&mut self, bit: u8, val: KMUX) {
+        assert!(bit < 2, "invalid byte enable bit index");
         self.set_kmux(8 + bit, val)
     }
 }
