@@ -474,6 +474,7 @@ impl FieldPositionCalculator for UseRstInA {
         TileRelativeBitPos { x: 35, y: 55 }
     }
 }
+
 struct UseRstInB {}
 impl FieldPositionCalculator for UseRstInB {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
@@ -490,6 +491,31 @@ struct UseRstOutB {}
 impl FieldPositionCalculator for UseRstOutB {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 65 }
+    }
+}
+
+struct UseClkEnInA {}
+impl FieldPositionCalculator for UseClkEnInA {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 35, y: 3 }
+    }
+}
+struct UseClkEnInB {}
+impl FieldPositionCalculator for UseClkEnInB {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 35, y: 19 }
+    }
+}
+struct UseClkEnOutA {}
+impl FieldPositionCalculator for UseClkEnOutA {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 35, y: 7 }
+    }
+}
+struct UseClkEnOutB {}
+impl FieldPositionCalculator for UseClkEnOutB {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 35, y: 29 }
     }
 }
 
@@ -672,6 +698,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         };
         ref_.get_bit(0)
     }
+
     pub fn use_rst_in_a(&self) -> bool {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -708,6 +735,44 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         };
         ref_.get_bit(0)
     }
+
+    pub fn use_clk_en_in_a(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: UseClkEnInA {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    pub fn use_clk_en_in_b(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: UseClkEnInB {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    pub fn use_clk_en_out_a(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: UseClkEnOutA {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    pub fn use_clk_en_out_b(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: UseClkEnOutB {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+
     pub fn write_thru_a(&self) -> bool {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -906,6 +971,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
         };
         ref_.set_bit(0, val);
     }
+
     pub fn set_use_rst_in_a(&mut self, val: bool) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
@@ -942,6 +1008,44 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
         };
         ref_.set_bit(0, val);
     }
+
+    pub fn set_use_clk_en_in_a(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: UseClkEnInA {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    pub fn set_use_clk_en_in_b(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: UseClkEnInB {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    pub fn set_use_clk_en_out_a(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: UseClkEnOutA {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    pub fn set_use_clk_en_out_b(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: UseClkEnOutB {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+
     pub fn set_write_thru_a(&mut self, val: bool) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
