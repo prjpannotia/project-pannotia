@@ -372,6 +372,13 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
 
+                            for tmux_i in 0..16 {
+                                let tmux = tile.tmux(tmux_i);
+                                if tmux != Default::default() {
+                                    println!("tile[{}].tmux[{}] = {}", tile_pos, tmux_i, tmux);
+                                }
+                            }
+
                             let mut init_val: BitArr!(for 9216, in u8, Lsb0) = BitArray::ZERO;
                             tile.init_data(&mut init_val.as_mut_bitslice());
                             if init_val.any() {

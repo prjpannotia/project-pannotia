@@ -55,6 +55,71 @@ impl FieldPositionCalculator for InitVal {
     }
 }
 
+struct TMUXRef(u8);
+impl FieldPositionCalculator for TMUXRef {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "TMUX index out of range");
+
+        // the TMUX vertical position pattern repeats in groups of 4
+        let group_of_4 = self.0 / 4;
+        let within_group_4 = self.0 % 4;
+        let y_base =
+            [0, 16, 32 + 4, 48 + 4][group_of_4 as usize] + [2, 6, 8, 12][within_group_4 as usize];
+
+        // Now we can look up the main 4x2 bloc
+        bitmux::bittable!(
+            TileRelativeBitPos { x: 28 + #x, y: y_base + #y },
+            0   2   4   5,
+            1   3   7   6,
+        )[biti]
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum TMUX {
+    None,
+    I(u8),
+}
+impl Default for TMUX {
+    fn default() -> Self {
+        Self::None
+    }
+}
+impl Display for TMUX {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "<unset>"),
+            Self::I(i) => write!(f, "#{i}"),
+        }
+    }
+}
+impl bitmux::BitstreamField for TMUX {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<8>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<8>(self.to_bits());
+    }
+}
+impl TMUX {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        bitmux::twohot!(3, 5, match bits {
+            #bits => Self::I(#val),
+            0 => Self::None,
+            _ => panic!("invalid TMUX {bits:08b}"),
+        })
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        bitmux::twohot!(3, 5, match self {
+            Self::I(#val) => #bits,
+            Self::None => 0,
+            _ => panic!("invalid TMUX {}", self),
+        })
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
@@ -122,6 +187,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         for i in 0..9216 {
             sink.set(i, ref_.get_bit(i));
         }
+    }
+
+    pub fn tmux(&self, i: u8) -> TMUX {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TMUXRef(i),
+            _d: PhantomData,
+        };
+        TMUX::get(ref_)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
@@ -191,6 +266,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
         for i in 0..9216 {
             ref_.set_bit(i, source.get(i));
         }
+    }
+
+    pub fn set_tmux(&mut self, i: u8, val: TMUX) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TMUXRef(i),
+            _d: PhantomData,
+        };
+        val.set(ref_);
     }
 }
 
