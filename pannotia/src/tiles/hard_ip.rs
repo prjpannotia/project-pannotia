@@ -163,9 +163,9 @@ pub(crate) struct TopIPFromExtMux(u8);
 impl FieldPositionCalculator for TopIPFromExtMux {
     #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
-        assert!(self.0 < 12, "OMUX index out of range");
+        assert!(self.0 < 12, "output mux index out of range");
 
-        // The 12 OMUXes group into 2 columns of 6
+        // The 12 output muxes group into 2 columns of 6
         let is_second_col = self.0 >= 6;
         let inst_within_col = self.0 % 6;
 
@@ -346,6 +346,18 @@ impl FieldPositionCalculator for LeftRightIPToExtMux17 {
     }
 }
 
+pub(crate) struct LeftRightIPFromExtMux(u8);
+impl FieldPositionCalculator for LeftRightIPFromExtMux {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "output mux index out of range");
+        TileRelativeBitPos {
+            x: 12,
+            y: self.0 as u32,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct LeftRightIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -389,6 +401,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
         };
         Mux17Inv::get(ref_)
     }
+
+    pub fn from_ip(&self, idx: u8) -> Mux2 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPFromExtMux(idx),
+            _d: PhantomData,
+        };
+        Mux2::from(ref_.get_bit(0))
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
     pub fn set_to_ip_13(&mut self, idx: u8, val: Mux13Inv) {
@@ -408,5 +430,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    pub fn set_from_ip(&mut self, idx: u8, val: Mux2) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPFromExtMux(idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
     }
 }

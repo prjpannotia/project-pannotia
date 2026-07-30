@@ -580,6 +580,16 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                             }
+
+                            for from_ip_i in 0..12 {
+                                let from_ip = tile.from_ip(from_ip_i);
+                                if from_ip != Default::default() {
+                                    println!(
+                                        "tile[{}].from_ip[{}] = {}",
+                                        tile_pos, from_ip_i, from_ip
+                                    );
+                                }
+                            }
                         }
                         // TileType::TopBottomIO => todo!(),
                         // TileType::LeftRightIO => todo!(),
