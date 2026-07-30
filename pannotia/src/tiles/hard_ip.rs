@@ -184,6 +184,36 @@ impl FieldPositionCalculator for TopIPFromExtMux {
     }
 }
 
+pub(crate) struct TopIPGlobal2Local(u8);
+impl FieldPositionCalculator for TopIPGlobal2Local {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "GlobalToLocalMux index out of range");
+
+        // The 12 BBMUXes group into 2 columns of 6,
+        // where the second column has its bits mirrored horizontally.
+        let is_second_col = self.0 >= 6;
+        let inst_within_col = self.0 % 6;
+
+        // This is the "baseline" shape
+        let mut y = 54 + inst_within_col as u32 * 2;
+
+        // Within each column of 6, there is a gap of 2 rows between the top 3 and bottom 3.
+        if inst_within_col >= 3 {
+            y += 2;
+        }
+
+        // The location of each column is as follows
+        let x = if !is_second_col {
+            9 + biti as u32
+        } else {
+            20 - biti as u32
+        };
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -226,6 +256,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopIPTileRef<D, Ref> {
         };
         Mux2::from(ref_.get_bit(0))
     }
+
+    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopIPGlobal2Local(idx),
+            _d: PhantomData,
+        };
+        GlobalToLocalMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopIPTileRef<D, Ref> {
     pub fn set_to_ip(&mut self, idx: u8, val: Mux13Inv) {
@@ -246,5 +286,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopIPTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bit(0, val.into());
+    }
+
+    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopIPGlobal2Local(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
     }
 }

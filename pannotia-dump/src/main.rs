@@ -533,6 +533,16 @@ fn main() -> Result<ExitCode, Error> {
                         TileType::TopIP => {
                             let tile = tile.as_top_ip_tile();
 
+                            for glb2loc_i in 0..12 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
+
                             for to_ip_i in 0..12 {
                                 let to_ip = tile.to_ip(to_ip_i);
                                 if to_ip != Default::default() {
