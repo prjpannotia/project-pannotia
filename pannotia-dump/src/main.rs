@@ -616,6 +616,16 @@ fn main() -> Result<ExitCode, Error> {
                         }
                         TileType::LeftRightIO => {
                             let tile = tile.as_leftright_io_tile();
+
+                            for local_line_i in 0..48 {
+                                let local_line = tile.local_line(local_line_i);
+                                if local_line != Default::default() {
+                                    println!(
+                                        "tile[{}].local_line[{}] = {}",
+                                        tile_pos, local_line_i, local_line
+                                    );
+                                }
+                            }
                         }
                         // TileType::PLL => todo!(),
                         // TileType::GCLKSW => todo!(),
