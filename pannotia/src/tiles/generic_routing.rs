@@ -129,6 +129,14 @@ impl RMUX {
         })
     }
 }
+impl bitmux::BitstreamField for RMUX {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<10>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<10>(self.to_bits());
+    }
+}
 
 pub trait GenericRoutingRefTrait {
     fn rmux(&self, rmux_idx: u8) -> RMUX;

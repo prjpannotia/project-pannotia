@@ -64,25 +64,115 @@ impl Default for IMUX {
 impl Display for IMUX {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            IMUX::None => write!(f, "<unset>"),
-            IMUX::I(i) => write!(f, "#{i}"),
+            Self::None => write!(f, "<unset>"),
+            Self::I(i) => write!(f, "#{i}"),
         }
+    }
+}
+impl bitmux::BitstreamField for IMUX {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<12>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<12>(self.to_bits());
     }
 }
 impl IMUX {
     pub(crate) fn from_bits(bits: u32) -> Self {
         bitmux::twohot!(3, 9, match bits {
-            #bits => IMUX::I(#val),
-            0 => IMUX::None,
-            _ => panic!("invalid IMUX {bits:010b}"),
+            #bits => Self::I(#val),
+            0 => Self::None,
+            _ => panic!("invalid IMUX {bits:012b}"),
         })
     }
 
     pub(crate) fn to_bits(self) -> u32 {
         bitmux::twohot!(3, 9, match self {
-            IMUX::I(#val) => #bits,
-            IMUX::None => 0,
+            Self::I(#val) => #bits,
+            Self::None => 0,
             _ => panic!("invalid IMUX {}", self),
+        })
+    }
+}
+
+pub(crate) struct CtrlMuxRef {
+    pub(crate) is_bram: bool,
+    pub(crate) i: u8,
+}
+impl FieldPositionCalculator for CtrlMuxRef {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "CtrlMux index out of range");
+        // There are 4 CtrlMux per tile, which fit into the "gap" between the
+        // top half and the bottom half. They are arranged into a 2x2 block.
+        let ctrlmux_row = (self.i / 2) as u32;
+        let ctrlmux_col = self.i % 2;
+
+        let y_offs = 32 + ctrlmux_row * 2;
+
+        // We can perform a basic lookup of the 6x2 bit block now
+        let (y, xbase) = bitmux::bittable!(
+            (y_offs + #y, #x),
+            0   2   4   6   8   10,
+            1   3   5   7   9   11,
+        )[biti];
+
+        // Deal with inverting the second column
+        let mut x = match ctrlmux_col {
+            0 => xbase,
+            1 => 11 - xbase,
+            _ => unreachable!(),
+        } + 15; // + 15 to skip over RMUX
+
+        // For a BRAM tile, this is scooted right by 1
+        if self.is_bram {
+            x += 1;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum CtrlMux {
+    None,
+    I(u8),
+}
+impl Default for CtrlMux {
+    fn default() -> Self {
+        Self::None
+    }
+}
+impl Display for CtrlMux {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "<unset>"),
+            Self::I(i) => write!(f, "#{i}"),
+        }
+    }
+}
+impl bitmux::BitstreamField for CtrlMux {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<12>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<12>(self.to_bits());
+    }
+}
+impl CtrlMux {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        bitmux::twohot!(3, 9, match bits {
+            #bits => Self::I(#val),
+            0 => Self::None,
+            _ => panic!("invalid CtrlMux {bits:012b}"),
+        })
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        bitmux::twohot!(3, 9, match self {
+            Self::I(#val) => #bits,
+            Self::None => 0,
+            _ => panic!("invalid CtrlMux {}", self),
         })
     }
 }

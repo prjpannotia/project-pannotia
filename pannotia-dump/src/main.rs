@@ -176,6 +176,24 @@ fn main() -> Result<ExitCode, Error> {
                     match tile.tile_type() {
                         TileType::Logic => {
                             let tile = tile.as_logic_tile();
+
+                            for glb2loc_i in 0..4 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
+
+                            for ctrl_i in 0..4 {
+                                let ctrl_mux = tile.control_signal_preselect(ctrl_i);
+                                if ctrl_mux != Default::default() {
+                                    println!("tile[{}].ctrl[{}] = {}", tile_pos, ctrl_i, ctrl_mux);
+                                }
+                            }
+
                             for lut_i in 0..16 {
                                 let lut = tile.lut(lut_i);
                                 if lut != 0 {

@@ -3,7 +3,7 @@
 use std::borrow::{Borrow, BorrowMut};
 
 use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, RMUX, RMUXRef};
-use super::local_lines::{IMUX, IMUXRef};
+use super::local_lines::{CtrlMux, CtrlMuxRef, IMUX, IMUXRef};
 use super::*;
 
 use bitmux::{BitGetter, BitSetter, BitstreamField};
@@ -184,6 +184,32 @@ impl FieldPositionCalculator for LogicOut {
 }
 
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
+    pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: GlobalToLocalMuxRef {
+                is_bram: false,
+                i: inp_idx,
+            },
+            _d: PhantomData,
+        };
+        GlobalToLocalMux::get(ref_)
+    }
+
+    pub fn control_signal_preselect(&self, inp_idx: u8) -> CtrlMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: CtrlMuxRef {
+                is_bram: false,
+                i: inp_idx,
+            },
+            _d: PhantomData,
+        };
+        CtrlMux::get(ref_)
+    }
+
     pub fn lut(&self, lc_idx: u8) -> u16 {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -204,7 +230,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
             },
             _d: PhantomData,
         };
-        IMUX::from_bits(ref_.get_bits::<12>())
+        IMUX::get(ref_)
     }
 
     pub fn lc_output(&self, lc_idx: u8, out_idx: u8) -> OMUX {
@@ -277,6 +303,32 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
+    pub fn set_global_to_local(&mut self, inp_idx: u8, val: GlobalToLocalMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: GlobalToLocalMuxRef {
+                is_bram: false,
+                i: inp_idx,
+            },
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_control_signal_preselect(&mut self, inp_idx: u8, val: CtrlMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: CtrlMuxRef {
+                is_bram: false,
+                i: inp_idx,
+            },
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
     pub fn set_lut(&mut self, lc_idx: u8, val: u16) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
@@ -288,7 +340,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
     }
 
     pub fn set_lut_input(&mut self, lc_idx: u8, inp_idx: u8, val: IMUX) {
-        let mut ref_ = GenericFieldRef {
+        let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: IMUXRef {
@@ -297,7 +349,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
             },
             _d: PhantomData,
         };
-        ref_.set_bits::<16>(val.to_bits());
+        val.set(ref_);
     }
 
     pub fn set_lc_output(&mut self, lc_idx: u8, out_idx: u8, val: OMUX) {
@@ -381,14 +433,14 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRefTrait for Logic
             },
             _d: PhantomData,
         };
-        RMUX::from_bits(ref_.get_bits::<10>())
+        RMUX::get(ref_)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
     for LogicTileRef<D, Ref>
 {
     fn set_rmux(&mut self, rmux_idx: u8, val: RMUX) {
-        let mut ref_ = GenericFieldRef {
+        let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: RMUXRef {
@@ -397,6 +449,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
             },
             _d: PhantomData,
         };
-        ref_.set_bits::<10>(val.to_bits());
+        val.set(ref_);
     }
 }

@@ -177,6 +177,112 @@ impl From<Mux2> for bool {
     }
 }
 
+pub(crate) struct GlobalToLocalMuxRef {
+    pub(crate) is_bram: bool,
+    pub(crate) i: u8,
+}
+impl FieldPositionCalculator for GlobalToLocalMuxRef {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        if !self.is_bram {
+            assert!(self.i < 4, "GlobalToLocalMux index out of range");
+        } else {
+            assert!(self.i < 6, "GlobalToLocalMux index out of range");
+        }
+
+        if self.i < 4 {
+            // There are 4 GlobalToLocalMux which fit into the "gap" between the
+            // top half and the bottom half of a tile's control bits.
+            let y = match self.i {
+                0 | 2 => 32,
+                1 | 3 => 35,
+                _ => unreachable!(),
+            };
+
+            let mut x = 2
+                + biti as u32
+                + match self.i {
+                    0 | 1 => 0,
+                    2 | 3 => 5,
+                    _ => unreachable!(),
+                };
+
+            // For a BRAM tile, this is scooted right by 1
+            if self.is_bram {
+                x += 1;
+            }
+
+            TileRelativeBitPos { y, x }
+        } else {
+            // BRAM tiles have 2 additional global-to-local muxes.
+            // They sit in the leftmost column (the one which causes everything else to need to scoot over).
+
+            let y = match self.i {
+                4 => biti as u32 + 26,
+                5 => 41 - biti as u32,
+                _ => unreachable!(),
+            };
+
+            TileRelativeBitPos { y, x: 0 }
+        }
+    }
+}
+
+/// A mux for getting a global wire into a tile
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum GlobalToLocalMux {
+    None,
+    I(u8),
+}
+impl Default for GlobalToLocalMux {
+    fn default() -> Self {
+        Self::None
+    }
+}
+impl Display for GlobalToLocalMux {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "<unset>"),
+            Self::I(i) => write!(f, "#{i}"),
+        }
+    }
+}
+impl bitmux::BitstreamField for GlobalToLocalMux {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<6>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<6>(self.to_bits());
+    }
+}
+impl GlobalToLocalMux {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        match bits {
+            0b000001 => Self::I(0),
+            0b000010 => Self::I(1),
+            0b000100 => Self::I(2),
+            0b001000 => Self::I(3),
+            0b010000 => Self::I(4),
+            0b100000 => Self::I(5),
+            0b000000 => Self::None,
+            _ => panic!("invalid GlobalToLocalMux {bits:06b}"),
+        }
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        match self {
+            Self::I(0) => 0b000001,
+            Self::I(1) => 0b000010,
+            Self::I(2) => 0b000100,
+            Self::I(3) => 0b001000,
+            Self::I(4) => 0b010000,
+            Self::I(5) => 0b100000,
+            Self::None => 0b000000,
+            _ => panic!("invalid GlobalToLocalMux {}", self),
+        }
+    }
+}
+
 pub mod generic_routing;
 pub mod local_lines;
 pub mod logic;
