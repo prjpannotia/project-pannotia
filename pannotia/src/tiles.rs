@@ -435,7 +435,7 @@ impl Mux3Inv {
             0b100 => Self::I { invert, i: 2 },
             0b000 if invert => Self::GND,
             0b000 if !invert => Self::VCC,
-            _ => panic!("invalid Mux3Inv {bits:03b}"),
+            _ => panic!("invalid Mux3Inv {bits:04b}"),
         }
     }
 
@@ -488,6 +488,7 @@ impl BitSource for &[bool] {
 pub mod bram9k;
 pub mod generic_routing;
 pub mod hard_ip;
+pub mod io;
 pub mod local_lines;
 pub mod logic;
 pub mod routing_only;

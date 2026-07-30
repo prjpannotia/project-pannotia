@@ -49,7 +49,7 @@ impl Mux13Inv {
             0b1000_0000 => Self::I { invert, i: 12 },
             0 if invert => Self::GND,
             0 if !invert => Self::VCC,
-            _ => panic!("invalid Mux13Inv {bits:03b}"),
+            _ => panic!("invalid Mux13Inv {bits:09b}"),
         })
     }
 
@@ -110,7 +110,7 @@ impl Mux17Inv {
             0b1_0000_0000 => Self::I { invert, i: 16 },
             0 if invert => Self::GND,
             0 if !invert => Self::VCC,
-            _ => panic!("invalid Mux17Inv {bits:03b}"),
+            _ => panic!("invalid Mux17Inv {bits:010b}"),
         })
     }
 
