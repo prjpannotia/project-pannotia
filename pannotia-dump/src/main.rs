@@ -309,6 +309,24 @@ fn main() -> Result<ExitCode, Error> {
                         TileType::BRAM => {
                             let tile = tile.as_bram9k_tile();
 
+                            for clk_i in 0..2 {
+                                let clk_mux = tile.clock_mux(clk_i);
+                                if clk_mux != Default::default() {
+                                    println!("tile[{}].clk[{}] = {}", tile_pos, clk_i, clk_mux);
+                                }
+                                let ce_mux = tile.clock_en_mux(clk_i);
+                                if ce_mux != Default::default() {
+                                    println!("tile[{}].ce[{}] = {}", tile_pos, clk_i, ce_mux);
+                                }
+                            }
+
+                            for asy_i in 0..2 {
+                                let async_mux = tile.async_mux(asy_i);
+                                if async_mux != Default::default() {
+                                    println!("tile[{}].async[{}] = {}", tile_pos, asy_i, async_mux);
+                                }
+                            }
+
                             for glb2loc_i in 0..6 {
                                 let glb2loc_mux = tile.global_to_local(glb2loc_i);
                                 if glb2loc_mux != Default::default() {

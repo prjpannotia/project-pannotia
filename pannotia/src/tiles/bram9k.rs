@@ -210,6 +210,58 @@ impl KMUX {
     }
 }
 
+struct TileClk(u8);
+impl FieldPositionCalculator for TileClk {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        let y = match self.0 {
+            0 => 32,
+            1 => 35,
+            _ => panic!("clock index out of range"),
+        };
+        bitmux::bittable!(
+            TileRelativeBitPos { x: 32 + #x, y },
+            2   1   0   3
+        )[biti]
+    }
+}
+struct TileClkEn(u8);
+impl FieldPositionCalculator for TileClkEn {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        match self.0 {
+            0 => bitmux::bittable!(
+                TileRelativeBitPos { x: 32 + #x, y: 34 },
+                2   1   0   3
+            )[biti],
+            1 => bitmux::bittable!(
+                TileRelativeBitPos { x: 30 + #x, y: 34 + #y },
+                1   2,
+                0   3,
+            )[biti],
+            _ => panic!("clock enable index out of range"),
+        }
+    }
+}
+struct TileAsync(u8);
+impl FieldPositionCalculator for TileAsync {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        match self.0 {
+            0 => bitmux::bittable!(
+                TileRelativeBitPos { x: 30 + #x, y: 32 + #y },
+                0   3,
+                1   2,
+            )[biti],
+            1 => bitmux::bittable!(
+                TileRelativeBitPos { x: 32 + #x, y: 33 },
+                2   1   0   3
+            )[biti],
+            _ => panic!("async index out of range"),
+        }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
@@ -322,6 +374,34 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn byte_en_b(&self, bit: u8) -> KMUX {
         assert!(bit < 2, "invalid byte enable bit index");
         self.kmux(8 + bit)
+    }
+
+    pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileClk(clk_idx),
+            _d: PhantomData,
+        };
+        Mux3Inv::get(ref_)
+    }
+    pub fn clock_en_mux(&self, clk_idx: u8) -> Mux3Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileClkEn(clk_idx),
+            _d: PhantomData,
+        };
+        Mux3Inv::get(ref_)
+    }
+    pub fn async_mux(&self, clk_idx: u8) -> Mux3Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileAsync(clk_idx),
+            _d: PhantomData,
+        };
+        Mux3Inv::get(ref_)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
@@ -436,6 +516,34 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn set_byte_en_b(&mut self, bit: u8, val: KMUX) {
         assert!(bit < 2, "invalid byte enable bit index");
         self.set_kmux(8 + bit, val)
+    }
+
+    pub fn set_clock_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileClk(clk_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_clock_en_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileClkEn(clk_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_async_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileAsync(clk_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
     }
 }
 
