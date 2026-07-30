@@ -5,6 +5,9 @@ use std::fs::File;
 use std::io::{self, BufReader};
 use std::process::ExitCode;
 
+use base64::prelude::*;
+use bitvec::prelude::*;
+
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
 use pannotia::tiles::{TileRefTrait, TileType};
@@ -367,6 +370,16 @@ fn main() -> Result<ExitCode, Error> {
                                         tile_pos, imux_xtra_i, imux_xtra
                                     );
                                 }
+                            }
+
+                            let mut init_val: BitArr!(for 9216, in u8, Lsb0) = BitArray::ZERO;
+                            tile.init_data(&mut init_val.as_mut_bitslice());
+                            if init_val.any() {
+                                println!(
+                                    "tile[{}].init_data = {}",
+                                    tile_pos,
+                                    BASE64_URL_SAFE.encode(init_val.as_raw_slice())
+                                );
                             }
                         }
                         // TileType::TopBottomIO => todo!(),

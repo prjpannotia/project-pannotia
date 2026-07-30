@@ -421,6 +421,40 @@ impl Mux3Inv {
     }
 }
 
+/// This trait is used for getting BRAM init data
+pub trait BitSink {
+    fn set(&mut self, biti: usize, val: bool);
+}
+impl<T: bitvec::store::BitStore, O: bitvec::order::BitOrder> BitSink
+    for &mut bitvec::slice::BitSlice<T, O>
+{
+    fn set(&mut self, biti: usize, val: bool) {
+        bitvec::slice::BitSlice::set(self, biti, val);
+    }
+}
+impl BitSink for &mut [bool] {
+    fn set(&mut self, biti: usize, val: bool) {
+        self[biti] = val;
+    }
+}
+
+/// This trait is used for setting BRAM init data
+pub trait BitSource {
+    fn get(&self, biti: usize) -> bool;
+}
+impl<T: bitvec::store::BitStore, O: bitvec::order::BitOrder> BitSource
+    for &mut bitvec::slice::BitSlice<T, O>
+{
+    fn get(&self, biti: usize) -> bool {
+        self[biti]
+    }
+}
+impl BitSource for &[bool] {
+    fn get(&self, biti: usize) -> bool {
+        self[biti]
+    }
+}
+
 pub mod bram9k;
 pub mod generic_routing;
 pub mod local_lines;
