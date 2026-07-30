@@ -90,7 +90,7 @@ impl Family {
                     TileType::LeftRightIO // right/east IO
                 } else if pos.x >= 14 && pos.x <= 20 && pos.y == 13 {
                     TileType::TopBottomIO // top/north IO
-                } else if pos.x >= 1 && pos.x <= 20 && pos.x != 4 && pos.x != 13 && pos.y == 0 {
+                } else if pos.x >= 1 && pos.x <= 20 && pos.x != 13 && pos.y == 0 {
                     TileType::TopBottomIO // bottom/south IO
                 } else if pos.x == 22 && pos.y >= 6 && pos.y <= 12 {
                     TileType::LeftRightIP // analog IP
