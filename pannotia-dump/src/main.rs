@@ -530,10 +530,19 @@ fn main() -> Result<ExitCode, Error> {
                                 );
                             }
                         }
+                        TileType::TopIP => {
+                            let tile = tile.as_top_ip_tile();
+
+                            for to_ip_i in 0..12 {
+                                let to_ip = tile.to_ip(to_ip_i);
+                                if to_ip != Default::default() {
+                                    println!("tile[{}].to_ip[{}] = {}", tile_pos, to_ip_i, to_ip);
+                                }
+                            }
+                        }
+                        // TileType::LeftRightIP => todo!(),
                         // TileType::TopBottomIO => todo!(),
                         // TileType::LeftRightIO => todo!(),
-                        // TileType::TopBottomIP => todo!(),
-                        // TileType::LeftRightIP => todo!(),
                         // TileType::PLL => todo!(),
                         // TileType::GCLKSW => todo!(),
                         _ => {}

@@ -170,6 +170,17 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
             _d: PhantomData,
         }
     }
+
+    /// Coerce to a reference to a hard IP tile
+    #[inline]
+    pub fn as_top_ip_tile(self) -> hard_ip::TopIPTileRef<D, Ref> {
+        assert!(self.tile_type() == TileType::TopIP);
+        hard_ip::TopIPTileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
 }
 
 /// A generic 2-choice mux

@@ -1,6 +1,11 @@
 //! Interface to external hard IP blocks
 
+use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
+
+use super::*;
+
+use bitmux::BitstreamField;
 
 /// A mux with 13 choices and an optional invert
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -121,5 +126,80 @@ impl Mux17Inv {
             bits |= 0b10_0000_0000;
         }
         bits
+    }
+}
+
+pub(crate) struct TopIPToExtMux(u8);
+impl FieldPositionCalculator for TopIPToExtMux {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "BBMUX index out of range");
+
+        // The 12 BBMUXes group into 2 columns of 6,
+        // where the second column has its bits mirrored horizontally.
+        let is_second_col = self.0 >= 6;
+        let inst_within_col = self.0 % 6;
+
+        // This is the "baseline" shape
+        let (xbase, mut y) = bitmux::bittable!(
+            (#x, 54 + inst_within_col as u32 * 2 + #y),
+            0   2   4   6   .   .   .,
+            1   3   5   7   .   .   8,
+        )[biti];
+
+        // Within each column of 6, there is a gap of 2 rows between the top 3 and bottom 3.
+        if inst_within_col >= 3 {
+            y += 2;
+        }
+
+        // The second column is all the way over here
+        let x = if !is_second_col { xbase } else { 29 - xbase };
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub struct TopIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+    pub(super) r: Ref,
+    pub(super) p: TilePos,
+    pub(super) _d: PhantomData<D>,
+}
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for TopIPTileRef<D, Ref> {
+    fn tile_type(&self) -> TileType {
+        TileType::TopIP
+    }
+    fn pos(&self) -> TilePos {
+        self.p
+    }
+    fn as_base_tile(self) -> TileRef<D, Ref> {
+        TileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
+}
+
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopIPTileRef<D, Ref> {
+    pub fn to_ip(&self, idx: u8) -> Mux13Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopIPToExtMux(idx),
+            _d: PhantomData,
+        };
+        Mux13Inv::get(ref_)
+    }
+}
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopIPTileRef<D, Ref> {
+    pub fn set_lut_input(&mut self, idx: u8, val: Mux13Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopIPToExtMux(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
     }
 }
