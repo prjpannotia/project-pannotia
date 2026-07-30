@@ -283,7 +283,19 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
                         }
-                        // TileType::RoutingOnly => todo!(),
+                        TileType::RoutingOnly => {
+                            let tile = tile.as_routing_only_tile();
+
+                            for glb2loc_i in 0..4 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
+                        }
                         // TileType::BRAM => todo!(),
                         // TileType::TopBottomIO => todo!(),
                         // TileType::LeftRightIO => todo!(),

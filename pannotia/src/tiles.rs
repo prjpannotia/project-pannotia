@@ -139,6 +139,17 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
             _d: PhantomData,
         }
     }
+
+    /// Coerce to a reference to a routing-only tile
+    #[inline]
+    pub fn as_routing_only_tile(self) -> routing_only::RoutingOnlyTileRef<D, Ref> {
+        assert!(self.tile_type() == TileType::RoutingOnly);
+        routing_only::RoutingOnlyTileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
 }
 
 /// A generic 2-choice mux
@@ -203,7 +214,7 @@ impl FieldPositionCalculator for GlobalToLocalMuxRef {
                 + biti as u32
                 + match self.i {
                     0 | 1 => 0,
-                    2 | 3 => 5,
+                    2 | 3 => 6,
                     _ => unreachable!(),
                 };
 
@@ -402,3 +413,4 @@ impl Mux3Inv {
 pub mod generic_routing;
 pub mod local_lines;
 pub mod logic;
+pub mod routing_only;
