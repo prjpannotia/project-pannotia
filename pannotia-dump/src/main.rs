@@ -226,6 +226,16 @@ fn main() -> Result<ExitCode, Error> {
                                 if lc_bypass {
                                     println!("tile[{}].lc_bypass[{}] = 1", tile_pos, lut_i);
                                 }
+
+                                for out_i in 0..3 {
+                                    let outp = tile.lc_output(lut_i, out_i);
+                                    if outp != Default::default() {
+                                        println!(
+                                            "tile[{}].omux{}[{}] = {}",
+                                            tile_pos, out_i, lut_i, outp
+                                        );
+                                    }
+                                }
                             }
                         }
                         // TileType::RoutingOnly => todo!(),

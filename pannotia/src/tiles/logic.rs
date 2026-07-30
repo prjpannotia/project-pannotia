@@ -131,6 +131,58 @@ impl FieldPositionCalculator for LogicBypassMode {
     }
 }
 
+/// A choice between the LUT's output and the flip-flop's output
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum OMUX {
+    LUT,
+    FlipFlop,
+}
+impl Display for OMUX {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::LUT => write!(f, "LUT"),
+            Self::FlipFlop => write!(f, "FF"),
+        }
+    }
+}
+impl Default for OMUX {
+    fn default() -> Self {
+        Self::LUT
+    }
+}
+impl From<bool> for OMUX {
+    fn from(value: bool) -> Self {
+        match value {
+            false => Self::LUT,
+            true => Self::FlipFlop,
+        }
+    }
+}
+impl From<OMUX> for bool {
+    fn from(value: OMUX) -> Self {
+        match value {
+            OMUX::LUT => false,
+            OMUX::FlipFlop => true,
+        }
+    }
+}
+
+struct LogicOut {
+    lc: u8,
+    i: u8,
+}
+impl FieldPositionCalculator for LogicOut {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.lc < 16, "LUT index out of range");
+        assert!(self.i < 3, "output index out of range");
+        TileRelativeBitPos {
+            x: 33,
+            y: [0, 2, 3][self.i as usize] + self.lc as u32 * 4 + if self.lc >= 8 { 4 } else { 0 },
+        }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
     pub fn lut(&self, lc_idx: u8) -> u16 {
         let ref_ = GenericFieldRef {
@@ -153,6 +205,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
             _d: PhantomData,
         };
         IMUX::from_bits(ref_.get_bits::<12>())
+    }
+
+    pub fn lc_output(&self, lc_idx: u8, out_idx: u8) -> OMUX {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LogicOut {
+                lc: lc_idx,
+                i: out_idx,
+            },
+            _d: PhantomData,
+        };
+        OMUX::from(ref_.get_bit(0))
     }
 
     pub fn lc_input_c_mode(&self, lc_idx: u8) -> InputCMode {
@@ -233,6 +298,19 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bits::<16>(val.to_bits());
+    }
+
+    pub fn set_lc_output(&mut self, lc_idx: u8, out_idx: u8, val: OMUX) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LogicOut {
+                lc: lc_idx,
+                i: out_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
     }
 
     pub fn set_lc_input_c_mode(&mut self, lc_idx: u8, val: InputCMode) {
