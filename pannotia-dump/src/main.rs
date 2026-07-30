@@ -605,7 +605,9 @@ fn main() -> Result<ExitCode, Error> {
                         // TileType::LeftRightIO => todo!(),
                         // TileType::PLL => todo!(),
                         // TileType::GCLKSW => todo!(),
-                        _ => {}
+                        tile_type => {
+                            println!("// WARN: Unimplemented tile type {:?}", tile_type);
+                        }
                     }
                 }
             }
