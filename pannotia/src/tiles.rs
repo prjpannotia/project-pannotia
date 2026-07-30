@@ -466,6 +466,7 @@ impl BitSource for &[bool] {
 
 pub mod bram9k;
 pub mod generic_routing;
+pub mod hard_ip;
 pub mod local_lines;
 pub mod logic;
 pub mod routing_only;
