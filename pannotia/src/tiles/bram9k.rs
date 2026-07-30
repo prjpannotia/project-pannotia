@@ -538,6 +538,13 @@ impl FieldPositionCalculator for DlyTime {
     }
 }
 
+struct PackedModeAddressOverride {}
+impl FieldPositionCalculator for PackedModeAddressOverride {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 34, y: 3 }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
@@ -678,6 +685,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         Mux3Inv::get(ref_)
+    }
+
+    pub fn use_packed_mode_address_override(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: PackedModeAddressOverride {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
     }
 
     pub fn width_a(&self) -> PortWidth {
@@ -970,6 +987,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    pub fn set_use_packed_mode_address_override(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: PackedModeAddressOverride {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
     }
 
     pub fn set_width_a(&mut self, val: PortWidth) {

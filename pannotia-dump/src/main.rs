@@ -441,6 +441,11 @@ fn main() -> Result<ExitCode, Error> {
                             }
 
                             // settings for the RAM itself
+                            let cfg_setting = tile.use_packed_mode_address_override();
+                            if cfg_setting {
+                                println!("tile[{}].use_packed_mode_address_override = 1", tile_pos);
+                            }
+
                             let cfg_setting = tile.width_a();
                             if cfg_setting != Default::default() {
                                 println!("tile[{}].width_a = {}", tile_pos, cfg_setting);
