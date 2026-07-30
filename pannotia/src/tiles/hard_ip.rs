@@ -42,7 +42,7 @@ impl bitmux::BitstreamField for Mux13Inv {
     }
 }
 impl Mux13Inv {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         let invert = bits & 0b1_0000_0000 != 0;
         bitmux::twohot!(3, 4, match bits & 0b1111_1111 {
             #bits => Self::I { invert, i: #val },
@@ -53,7 +53,7 @@ impl Mux13Inv {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         let mut bits = bitmux::twohot!(3, 4, match self {
             Self::I { i: #val, .. } => #bits,
             Self::I { i: 12, .. } => 0b1000_0000,
@@ -103,7 +103,7 @@ impl bitmux::BitstreamField for Mux17Inv {
     }
 }
 impl Mux17Inv {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         let invert = bits & 0b10_0000_0000 != 0;
         bitmux::twohot!(4, 4, match bits & 0b1_1111_1111 {
             #bits => Self::I { invert, i: #val },
@@ -114,7 +114,7 @@ impl Mux17Inv {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         let mut bits = bitmux::twohot!(4, 4, match self {
             Self::I { i: #val, .. } => #bits,
             Self::I { i: 16, .. } => 0b1_0000_0000,
@@ -129,7 +129,7 @@ impl Mux17Inv {
     }
 }
 
-pub(crate) struct TopIPToExtMux(u8);
+struct TopIPToExtMux(u8);
 impl FieldPositionCalculator for TopIPToExtMux {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
@@ -159,7 +159,7 @@ impl FieldPositionCalculator for TopIPToExtMux {
     }
 }
 
-pub(crate) struct TopIPFromExtMux(u8);
+struct TopIPFromExtMux(u8);
 impl FieldPositionCalculator for TopIPFromExtMux {
     #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
@@ -184,7 +184,7 @@ impl FieldPositionCalculator for TopIPFromExtMux {
     }
 }
 
-pub(crate) struct TopIPGlobal2Local(u8);
+struct TopIPGlobal2Local(u8);
 impl FieldPositionCalculator for TopIPGlobal2Local {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
@@ -299,7 +299,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopIPTileRef<D, Ref> {
     }
 }
 
-pub(crate) struct LeftRightIPToExtMux13(u8);
+struct LeftRightIPToExtMux13(u8);
 impl FieldPositionCalculator for LeftRightIPToExtMux13 {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
@@ -321,7 +321,7 @@ impl FieldPositionCalculator for LeftRightIPToExtMux13 {
     }
 }
 
-pub(crate) struct LeftRightIPToExtMux17(u8);
+struct LeftRightIPToExtMux17(u8);
 impl FieldPositionCalculator for LeftRightIPToExtMux17 {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
@@ -346,7 +346,7 @@ impl FieldPositionCalculator for LeftRightIPToExtMux17 {
     }
 }
 
-pub(crate) struct LeftRightIPFromExtMux(u8);
+struct LeftRightIPFromExtMux(u8);
 impl FieldPositionCalculator for LeftRightIPFromExtMux {
     #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
@@ -358,7 +358,7 @@ impl FieldPositionCalculator for LeftRightIPFromExtMux {
     }
 }
 
-pub(crate) struct LeftRightIPGlobal2Local(u8);
+struct LeftRightIPGlobal2Local(u8);
 impl FieldPositionCalculator for LeftRightIPGlobal2Local {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {

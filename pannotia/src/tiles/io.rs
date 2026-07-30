@@ -1,5 +1,6 @@
 //! I/O tiles
 
+use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
 
 use super::*;
@@ -33,7 +34,7 @@ impl bitmux::BitstreamField for TopBottomIOLocalMux {
     }
 }
 impl TopBottomIOLocalMux {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         bitmux::twohot!(2, 3, match bits {
             #bits => Self::I(#val),
             0b1_00_000 => Self::I(6),
@@ -42,7 +43,7 @@ impl TopBottomIOLocalMux {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         bitmux::twohot!(2, 3, match self {
             Self::I(#val) => #bits,
             Self::I(6) => 0b1_00_000,
@@ -79,7 +80,7 @@ impl bitmux::BitstreamField for LeftRightIOLocalMux {
     }
 }
 impl LeftRightIOLocalMux {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         bitmux::twohot!(2, 4, match bits {
             #bits => Self::I(#val),
             0b1_00_0000 => Self::I(8),
@@ -88,7 +89,7 @@ impl LeftRightIOLocalMux {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         bitmux::twohot!(2, 4, match self {
             Self::I(#val) => #bits,
             Self::I(8) => 0b1_00_0000,
@@ -97,3 +98,57 @@ impl LeftRightIOLocalMux {
         })
     }
 }
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+    pub(super) r: Ref,
+    pub(super) p: TilePos,
+    pub(super) _d: PhantomData<D>,
+}
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
+    for TopBottomIOTileRef<D, Ref>
+{
+    fn tile_type(&self) -> TileType {
+        TileType::TopBottomIO
+    }
+    fn pos(&self) -> TilePos {
+        self.p
+    }
+    fn as_base_tile(self) -> TileRef<D, Ref> {
+        TileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
+}
+
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {}
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub struct LeftRightIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+    pub(super) r: Ref,
+    pub(super) p: TilePos,
+    pub(super) _d: PhantomData<D>,
+}
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
+    for LeftRightIOTileRef<D, Ref>
+{
+    fn tile_type(&self) -> TileType {
+        TileType::LeftRightIO
+    }
+    fn pos(&self) -> TilePos {
+        self.p
+    }
+    fn as_base_tile(self) -> TileRef<D, Ref> {
+        TileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
+}
+
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {}
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {}

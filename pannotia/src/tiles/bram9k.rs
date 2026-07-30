@@ -103,7 +103,7 @@ impl bitmux::BitstreamField for TMUX {
     }
 }
 impl TMUX {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         bitmux::twohot!(3, 5, match bits {
             #bits => Self::I(#val),
             0 => Self::None,
@@ -111,7 +111,7 @@ impl TMUX {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         bitmux::twohot!(3, 5, match self {
             Self::I(#val) => #bits,
             Self::None => 0,
@@ -182,7 +182,7 @@ impl bitmux::BitstreamField for KMUX {
     }
 }
 impl KMUX {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         let invert = bits & 0b1_00000000 != 0;
         bitmux::twohot!(3, 5, match bits & 0b1111_1111 {
             #bits => Self::I { invert, i: #val },
@@ -192,7 +192,7 @@ impl KMUX {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         let mut bits = bitmux::twohot!(
             3,
             5,

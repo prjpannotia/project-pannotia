@@ -601,8 +601,12 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
                         }
-                        // TileType::TopBottomIO => todo!(),
-                        // TileType::LeftRightIO => todo!(),
+                        TileType::TopBottomIO => {
+                            let tile = tile.as_topbottom_io_tile();
+                        }
+                        TileType::LeftRightIO => {
+                            let tile = tile.as_leftright_io_tile();
+                        }
                         // TileType::PLL => todo!(),
                         // TileType::GCLKSW => todo!(),
                         tile_type => {

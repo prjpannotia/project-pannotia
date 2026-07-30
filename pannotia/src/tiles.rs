@@ -191,6 +191,27 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
             _d: PhantomData,
         }
     }
+
+    /// Coerce to a reference to an I/O tile
+    #[inline]
+    pub fn as_topbottom_io_tile(self) -> io::TopBottomIOTileRef<D, Ref> {
+        assert!(self.tile_type() == TileType::TopBottomIO);
+        io::TopBottomIOTileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
+    /// Coerce to a reference to an I/O tile
+    #[inline]
+    pub fn as_leftright_io_tile(self) -> io::LeftRightIOTileRef<D, Ref> {
+        assert!(self.tile_type() == TileType::LeftRightIO);
+        io::LeftRightIOTileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
 }
 
 /// A generic 2-choice mux
