@@ -83,7 +83,7 @@ impl Family {
                 } else if pos.x == 13 && pos.y >= 5 && pos.y <= 12 {
                     TileType::LeftRightIP // MCU right-side interface
                 } else if pos.x >= 1 && pos.x <= 12 && pos.y == 5 {
-                    TileType::TopBottomIP // MCU bottom-side interface
+                    TileType::TopIP // MCU bottom-side interface
                 } else if pos.x == 0 && pos.y >= 1 && pos.y <= 4 {
                     TileType::LeftRightIO // left/west IO
                 } else if pos.x == 22 && pos.y >= 1 && pos.y <= 3 {

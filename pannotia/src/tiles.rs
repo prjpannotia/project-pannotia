@@ -48,18 +48,27 @@ pub enum TileType {
     /// IO, on the left and right sides
     LeftRightIO,
 
-    /// Special function interface, on the top and bottom sides
+    /// Special function interface, on the top side
     ///
-    /// Note that "top" and "bottom" are relative to "the rest of the logic fabric"
-    /// and are not the top and bottom of the entire tile grid.
-    /// In fact, the bottom side of the MCU is interfaced with `TopBottomIP` tiles,
-    /// and these tiles are found in a row in the middle of the tile grid.
-    TopBottomIP,
+    /// Note that "top" is relative to "the rest of the logic fabric"
+    /// and is not at the top of the entire tile grid.
+    ///
+    /// This tile type is used to connect the MCU to the logic fabric.
+    /// In all cases seen so far, the MCU is in the upper-left corner,
+    /// so the _bottom_ side of the MCU is interfaced with `TopIP` tiles.
+    /// These tiles are found in a row in the middle of the tile grid,
+    /// but at the "top" of the valid logic region.
+    ///
+    /// There is no "bottom" IP tile encountered anywhere.
+    TopIP,
     /// Special function interface, on the left and right sides
     ///
-    /// See the note for [TopBottomIP](Self::TopBottomIP).
+    /// See the note for [TopIP](Self::TopIP).
     /// These tiles can be found both in the middle (for interfacing with the MCU)
     /// and on the actual tile grid boundary (for interfacing with analog IP).
+    /// In all cases seen so far, "left" IP tiles connect to the MCU
+    /// (which is in the upper-left), and "right" IP tiles connect to analog IP
+    /// (replacing some right-hand-side IO tiles).
     LeftRightIP,
 
     /// Tile containing a PLL
