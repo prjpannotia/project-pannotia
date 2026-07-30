@@ -450,6 +450,23 @@ fn main() -> Result<ExitCode, Error> {
                                 println!("tile[{}].width_b = {}", tile_pos, cfg_setting);
                             }
 
+                            let cfg_setting = tile.use_output_register_a();
+                            if cfg_setting {
+                                println!("tile[{}].use_output_register_a = 1", tile_pos);
+                            }
+                            let cfg_setting = tile.use_output_register_b();
+                            if cfg_setting {
+                                println!("tile[{}].use_output_register_b = 1", tile_pos);
+                            }
+                            let cfg_setting = tile.write_thru_a();
+                            if cfg_setting {
+                                println!("tile[{}].write_thru_a = 1", tile_pos);
+                            }
+                            let cfg_setting = tile.write_thru_b();
+                            if cfg_setting {
+                                println!("tile[{}].write_thru_b = 1", tile_pos);
+                            }
+
                             let mut init_val: BitArr!(for 9216, in u8, Lsb0) = BitArray::ZERO;
                             tile.init_data(&mut init_val.as_mut_bitslice());
                             if init_val.any() {

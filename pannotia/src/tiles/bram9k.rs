@@ -444,6 +444,31 @@ impl FieldPositionCalculator for PortBWidth {
     }
 }
 
+struct OutRegA {}
+impl FieldPositionCalculator for OutRegA {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 34, y: 29 }
+    }
+}
+struct OutRegB {}
+impl FieldPositionCalculator for OutRegB {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 35, y: 39 }
+    }
+}
+struct WriteThruA {}
+impl FieldPositionCalculator for WriteThruA {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 35, y: 9 }
+    }
+}
+struct WriteThruB {}
+impl FieldPositionCalculator for WriteThruB {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        TileRelativeBitPos { x: 34, y: 59 }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
@@ -603,6 +628,43 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         PortWidth::get(ref_)
+    }
+
+    pub fn use_output_register_a(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: OutRegA {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    pub fn use_output_register_b(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: OutRegB {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    pub fn write_thru_a(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: WriteThruA {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    pub fn write_thru_b(&self) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: WriteThruB {},
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
@@ -764,6 +826,43 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    pub fn set_use_output_register_a(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: OutRegA {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    pub fn set_use_output_register_b(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: OutRegB {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    pub fn set_write_thru_a(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: WriteThruA {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    pub fn set_write_thru_b(&mut self, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: WriteThruB {},
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
     }
 }
 
