@@ -297,6 +297,30 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         };
         KMUX::get(ref_)
     }
+    pub fn read_en_a(&self) -> KMUX {
+        self.kmux(6)
+    }
+    pub fn read_en_b(&self) -> KMUX {
+        self.kmux(7)
+    }
+    pub fn write_en_a(&self) -> KMUX {
+        self.kmux(3)
+    }
+    pub fn write_en_b(&self) -> KMUX {
+        self.kmux(0)
+    }
+    pub fn addr_stall_a(&self) -> KMUX {
+        self.kmux(4)
+    }
+    pub fn addr_stall_b(&self) -> KMUX {
+        self.kmux(5)
+    }
+    pub fn byte_en_a(&self, bit: u8) -> KMUX {
+        self.kmux(1 + bit)
+    }
+    pub fn byte_en_b(&self, bit: u8) -> KMUX {
+        self.kmux(8 + bit)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn set_global_to_local(&mut self, inp_idx: u8, val: GlobalToLocalMux) {
@@ -384,6 +408,30 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+    pub fn set_read_en_a(&mut self, val: KMUX) {
+        self.set_kmux(6, val);
+    }
+    pub fn set_read_en_b(&mut self, val: KMUX) {
+        self.set_kmux(7, val);
+    }
+    pub fn set_write_en_a(&mut self, val: KMUX) {
+        self.set_kmux(3, val);
+    }
+    pub fn set_write_en_b(&mut self, val: KMUX) {
+        self.set_kmux(0, val);
+    }
+    pub fn set_addr_stall_a(&mut self, val: KMUX) {
+        self.set_kmux(4, val);
+    }
+    pub fn set_addr_stall_b(&mut self, val: KMUX) {
+        self.set_kmux(5, val);
+    }
+    pub fn set_byte_en_a(&mut self, bit: u8, val: KMUX) {
+        self.set_kmux(1 + bit, val)
+    }
+    pub fn set_byte_en_b(&mut self, bit: u8, val: KMUX) {
+        self.set_kmux(8 + bit, val)
     }
 }
 

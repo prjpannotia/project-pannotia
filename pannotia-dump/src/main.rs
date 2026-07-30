@@ -378,7 +378,44 @@ fn main() -> Result<ExitCode, Error> {
                                     println!("tile[{}].tmux[{}] = {}", tile_pos, tmux_i, tmux);
                                 }
                             }
-                            for kmux_i in 0..16 {
+
+                            let kmux = tile.read_en_a();
+                            if kmux != Default::default() {
+                                println!("tile[{}].read_en_a = {}", tile_pos, kmux);
+                            }
+                            let kmux = tile.read_en_b();
+                            if kmux != Default::default() {
+                                println!("tile[{}].read_en_b = {}", tile_pos, kmux);
+                            }
+                            let kmux = tile.write_en_a();
+                            if kmux != Default::default() {
+                                println!("tile[{}].write_en_a = {}", tile_pos, kmux);
+                            }
+                            let kmux = tile.write_en_b();
+                            if kmux != Default::default() {
+                                println!("tile[{}].write_en_b = {}", tile_pos, kmux);
+                            }
+                            let kmux = tile.addr_stall_a();
+                            if kmux != Default::default() {
+                                println!("tile[{}].addr_stall_a = {}", tile_pos, kmux);
+                            }
+                            let kmux = tile.addr_stall_b();
+                            if kmux != Default::default() {
+                                println!("tile[{}].addr_stall_b = {}", tile_pos, kmux);
+                            }
+                            for bit in 0..2 {
+                                let kmux = tile.byte_en_a(bit);
+                                if kmux != Default::default() {
+                                    println!("tile[{}].byte_en_a[{}] = {}", tile_pos, bit, kmux);
+                                }
+                            }
+                            for bit in 0..2 {
+                                let kmux = tile.byte_en_b(bit);
+                                if kmux != Default::default() {
+                                    println!("tile[{}].byte_en_b[{}] = {}", tile_pos, bit, kmux);
+                                }
+                            }
+                            for kmux_i in 10..16 {
                                 let kmux = tile.kmux(kmux_i);
                                 if kmux != Default::default() {
                                     println!("tile[{}].kmux[{}] = {}", tile_pos, kmux_i, kmux);
