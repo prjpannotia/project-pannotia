@@ -603,6 +603,16 @@ fn main() -> Result<ExitCode, Error> {
                         }
                         TileType::TopBottomIO => {
                             let tile = tile.as_topbottom_io_tile();
+
+                            for local_line_i in 0..32 {
+                                let local_line = tile.local_line(local_line_i);
+                                if local_line != Default::default() {
+                                    println!(
+                                        "tile[{}].local_line[{}] = {}",
+                                        tile_pos, local_line_i, local_line
+                                    );
+                                }
+                            }
                         }
                         TileType::LeftRightIO => {
                             let tile = tile.as_leftright_io_tile();
