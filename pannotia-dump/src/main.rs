@@ -502,6 +502,15 @@ fn main() -> Result<ExitCode, Error> {
                                 println!("tile[{}].write_thru_b = 1", tile_pos);
                             }
 
+                            let cfg_setting = tile.rsen_delay();
+                            if cfg_setting != 0 {
+                                println!("tile[{}].rsen_delay = {}", tile_pos, cfg_setting);
+                            }
+                            let cfg_setting = tile.delay_time();
+                            if cfg_setting != 0 {
+                                println!("tile[{}].delay_time = {}", tile_pos, cfg_setting);
+                            }
+
                             let mut init_val: BitArr!(for 9216, in u8, Lsb0) = BitArray::ZERO;
                             tile.init_data(&mut init_val.as_mut_bitslice());
                             if init_val.any() {

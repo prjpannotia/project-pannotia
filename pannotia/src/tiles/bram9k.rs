@@ -519,6 +519,25 @@ impl FieldPositionCalculator for UseClkEnOutB {
     }
 }
 
+struct RsenDly {}
+impl FieldPositionCalculator for RsenDly {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        [
+            TileRelativeBitPos { x: 34, y: 13 },
+            TileRelativeBitPos { x: 34, y: 23 },
+        ][biti]
+    }
+}
+struct DlyTime {}
+impl FieldPositionCalculator for DlyTime {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        [
+            TileRelativeBitPos { x: 34, y: 25 },
+            TileRelativeBitPos { x: 34, y: 39 },
+        ][biti]
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
@@ -790,6 +809,25 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.get_bit(0)
+    }
+
+    pub fn rsen_delay(&self) -> u8 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: RsenDly {},
+            _d: PhantomData,
+        };
+        ref_.get_bits::<2>() as u8
+    }
+    pub fn delay_time(&self) -> u8 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: DlyTime {},
+            _d: PhantomData,
+        };
+        ref_.get_bits::<2>() as u8
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
@@ -1063,6 +1101,27 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bit(0, val);
+    }
+
+    pub fn set_rsen_delay(&mut self, val: u8) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: RsenDly {},
+            _d: PhantomData,
+        };
+        assert!(val & !0b11 == 0, "invalid setting");
+        ref_.set_bits::<2>(val as u32);
+    }
+    pub fn set_delay_time(&mut self, val: u8) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: DlyTime {},
+            _d: PhantomData,
+        };
+        assert!(val & !0b11 == 0, "invalid setting");
+        ref_.set_bits::<2>(val as u32);
     }
 }
 
