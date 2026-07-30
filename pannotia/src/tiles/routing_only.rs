@@ -6,7 +6,7 @@ use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, 
 
 use super::*;
 
-use bitmux::BitstreamField;
+use bitmux::{BitGetter, BitSetter, BitstreamField};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct RoutingOnlyTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
@@ -32,6 +32,18 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
     }
 }
 
+struct OMUXRef(u8);
+impl FieldPositionCalculator for OMUXRef {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 16, "(virtual) LUT index out of range");
+        TileRelativeBitPos {
+            x: 15,
+            y: self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+        }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> RoutingOnlyTileRef<D, Ref> {
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
@@ -44,6 +56,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> RoutingOnlyTileRef<D, Ref> {
             _d: PhantomData,
         };
         GlobalToLocalMux::get(ref_)
+    }
+
+    pub fn right_neighbor_output(&self, lc_idx: u8) -> Mux2 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: OMUXRef(lc_idx),
+            _d: PhantomData,
+        };
+        Mux2::from(ref_.get_bit(0))
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> RoutingOnlyTileRef<D, Ref> {
@@ -58,6 +80,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> RoutingOnlyTileRef<D, Ref> {
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    pub fn set_right_neighbor_output(&mut self, lc_idx: u8, val: Mux2) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: OMUXRef(lc_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
     }
 }
 

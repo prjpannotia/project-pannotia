@@ -295,6 +295,13 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                             }
+
+                            for lut_i in 0..16 {
+                                let outp = tile.right_neighbor_output(lut_i);
+                                if outp != Default::default() {
+                                    println!("tile[{}].omux[{}] = {}", tile_pos, lut_i, outp);
+                                }
+                            }
                         }
                         // TileType::BRAM => todo!(),
                         // TileType::TopBottomIO => todo!(),
