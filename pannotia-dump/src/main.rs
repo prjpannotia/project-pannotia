@@ -440,6 +440,16 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
 
+                            // settings for the RAM itself
+                            let cfg_setting = tile.width_a();
+                            if cfg_setting != Default::default() {
+                                println!("tile[{}].width_a = {}", tile_pos, cfg_setting);
+                            }
+                            let cfg_setting = tile.width_b();
+                            if cfg_setting != Default::default() {
+                                println!("tile[{}].width_b = {}", tile_pos, cfg_setting);
+                            }
+
                             let mut init_val: BitArr!(for 9216, in u8, Lsb0) = BitArray::ZERO;
                             tile.init_data(&mut init_val.as_mut_bitslice());
                             if init_val.any() {

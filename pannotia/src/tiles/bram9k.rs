@@ -262,6 +262,188 @@ impl FieldPositionCalculator for TileAsync {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[bitmux::bitenum]
+pub enum PortWidth {
+    X36 = "10000",
+    X18 = "00000",
+    X9 = "01000",
+    X4 = "01100",
+    X2 = "01110",
+    X1 = "01111",
+}
+impl Default for PortWidth {
+    fn default() -> Self {
+        Self::X18
+    }
+}
+impl Display for PortWidth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PortWidth::X36 => write!(f, "36"),
+            PortWidth::X18 => write!(f, "18"),
+            PortWidth::X9 => write!(f, "9"),
+            PortWidth::X4 => write!(f, "4"),
+            PortWidth::X2 => write!(f, "2"),
+            PortWidth::X1 => write!(f, "1"),
+        }
+    }
+}
+struct PortAWidth {}
+impl FieldPositionCalculator for PortAWidth {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        bitmux::bittable!(
+            TileRelativeBitPos { x: 32 + #x, y: #y },
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   3,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   2   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   1,
+            .   .   .   .,
+            .   .   .   0,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   4   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+        )[biti]
+    }
+}
+struct PortBWidth {}
+impl FieldPositionCalculator for PortBWidth {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        bitmux::bittable!(
+            TileRelativeBitPos { x: 32 + #x, y: #y },
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   1   0,
+            .   .   .   .,
+            .   .   .   4,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   2   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   3   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+        )[biti]
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
@@ -403,6 +585,25 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         };
         Mux3Inv::get(ref_)
     }
+
+    pub fn width_a(&self) -> PortWidth {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: PortAWidth {},
+            _d: PhantomData,
+        };
+        PortWidth::get(ref_)
+    }
+    pub fn width_b(&self) -> PortWidth {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: PortBWidth {},
+            _d: PhantomData,
+        };
+        PortWidth::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn set_global_to_local(&mut self, inp_idx: u8, val: GlobalToLocalMux) {
@@ -541,6 +742,25 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TileAsync(clk_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_width_a(&mut self, val: PortWidth) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: PortAWidth {},
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_width_b(&mut self, val: PortWidth) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: PortBWidth {},
             _d: PhantomData,
         };
         val.set(ref_);
