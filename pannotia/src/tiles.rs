@@ -283,6 +283,122 @@ impl GlobalToLocalMux {
     }
 }
 
+/// A mux with two choices and an optional invert
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum Mux2Inv {
+    VCC,
+    GND,
+    I { invert: bool, i: u8 },
+}
+impl Default for Mux2Inv {
+    fn default() -> Self {
+        Self::VCC
+    }
+}
+impl Display for Mux2Inv {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VCC => write!(f, "VCC"),
+            Self::GND => write!(f, "GND"),
+            Self::I { invert, i } => {
+                if *invert {
+                    write!(f, "!")?;
+                }
+                write!(f, "#{i}")
+            }
+        }
+    }
+}
+impl bitmux::BitstreamField for Mux2Inv {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<3>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<3>(self.to_bits());
+    }
+}
+impl Mux2Inv {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        let invert = bits & 0b100 != 0;
+        match bits & 0b11 {
+            0b01 => Self::I { invert, i: 0 },
+            0b10 => Self::I { invert, i: 1 },
+            0b00 if invert => Self::GND,
+            0b00 if !invert => Self::VCC,
+            _ => panic!("invalid Mux2Inv {bits:03b}"),
+        }
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        match self {
+            Self::VCC => 0b000,
+            Self::GND => 0b100,
+            Self::I { invert, i: 0 } => 0b01 | if invert { 0b100 } else { 0 },
+            Self::I { invert, i: 1 } => 0b10 | if invert { 0b100 } else { 0 },
+            _ => panic!("invalid Mux2Inv {}", self),
+        }
+    }
+}
+
+/// A mux with three choices and an optional invert
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum Mux3Inv {
+    VCC,
+    GND,
+    I { invert: bool, i: u8 },
+}
+impl Default for Mux3Inv {
+    fn default() -> Self {
+        Self::VCC
+    }
+}
+impl Display for Mux3Inv {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VCC => write!(f, "VCC"),
+            Self::GND => write!(f, "GND"),
+            Self::I { invert, i } => {
+                if *invert {
+                    write!(f, "!")?;
+                }
+                write!(f, "#{i}")
+            }
+        }
+    }
+}
+impl bitmux::BitstreamField for Mux3Inv {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<4>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<4>(self.to_bits());
+    }
+}
+impl Mux3Inv {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        let invert = bits & 0b1000 != 0;
+        match bits & 0b11 {
+            0b001 => Self::I { invert, i: 0 },
+            0b010 => Self::I { invert, i: 1 },
+            0b100 => Self::I { invert, i: 2 },
+            0b000 if invert => Self::GND,
+            0b000 if !invert => Self::VCC,
+            _ => panic!("invalid Mux3Inv {bits:03b}"),
+        }
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        match self {
+            Self::VCC => 0b0000,
+            Self::GND => 0b1000,
+            Self::I { invert, i: 0 } => 0b001 | if invert { 0b1000 } else { 0 },
+            Self::I { invert, i: 1 } => 0b010 | if invert { 0b1000 } else { 0 },
+            Self::I { invert, i: 2 } => 0b100 | if invert { 0b1000 } else { 0 },
+            _ => panic!("invalid Mux3Inv {}", self),
+        }
+    }
+}
+
 pub mod generic_routing;
 pub mod local_lines;
 pub mod logic;

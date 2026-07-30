@@ -30,6 +30,55 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for LogicTi
     }
 }
 
+struct TileClk(u8);
+impl FieldPositionCalculator for TileClk {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 2, "clock index out of range");
+        let x = 30 - biti as u32;
+        let y = [32, 35][self.0 as usize];
+        TileRelativeBitPos { y, x }
+    }
+}
+struct TileClkEn(u8);
+impl FieldPositionCalculator for TileClkEn {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 2, "clock enable index out of range");
+        let x = 33 - biti as u32;
+        let y = [32, 35][self.0 as usize];
+        TileRelativeBitPos { y, x }
+    }
+}
+struct TileAsync(u8);
+impl FieldPositionCalculator for TileAsync {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 2, "async index out of range");
+        let x = 30 - biti as u32;
+        let y = [33, 34][self.0 as usize];
+        TileRelativeBitPos { y, x }
+    }
+}
+struct TileSLoad {}
+impl FieldPositionCalculator for TileSLoad {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        let x = 33 - biti as u32;
+        let y = 33;
+        TileRelativeBitPos { y, x }
+    }
+}
+struct TileSClr {}
+impl FieldPositionCalculator for TileSClr {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        let x = 33 - biti as u32;
+        let y = 34;
+        TileRelativeBitPos { y, x }
+    }
+}
+
 struct LogicLUT(u8);
 impl FieldPositionCalculator for LogicLUT {
     #[inline]
@@ -184,6 +233,52 @@ impl FieldPositionCalculator for LogicOut {
 }
 
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
+    pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileClk(clk_idx),
+            _d: PhantomData,
+        };
+        Mux3Inv::get(ref_)
+    }
+    pub fn clock_en_mux(&self, clk_idx: u8) -> Mux2Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileClkEn(clk_idx),
+            _d: PhantomData,
+        };
+        Mux2Inv::get(ref_)
+    }
+    pub fn async_mux(&self, clk_idx: u8) -> Mux3Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileAsync(clk_idx),
+            _d: PhantomData,
+        };
+        Mux3Inv::get(ref_)
+    }
+    pub fn sync_load_mux(&self) -> Mux2Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileSLoad {},
+            _d: PhantomData,
+        };
+        Mux2Inv::get(ref_)
+    }
+    pub fn sync_clr_mux(&self) -> Mux2Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TileSClr {},
+            _d: PhantomData,
+        };
+        Mux2Inv::get(ref_)
+    }
+
     pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -303,6 +398,52 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
+    pub fn set_clock_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileClk(clk_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_clock_en_mux(&mut self, clk_idx: u8, val: Mux2Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileClkEn(clk_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_async_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileAsync(clk_idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_sync_load_mux(&mut self, val: Mux2Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileSLoad {},
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_sync_clr_mux(&mut self, val: Mux2Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TileSClr {},
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
     pub fn set_global_to_local(&mut self, inp_idx: u8, val: GlobalToLocalMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),

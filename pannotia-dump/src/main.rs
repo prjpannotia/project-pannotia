@@ -177,6 +177,33 @@ fn main() -> Result<ExitCode, Error> {
                         TileType::Logic => {
                             let tile = tile.as_logic_tile();
 
+                            for clk_i in 0..2 {
+                                let clk_mux = tile.clock_mux(clk_i);
+                                if clk_mux != Default::default() {
+                                    println!("tile[{}].clk[{}] = {}", tile_pos, clk_i, clk_mux);
+                                }
+                                let ce_mux = tile.clock_en_mux(clk_i);
+                                if ce_mux != Default::default() {
+                                    println!("tile[{}].ce[{}] = {}", tile_pos, clk_i, ce_mux);
+                                }
+                            }
+
+                            for asy_i in 0..2 {
+                                let async_mux = tile.async_mux(asy_i);
+                                if async_mux != Default::default() {
+                                    println!("tile[{}].async[{}] = {}", tile_pos, asy_i, async_mux);
+                                }
+                            }
+
+                            let sload_mux = tile.sync_load_mux();
+                            if sload_mux != Default::default() {
+                                println!("tile[{}].sync_load = {}", tile_pos, sload_mux);
+                            }
+                            let sclr_mux = tile.sync_clr_mux();
+                            if sclr_mux != Default::default() {
+                                println!("tile[{}].sync_clr = {}", tile_pos, sclr_mux);
+                            }
+
                             for glb2loc_i in 0..4 {
                                 let glb2loc_mux = tile.global_to_local(glb2loc_i);
                                 if glb2loc_mux != Default::default() {
