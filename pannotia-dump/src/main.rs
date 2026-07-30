@@ -569,6 +569,17 @@ fn main() -> Result<ExitCode, Error> {
                                     println!("tile[{}].to_ip[{}] = {}", tile_pos, to_ip_i, to_ip);
                                 }
                             }
+                            for to_ip_i in 0..8 {
+                                let to_ip = tile.to_ip_17(to_ip_i);
+                                if to_ip != Default::default() {
+                                    println!(
+                                        "tile[{}].to_ip[{}] = {}",
+                                        tile_pos,
+                                        12 + to_ip_i,
+                                        to_ip
+                                    );
+                                }
+                            }
                         }
                         // TileType::TopBottomIO => todo!(),
                         // TileType::LeftRightIO => todo!(),

@@ -321,6 +321,31 @@ impl FieldPositionCalculator for LeftRightIPToExtMux13 {
     }
 }
 
+pub(crate) struct LeftRightIPToExtMux17(u8);
+impl FieldPositionCalculator for LeftRightIPToExtMux17 {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 8, "BBMUX index out of range");
+
+        // This is the "baseline" shape
+        let (x, ybase) = bitmux::bittable!(
+            (9 + #x, #y),
+            9   7   6   3   1,
+            .   .   .   .   .,
+            4   8   5   2   0,
+        )[biti];
+
+        // Even and odd instances alternate being mirrored vertically
+        let y = if self.0 % 2 == 0 {
+            40 + (self.0 as u32 / 2) * 6 + ybase
+        } else {
+            45 + (self.0 as u32 / 2) * 6 - ybase
+        };
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct LeftRightIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -355,6 +380,15 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
         };
         Mux13Inv::get(ref_)
     }
+    pub fn to_ip_17(&self, idx: u8) -> Mux17Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPToExtMux17(idx),
+            _d: PhantomData,
+        };
+        Mux17Inv::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
     pub fn set_to_ip_13(&mut self, idx: u8, val: Mux13Inv) {
@@ -362,6 +396,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: LeftRightIPToExtMux13(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+    pub fn set_to_ip_17(&mut self, idx: u8, val: Mux17Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIPToExtMux17(idx),
             _d: PhantomData,
         };
         val.set(ref_);
