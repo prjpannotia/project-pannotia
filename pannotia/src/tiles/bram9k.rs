@@ -96,27 +96,20 @@ impl Display for TMUX {
 }
 impl bitmux::BitstreamField for TMUX {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<8>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<8>(self.to_bits());
-    }
-}
-impl TMUX {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<8>();
         bitmux::twohot!(3, 5, match bits {
             #bits => Self::I(#val),
             0 => Self::None,
             _ => panic!("invalid TMUX {bits:08b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
-        bitmux::twohot!(3, 5, match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = bitmux::twohot!(3, 5, match self {
             Self::I(#val) => #bits,
             Self::None => 0,
             _ => panic!("invalid TMUX {}", self),
-        })
+        });
+        b.set_bits::<8>(bits);
     }
 }
 
@@ -175,15 +168,8 @@ impl Display for KMUX {
 }
 impl bitmux::BitstreamField for KMUX {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<9>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<9>(self.to_bits());
-    }
-}
-impl KMUX {
-    fn from_bits(bits: u32) -> Self {
-        let invert = bits & 0b1_00000000 != 0;
+        let bits = b.get_bits::<9>();
+        let invert = bits & 0b1_0000_0000 != 0;
         bitmux::twohot!(3, 5, match bits & 0b1111_1111 {
             #bits => Self::I { invert, i: #val },
             0 if invert => Self::GND,
@@ -191,22 +177,19 @@ impl KMUX {
             _ => panic!("invalid KMUX {bits:09b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
         let mut bits = bitmux::twohot!(
-            3,
-            5,
-            match self {
+            3, 5, match self {
                 Self::I { i: #val, .. } => #bits,
-                Self::GND => 0b1_00000000,
+                Self::GND => 0b1_0000_0000,
                 Self::VCC => 0,
                 _ => panic!("invalid KMUX {}", self),
             }
         );
         if let Self::I { invert: true, .. } = self {
-            bits |= 0b1_00000000;
+            bits |= 0b1_0000_0000;
         }
-        bits
+        b.set_bits::<9>(bits);
     }
 }
 

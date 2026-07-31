@@ -35,14 +35,7 @@ impl Display for Mux13Inv {
 }
 impl bitmux::BitstreamField for Mux13Inv {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<9>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<9>(self.to_bits());
-    }
-}
-impl Mux13Inv {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<9>();
         let invert = bits & 0b1_0000_0000 != 0;
         bitmux::twohot!(3, 4, match bits & 0b1111_1111 {
             #bits => Self::I { invert, i: #val },
@@ -52,8 +45,7 @@ impl Mux13Inv {
             _ => panic!("invalid Mux13Inv {bits:09b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
         let mut bits = bitmux::twohot!(3, 4, match self {
             Self::I { i: #val, .. } => #bits,
             Self::I { i: 12, .. } => 0b1000_0000,
@@ -64,7 +56,7 @@ impl Mux13Inv {
         if let Self::I { invert: true, .. } = self {
             bits |= 0b1_0000_0000;
         }
-        bits
+        b.set_bits::<9>(bits);
     }
 }
 
