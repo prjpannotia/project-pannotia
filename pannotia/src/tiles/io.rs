@@ -514,6 +514,9 @@ pub trait IOTileCommon {
     fn in_clock_local_to_clock(&self, io_idx: u8) -> IOLocalToClockMux {
         self.local_to_clock(io_idx * 2 + 1)
     }
+
+    fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux;
+    fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux;
 }
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
@@ -532,6 +535,9 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_in_clock_local_to_clock(&mut self, io_idx: u8, val: IOLocalToClockMux) {
         self.set_local_to_clock(io_idx * 2 + 1, val);
     }
+
+    fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux);
+    fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux);
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -615,6 +621,13 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
         };
         LocalToIOMux::get(ref_)
     }
+
+    fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
+        self.local_to_io([0, 1, 7, 6][io_idx as usize])
+    }
+    fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
+        self.local_to_io([2, 3, 5, 4][io_idx as usize])
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -668,6 +681,13 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
+        self.set_local_to_io([0, 1, 7, 6][io_idx as usize], val)
+    }
+    fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
+        self.set_local_to_io([2, 3, 5, 4][io_idx as usize], val)
     }
 }
 
@@ -740,6 +760,13 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
         };
         LocalToIOMux::get(ref_)
     }
+
+    fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
+        self.local_to_io(16 + io_idx)
+    }
+    fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
+        self.local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize])
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -781,5 +808,12 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
+        self.set_local_to_io(16 + io_idx, val)
+    }
+    fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
+        self.set_local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize], val)
     }
 }
