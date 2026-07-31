@@ -338,7 +338,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
             },
             _d: PhantomData,
         };
-        OMUX::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
 
     pub fn lc_input_c_mode(&self, lc_idx: u8) -> InputCMode {
@@ -367,7 +367,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
             field_pos: LogicAsyncMux(lc_idx),
             _d: PhantomData,
         };
-        Mux2::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
     pub fn lc_clk_choice(&self, lc_idx: u8) -> Mux2 {
         let ref_ = GenericFieldRef {
@@ -376,7 +376,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
             field_pos: LogicClkMux(lc_idx),
             _d: PhantomData,
         };
-        Mux2::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
     pub fn lc_shift_reg_mode(&self, lc_idx: u8) -> bool {
         let ref_ = GenericFieldRef {

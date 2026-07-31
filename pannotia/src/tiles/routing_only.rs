@@ -65,7 +65,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> RoutingOnlyTileRef<D, Ref> {
             field_pos: OMUXRef(lc_idx),
             _d: PhantomData,
         };
-        Mux2::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> RoutingOnlyTileRef<D, Ref> {

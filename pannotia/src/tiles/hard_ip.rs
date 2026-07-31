@@ -254,7 +254,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopIPTileRef<D, Ref> {
             field_pos: TopIPFromExtMux(idx),
             _d: PhantomData,
         };
-        Mux2::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
 
     pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
@@ -430,7 +430,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
             field_pos: LeftRightIPFromExtMux(idx),
             _d: PhantomData,
         };
-        Mux2::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
 
     pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {

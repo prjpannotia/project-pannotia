@@ -970,6 +970,240 @@ impl FieldPositionCalculator for LeftRightOEPU {
     }
 }
 
+/// The function of the sync/async control signal on the IOB register
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum RegCtrlMode {
+    Reset,
+    Set,
+}
+impl Display for RegCtrlMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Reset => write!(f, "R"),
+            Self::Set => write!(f, "S"),
+        }
+    }
+}
+impl Default for RegCtrlMode {
+    fn default() -> Self {
+        Self::Reset
+    }
+}
+impl From<bool> for RegCtrlMode {
+    fn from(value: bool) -> Self {
+        match value {
+            false => Self::Reset,
+            true => Self::Set,
+        }
+    }
+}
+impl From<RegCtrlMode> for bool {
+    fn from(value: RegCtrlMode) -> Self {
+        match value {
+            RegCtrlMode::Reset => false,
+            RegCtrlMode::Set => true,
+        }
+    }
+}
+
+struct TopBottomInSMode {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomInSMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(27, 2), (33, 2), (27, 21), (33, 21)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct TopBottomInAMode {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomInAMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(28, 2), (32, 2), (28, 21), (32, 21)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct TopBottomOutSMode {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOutSMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(27, 4), (33, 4), (27, 19), (33, 19)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct TopBottomOutAMode {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOutAMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(28, 4), (32, 4), (28, 19), (32, 19)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct TopBottomOESMode {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOESMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(27, 6), (33, 6), (27, 17), (33, 17)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct TopBottomOEAMode {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOEAMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(28, 6), (32, 6), (28, 17), (32, 17)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightInSMode(u8);
+impl FieldPositionCalculator for LeftRightInSMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 1,
+            y: self.0 as u32 * 10 + 0,
+        }
+    }
+}
+
+struct LeftRightInAMode(u8);
+impl FieldPositionCalculator for LeftRightInAMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 0,
+            y: self.0 as u32 * 10 + 0,
+        }
+    }
+}
+
+struct LeftRightOutSMode(u8);
+impl FieldPositionCalculator for LeftRightOutSMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 1,
+            y: self.0 as u32 * 10 + 2,
+        }
+    }
+}
+
+struct LeftRightOutAMode(u8);
+impl FieldPositionCalculator for LeftRightOutAMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 0,
+            y: self.0 as u32 * 10 + 2,
+        }
+    }
+}
+
+struct LeftRightOESMode(u8);
+impl FieldPositionCalculator for LeftRightOESMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 1,
+            y: self.0 as u32 * 10 + 4,
+        }
+    }
+}
+
+struct LeftRightOEAMode(u8);
+impl FieldPositionCalculator for LeftRightOEAMode {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 0,
+            y: self.0 as u32 * 10 + 4,
+        }
+    }
+}
+
 pub trait IOTileCommon {
     fn num_ios(&self) -> u8;
 
@@ -1015,6 +1249,14 @@ pub trait IOTileCommon {
     fn in_powerup_state(&self, io_idx: u8) -> bool;
     fn out_powerup_state(&self, io_idx: u8) -> bool;
     fn oe_powerup_state(&self, io_idx: u8) -> bool;
+
+    fn in_async_mode(&self, io_idx: u8) -> RegCtrlMode;
+    fn out_async_mode(&self, io_idx: u8) -> RegCtrlMode;
+    fn oe_async_mode(&self, io_idx: u8) -> RegCtrlMode;
+
+    fn in_sync_mode(&self, io_idx: u8) -> RegCtrlMode;
+    fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode;
+    fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode;
 }
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
@@ -1059,6 +1301,14 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_in_powerup_state(&mut self, io_idx: u8, val: bool);
     fn set_out_powerup_state(&mut self, io_idx: u8, val: bool);
     fn set_oe_powerup_state(&mut self, io_idx: u8, val: bool);
+
+    fn set_in_async_mode(&mut self, io_idx: u8, val: RegCtrlMode);
+    fn set_out_async_mode(&mut self, io_idx: u8, val: RegCtrlMode);
+    fn set_oe_async_mode(&mut self, io_idx: u8, val: RegCtrlMode);
+
+    fn set_in_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode);
+    fn set_out_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode);
+    fn set_oe_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode);
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -1166,7 +1416,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
             },
             _d: PhantomData,
         };
-        super::logic::OMUX::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
 
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
@@ -1285,6 +1535,80 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
             _d: PhantomData,
         };
         ref_.get_bit(0)
+    }
+
+    fn in_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomInAMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn out_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutAMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn oe_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOEAMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+
+    fn in_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomInSMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutSMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOESMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
@@ -1486,6 +1810,80 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
         };
         ref_.set_bit(0, val);
     }
+
+    fn set_in_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomInAMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_out_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutAMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_oe_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOEAMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+
+    fn set_in_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomInSMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_out_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutSMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_oe_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOESMode {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -1575,7 +1973,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
             field_pos: LeftRightIOOutMux(io_idx * 2 + out_idx),
             _d: PhantomData,
         };
-        super::logic::OMUX::from(ref_.get_bit(0))
+        ref_.get_bit(0).into()
     }
 
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
@@ -1670,6 +2068,62 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
             _d: PhantomData,
         };
         ref_.get_bit(0)
+    }
+
+    fn in_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightInAMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn out_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutAMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn oe_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOEAMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+
+    fn in_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightInSMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutSMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
+    }
+    fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOESMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0).into()
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
@@ -1828,5 +2282,61 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
             _d: PhantomData,
         };
         ref_.set_bit(0, val);
+    }
+
+    fn set_in_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightInAMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_out_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutAMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_oe_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOEAMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+
+    fn set_in_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightInSMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_out_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutSMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
+    }
+    fn set_oe_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOESMode(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into());
     }
 }

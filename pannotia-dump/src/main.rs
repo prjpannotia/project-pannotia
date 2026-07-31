@@ -661,6 +661,20 @@ fn main() -> Result<ExitCode, Error> {
                                 if setting {
                                     println!("tile[{}].out_use_reg[{}] = 1", tile_pos, io_i);
                                 }
+                                let setting = tile.out_async_mode(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].out_async_mode[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
+                                }
+                                let setting = tile.out_sync_mode(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].out_sync_mode[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
+                                }
                                 let setting = tile.out_powerup_state(io_i);
                                 if setting {
                                     println!("tile[{}].out_powerup_state[{}] = 1", tile_pos, io_i);
@@ -669,6 +683,20 @@ fn main() -> Result<ExitCode, Error> {
                                 let setting = tile.oe_use_reg(io_i);
                                 if setting {
                                     println!("tile[{}].oe_use_reg[{}] = 1", tile_pos, io_i);
+                                }
+                                let setting = tile.oe_async_mode(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].oe_async_mode[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
+                                }
+                                let setting = tile.oe_sync_mode(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].oe_sync_mode[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
                                 }
                                 let setting = tile.oe_powerup_state(io_i);
                                 if setting {
@@ -692,6 +720,20 @@ fn main() -> Result<ExitCode, Error> {
                                 let clkmux = tile.in_clock_choice(io_i);
                                 if clkmux != Default::default() {
                                     println!("tile[{}].in_clk[{}] = {}", tile_pos, io_i, clkmux);
+                                }
+                                let setting = tile.in_async_mode(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].in_async_mode[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
+                                }
+                                let setting = tile.in_sync_mode(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].in_sync_mode[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
                                 }
                                 let setting = tile.in_powerup_state(io_i);
                                 if setting {
