@@ -178,14 +178,12 @@ impl bitmux::BitstreamField for KMUX {
         })
     }
     fn set(&self, mut b: impl bitmux::BitSetter) {
-        let mut bits = bitmux::twohot!(
-            3, 5, match self {
-                Self::I { i: #val, .. } => #bits,
-                Self::GND => 0b1_0000_0000,
-                Self::VCC => 0,
-                _ => panic!("invalid KMUX {}", self),
-            }
-        );
+        let mut bits = bitmux::twohot!(3, 5, match self {
+            Self::I { i: #val, .. } => #bits,
+            Self::GND => 0b1_0000_0000,
+            Self::VCC => 0,
+            _ => panic!("invalid KMUX {}", self),
+        });
         if let Self::I { invert: true, .. } = self {
             bits |= 0b1_0000_0000;
         }

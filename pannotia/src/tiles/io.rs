@@ -27,14 +27,7 @@ impl Display for TopBottomIOLocalMux {
 }
 impl bitmux::BitstreamField for TopBottomIOLocalMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<6>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<6>(self.to_bits());
-    }
-}
-impl TopBottomIOLocalMux {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<6>();
         bitmux::twohot!(2, 3, match bits {
             #bits => Self::I(#val),
             0b1_00_000 => Self::I(6),
@@ -42,14 +35,14 @@ impl TopBottomIOLocalMux {
             _ => panic!("invalid TopBottomIOLocalMux {bits:06b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
-        bitmux::twohot!(2, 3, match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = bitmux::twohot!(2, 3, match self {
             Self::I(#val) => #bits,
             Self::I(6) => 0b1_00_000,
             Self::None => 0,
             _ => panic!("invalid TopBottomIOLocalMux {}", self),
-        })
+        });
+        b.set_bits::<6>(bits);
     }
 }
 
@@ -73,14 +66,7 @@ impl Display for LeftRightIOLocalMux {
 }
 impl bitmux::BitstreamField for LeftRightIOLocalMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<7>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<7>(self.to_bits());
-    }
-}
-impl LeftRightIOLocalMux {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<7>();
         bitmux::twohot!(2, 4, match bits {
             #bits => Self::I(#val),
             0b1_00_0000 => Self::I(8),
@@ -88,14 +74,14 @@ impl LeftRightIOLocalMux {
             _ => panic!("invalid LeftRightIOLocalMux {bits:07b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
-        bitmux::twohot!(2, 4, match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = bitmux::twohot!(2, 4, match self {
             Self::I(#val) => #bits,
             Self::I(8) => 0b1_00_0000,
             Self::None => 0,
             _ => panic!("invalid LeftRightIOLocalMux {}", self),
-        })
+        });
+        b.set_bits::<7>(bits);
     }
 }
 
@@ -263,27 +249,20 @@ impl Display for IOLocalToClockMux {
 }
 impl bitmux::BitstreamField for IOLocalToClockMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<6>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<6>(self.to_bits());
-    }
-}
-impl IOLocalToClockMux {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<6>();
         bitmux::twohot!(2, 4, match bits {
             #bits => Self::I(#val),
             0 => Self::None,
             _ => panic!("invalid IOLocalToClockMux {bits:06b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
-        bitmux::twohot!(2, 4, match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = bitmux::twohot!(2, 4, match self {
             Self::I(#val) => #bits,
             Self::None => 0,
             _ => panic!("invalid IOLocalToClockMux {}", self),
-        })
+        });
+        b.set_bits::<6>(bits);
     }
 }
 
@@ -390,14 +369,7 @@ impl Display for LocalToIOMux {
 }
 impl bitmux::BitstreamField for LocalToIOMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<7>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<7>(self.to_bits());
-    }
-}
-impl LocalToIOMux {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<7>();
         let invert = bits & 0b1_00_0000 != 0;
         bitmux::twohot!(2, 4, match bits & 0b11_1111 {
             #bits => Self::I { invert, i: #val },
@@ -406,18 +378,17 @@ impl LocalToIOMux {
             _ => panic!("invalid LocalToIOMux {bits:07b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
         let mut bits = bitmux::twohot!(2, 4, match self {
-                Self::I { i: #val, .. } => #bits,
-                Self::GND => 0b1_00_0000,
-                Self::VCC => 0,
-            _ => panic!("invalid LocalToIOMux {}", self),
+            Self::I { i: #val, .. } => #bits,
+            Self::GND => 0b1_00_0000,
+            Self::VCC => 0,
+        _ => panic!("invalid LocalToIOMux {}", self),
         });
         if let Self::I { invert: true, .. } = self {
             bits |= 0b1_00_0000;
         }
-        bits
+        b.set_bits::<7>(bits);
     }
 }
 
@@ -533,14 +504,7 @@ impl Display for IOClockMux {
 }
 impl bitmux::BitstreamField for IOClockMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<3>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<3>(self.to_bits());
-    }
-}
-impl IOClockMux {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<3>();
         let invert = bits & 0b100 != 0;
         match bits & 0b11 {
             0b01 => Self::ViaLocalToClock { invert },
@@ -550,14 +514,14 @@ impl IOClockMux {
             _ => panic!("invalid IOClockMux {bits:03b}"),
         }
     }
-
-    fn to_bits(self) -> u32 {
-        match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = match self {
             Self::VCC => 0b000,
             Self::GND => 0b100,
-            Self::ViaLocalToClock { invert } => 0b01 | if invert { 0b100 } else { 0 },
-            Self::ViaGlobalToLocal { invert } => 0b10 | if invert { 0b100 } else { 0 },
-        }
+            Self::ViaLocalToClock { invert } => 0b01 | if *invert { 0b100 } else { 0 },
+            Self::ViaGlobalToLocal { invert } => 0b10 | if *invert { 0b100 } else { 0 },
+        };
+        b.set_bits::<3>(bits);
     }
 }
 

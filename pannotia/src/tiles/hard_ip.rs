@@ -91,14 +91,7 @@ impl<const IS_INVERTED: bool> Display for Mux17InvGeneric<IS_INVERTED> {
 }
 impl<const IS_INVERTED: bool> bitmux::BitstreamField for Mux17InvGeneric<IS_INVERTED> {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<10>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<10>(self.to_bits());
-    }
-}
-impl<const IS_INVERTED: bool> Mux17InvGeneric<IS_INVERTED> {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<10>();
         let invert = (bits & 0b10_0000_0000 != 0) ^ IS_INVERTED;
         bitmux::twohot!(4, 4, match bits & 0b1_1111_1111 {
             #bits => Self::I { invert, i: #val },
@@ -108,8 +101,7 @@ impl<const IS_INVERTED: bool> Mux17InvGeneric<IS_INVERTED> {
             _ => panic!("invalid Mux17Inv {bits:010b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
         let mut bits = bitmux::twohot!(4, 4, match self {
             Self::I { i: #val, .. } => #bits,
             Self::I { i: 16, .. } => 0b1_0000_0000,
@@ -123,7 +115,7 @@ impl<const IS_INVERTED: bool> Mux17InvGeneric<IS_INVERTED> {
         if IS_INVERTED {
             bits ^= 0b10_0000_0000;
         }
-        bits
+        b.set_bits::<10>(bits);
     }
 }
 
