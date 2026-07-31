@@ -78,7 +78,7 @@ impl bitmux::BitstreamField for IMUX {
     }
 }
 impl IMUX {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         bitmux::twohot!(3, 9, match bits {
             #bits => Self::I(#val),
             0 => Self::None,
@@ -86,7 +86,7 @@ impl IMUX {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         bitmux::twohot!(3, 9, match self {
             Self::I(#val) => #bits,
             Self::None => 0,
@@ -160,7 +160,7 @@ impl bitmux::BitstreamField for CtrlMux {
     }
 }
 impl CtrlMux {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         bitmux::twohot!(3, 9, match bits {
             #bits => Self::I(#val),
             0 => Self::None,
@@ -168,7 +168,7 @@ impl CtrlMux {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         bitmux::twohot!(3, 9, match self {
             Self::I(#val) => #bits,
             Self::None => 0,

@@ -540,7 +540,7 @@ impl bitmux::BitstreamField for IOClockMux {
     }
 }
 impl IOClockMux {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         let invert = bits & 0b100 != 0;
         match bits & 0b11 {
             0b01 => Self::ViaLocalToClock { invert },
@@ -551,7 +551,7 @@ impl IOClockMux {
         }
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         match self {
             Self::VCC => 0b000,
             Self::GND => 0b100,

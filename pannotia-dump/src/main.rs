@@ -881,6 +881,16 @@ fn main() -> Result<ExitCode, Error> {
                                     println!("tile[{}].clk2fab[{}] = 1", tile_pos, clk_i);
                                 }
                             }
+
+                            for clk_i in 0..5 {
+                                let dmux = tile.clock_dist_mux(clk_i);
+                                if dmux != Default::default() {
+                                    println!(
+                                        "tile[{}].clock_dist_mux[{}] = {}",
+                                        tile_pos, clk_i, dmux
+                                    );
+                                }
+                            }
                         }
                         tile_type => {
                             println!("// WARN: Unimplemented tile type {:?}", tile_type);

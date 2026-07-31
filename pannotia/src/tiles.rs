@@ -351,7 +351,7 @@ impl bitmux::BitstreamField for GlobalToLocalMux {
     }
 }
 impl GlobalToLocalMux {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         match bits {
             0b000001 => Self::I(0),
             0b000010 => Self::I(1),
@@ -364,7 +364,7 @@ impl GlobalToLocalMux {
         }
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         match self {
             Self::I(0) => 0b000001,
             Self::I(1) => 0b000010,
@@ -413,7 +413,7 @@ impl bitmux::BitstreamField for Mux2Inv {
     }
 }
 impl Mux2Inv {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         let invert = bits & 0b100 != 0;
         match bits & 0b11 {
             0b01 => Self::I { invert, i: 0 },
@@ -424,7 +424,7 @@ impl Mux2Inv {
         }
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         match self {
             Self::VCC => 0b000,
             Self::GND => 0b100,
@@ -470,7 +470,7 @@ impl bitmux::BitstreamField for Mux3Inv {
     }
 }
 impl Mux3Inv {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         let invert = bits & 0b1000 != 0;
         match bits & 0b11 {
             0b001 => Self::I { invert, i: 0 },
@@ -482,7 +482,7 @@ impl Mux3Inv {
         }
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         match self {
             Self::VCC => 0b0000,
             Self::GND => 0b1000,

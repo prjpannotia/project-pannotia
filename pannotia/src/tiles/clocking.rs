@@ -217,6 +217,50 @@ impl FieldPositionCalculator for GCLKSWClockEnReg {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub struct GCLKMux4(pub u8);
+impl Default for GCLKMux4 {
+    fn default() -> Self {
+        Self(0)
+    }
+}
+impl Display for GCLKMux4 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "#{}", self.0)
+    }
+}
+impl bitmux::BitstreamField for GCLKMux4 {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<2>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<2>(self.to_bits());
+    }
+}
+impl GCLKMux4 {
+    fn from_bits(bits: u32) -> Self {
+        assert!(bits < 4, "invalid GCLKMux4");
+        Self(bits as u8)
+    }
+
+    fn to_bits(self) -> u32 {
+        assert!(self.0 < 4, "invalid GCLKMux4");
+        self.0 as u32
+    }
+}
+
+struct GCLKSWMux(u8);
+impl FieldPositionCalculator for GCLKSWMux {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 5, "clock index out of range");
+
+        let y = 7 + 6 * self.0 as u32 - biti as u32;
+
+        TileRelativeBitPos { y, x: 0 }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
     pub fn fabric_to_clock(&self, idx: u8) -> super::hard_ip::Mux17Inv {
         let ref_ = GenericFieldRef {
@@ -266,6 +310,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.get_bit(0)
+    }
+
+    pub fn clock_dist_mux(&self, idx: u8) -> GCLKMux4 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: GCLKSWMux(idx),
+            _d: PhantomData,
+        };
+        GCLKMux4::get(ref_)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
@@ -317,5 +371,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bit(0, val);
+    }
+
+    pub fn set_clock_dist_mux(&mut self, idx: u8, val: GCLKMux4) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: GCLKSWMux(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
     }
 }

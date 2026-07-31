@@ -113,7 +113,7 @@ impl Display for RMUX {
     }
 }
 impl RMUX {
-    pub(crate) fn from_bits(bits: u32) -> Self {
+    fn from_bits(bits: u32) -> Self {
         bitmux::twohot!(3, 7, match bits {
             #bits => RMUX::I(#val),
             0 => RMUX::None,
@@ -121,7 +121,7 @@ impl RMUX {
         })
     }
 
-    pub(crate) fn to_bits(self) -> u32 {
+    fn to_bits(self) -> u32 {
         bitmux::twohot!(3, 7, match self {
             RMUX::I(#val) => #bits,
             RMUX::None => 0,
