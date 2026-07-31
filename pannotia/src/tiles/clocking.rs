@@ -205,6 +205,18 @@ impl FieldPositionCalculator for GCLKSWClock2Fabric {
     }
 }
 
+struct GCLKSWClockEnReg(u8);
+impl FieldPositionCalculator for GCLKSWClockEnReg {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "clock index out of range");
+
+        let y = [3, 9, 15, 21, 27, 43][self.0 as usize];
+
+        TileRelativeBitPos { y, x: 0 }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
     pub fn fabric_to_clock(&self, idx: u8) -> super::hard_ip::Mux17Inv {
         let ref_ = GenericFieldRef {
@@ -244,6 +256,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.get_bit(0).into()
+    }
+
+    pub fn cen_is_registered(&self, idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: GCLKSWClockEnReg(idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
@@ -285,5 +307,15 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
             _d: PhantomData,
         };
         ref_.set_bit(0, val.into());
+    }
+
+    pub fn set_cen_is_registered(&mut self, idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: GCLKSWClockEnReg(idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
     }
 }

@@ -874,6 +874,13 @@ fn main() -> Result<ExitCode, Error> {
                                     println!("tile[{}].clk2fab[{}] = {}", tile_pos, out_i, outp);
                                 }
                             }
+
+                            for clk_i in 0..6 {
+                                let cen_reg = tile.cen_is_registered(clk_i);
+                                if cen_reg {
+                                    println!("tile[{}].clk2fab[{}] = 1", tile_pos, clk_i);
+                                }
+                            }
                         }
                         tile_type => {
                             println!("// WARN: Unimplemented tile type {:?}", tile_type);
