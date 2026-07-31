@@ -871,6 +871,105 @@ impl FieldPositionCalculator for LeftRightOEReg {
     }
 }
 
+struct TopBottomInPU {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomInPU {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(27, 3), (33, 3), (27, 20), (33, 20)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct TopBottomOutPU {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOutPU {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(27, 5), (33, 5), (27, 18), (33, 18)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct TopBottomOEPU {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOEPU {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(27, 7), (33, 7), (27, 16), (33, 16)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightInPU(u8);
+impl FieldPositionCalculator for LeftRightInPU {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 1,
+            y: self.0 as u32 * 10 + 1,
+        }
+    }
+}
+
+struct LeftRightOutPU(u8);
+impl FieldPositionCalculator for LeftRightOutPU {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 1,
+            y: self.0 as u32 * 10 + 3,
+        }
+    }
+}
+
+struct LeftRightOEPU(u8);
+impl FieldPositionCalculator for LeftRightOEPU {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 1,
+            y: self.0 as u32 * 10 + 5,
+        }
+    }
+}
+
 pub trait IOTileCommon {
     fn num_ios(&self) -> u8;
 
@@ -912,6 +1011,10 @@ pub trait IOTileCommon {
 
     fn out_use_reg(&self, io_idx: u8) -> bool;
     fn oe_use_reg(&self, io_idx: u8) -> bool;
+
+    fn in_powerup_state(&self, io_idx: u8) -> bool;
+    fn out_powerup_state(&self, io_idx: u8) -> bool;
+    fn oe_powerup_state(&self, io_idx: u8) -> bool;
 }
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
@@ -952,6 +1055,10 @@ pub trait IOTileCommonMut: IOTileCommon {
 
     fn set_out_use_reg(&mut self, io_idx: u8, val: bool);
     fn set_oe_use_reg(&mut self, io_idx: u8, val: bool);
+
+    fn set_in_powerup_state(&mut self, io_idx: u8, val: bool);
+    fn set_out_powerup_state(&mut self, io_idx: u8, val: bool);
+    fn set_oe_powerup_state(&mut self, io_idx: u8, val: bool);
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -1142,6 +1249,43 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
         };
         ref_.get_bit(0)
     }
+
+    fn in_powerup_state(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomInPU {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    fn out_powerup_state(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutPU {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    fn oe_powerup_state(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOEPU {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -1298,6 +1442,43 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TopBottomOEReg {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+
+    fn set_in_powerup_state(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomInPU {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    fn set_out_powerup_state(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutPU {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    fn set_oe_powerup_state(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOEPU {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
             },
@@ -1462,6 +1643,34 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
         };
         ref_.get_bit(0)
     }
+
+    fn in_powerup_state(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightInPU(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    fn out_powerup_state(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutPU(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    fn oe_powerup_state(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOEPU(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -1588,6 +1797,34 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: LeftRightOEReg(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+
+    fn set_in_powerup_state(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightInPU(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    fn set_out_powerup_state(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutPU(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    fn set_oe_powerup_state(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOEPU(io_idx),
             _d: PhantomData,
         };
         ref_.set_bit(0, val);

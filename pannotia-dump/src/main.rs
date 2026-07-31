@@ -661,10 +661,18 @@ fn main() -> Result<ExitCode, Error> {
                                 if setting {
                                     println!("tile[{}].out_use_reg[{}] = 1", tile_pos, io_i);
                                 }
+                                let setting = tile.out_powerup_state(io_i);
+                                if setting {
+                                    println!("tile[{}].out_powerup_state[{}] = 1", tile_pos, io_i);
+                                }
 
                                 let setting = tile.oe_use_reg(io_i);
                                 if setting {
                                     println!("tile[{}].oe_use_reg[{}] = 1", tile_pos, io_i);
+                                }
+                                let setting = tile.oe_powerup_state(io_i);
+                                if setting {
+                                    println!("tile[{}].oe_powerup_state[{}] = 1", tile_pos, io_i);
                                 }
 
                                 let glb2loc_mux = tile.in_clock_global_to_local(io_i);
@@ -684,6 +692,10 @@ fn main() -> Result<ExitCode, Error> {
                                 let clkmux = tile.in_clock_choice(io_i);
                                 if clkmux != Default::default() {
                                     println!("tile[{}].in_clk[{}] = {}", tile_pos, io_i, clkmux);
+                                }
+                                let setting = tile.in_powerup_state(io_i);
+                                if setting {
+                                    println!("tile[{}].in_powerup_state[{}] = 1", tile_pos, io_i);
                                 }
 
                                 let loc2io_mux = tile.local_to_io_out(io_i);
