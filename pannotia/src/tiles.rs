@@ -212,6 +212,17 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
             _d: PhantomData,
         }
     }
+
+    /// Coerce to a reference to a PLL tile
+    #[inline]
+    pub fn as_pll_tile(self) -> clocking::PLLTileRef<D, Ref> {
+        assert!(self.tile_type() == TileType::PLL);
+        clocking::PLLTileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
 }
 
 /// A generic 2-choice mux
@@ -507,6 +518,7 @@ impl BitSource for &[bool] {
 }
 
 pub mod bram9k;
+pub mod clocking;
 pub mod generic_routing;
 pub mod hard_ip;
 pub mod io;

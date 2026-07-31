@@ -813,7 +813,31 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
                         }
-                        // TileType::PLL => todo!(),
+                        TileType::PLL => {
+                            let tile = tile.as_pll_tile();
+
+                            for to_pll_i in 0..11 {
+                                let to_pll = tile.to_pll(to_pll_i);
+                                if to_pll != Default::default() {
+                                    println!(
+                                        "tile[{}].to_pll[{}] = {}",
+                                        tile_pos, to_pll_i, to_pll
+                                    );
+                                }
+                            }
+
+                            for glb2loc_i in 0..11 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
+
+                            // TODO: the PLL's "actual" attributes
+                        }
                         // TileType::GCLKSW => todo!(),
                         tile_type => {
                             println!("// WARN: Unimplemented tile type {:?}", tile_type);
