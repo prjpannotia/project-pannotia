@@ -223,6 +223,17 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
             _d: PhantomData,
         }
     }
+
+    /// Coerce to a reference to a GCLKSW tile
+    #[inline]
+    pub fn as_gclksw_tile(self) -> clocking::GCLKSWTileRef<D, Ref> {
+        assert!(self.tile_type() == TileType::GCLKSW);
+        clocking::GCLKSWTileRef {
+            r: self.r,
+            p: self.p,
+            _d: PhantomData,
+        }
+    }
 }
 
 /// A generic 2-choice mux

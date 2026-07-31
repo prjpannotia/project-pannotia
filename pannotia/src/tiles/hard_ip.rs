@@ -69,18 +69,21 @@ impl Mux13Inv {
 }
 
 /// A mux with 17 choices and an optional invert
+///
+/// This has a generic parameter to control if the sense of the "invert" bit
+/// should be flipped relative to the "default" (where 0 = do not invert)
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub enum Mux17Inv {
+pub enum Mux17InvGeneric<const IS_INVERTED: bool> {
     VCC,
     GND,
     I { invert: bool, i: u8 },
 }
-impl Default for Mux17Inv {
+impl<const IS_INVERTED: bool> Default for Mux17InvGeneric<IS_INVERTED> {
     fn default() -> Self {
         Self::VCC
     }
 }
-impl Display for Mux17Inv {
+impl<const IS_INVERTED: bool> Display for Mux17InvGeneric<IS_INVERTED> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::VCC => write!(f, "VCC"),
@@ -94,7 +97,7 @@ impl Display for Mux17Inv {
         }
     }
 }
-impl bitmux::BitstreamField for Mux17Inv {
+impl<const IS_INVERTED: bool> bitmux::BitstreamField for Mux17InvGeneric<IS_INVERTED> {
     fn get(b: impl bitmux::BitGetter) -> Self {
         Self::from_bits(b.get_bits::<10>())
     }
@@ -102,9 +105,9 @@ impl bitmux::BitstreamField for Mux17Inv {
         b.set_bits::<10>(self.to_bits());
     }
 }
-impl Mux17Inv {
+impl<const IS_INVERTED: bool> Mux17InvGeneric<IS_INVERTED> {
     fn from_bits(bits: u32) -> Self {
-        let invert = bits & 0b10_0000_0000 != 0;
+        let invert = (bits & 0b10_0000_0000 != 0) ^ IS_INVERTED;
         bitmux::twohot!(4, 4, match bits & 0b1_1111_1111 {
             #bits => Self::I { invert, i: #val },
             0b1_0000_0000 => Self::I { invert, i: 16 },
@@ -125,9 +128,15 @@ impl Mux17Inv {
         if let Self::I { invert: true, .. } = self {
             bits |= 0b10_0000_0000;
         }
+        if IS_INVERTED {
+            bits ^= 0b10_0000_0000;
+        }
         bits
     }
 }
+
+/// A mux with 17 choices and an optional invert
+pub type Mux17Inv = Mux17InvGeneric<false>;
 
 struct TopIPToExtMux(u8);
 impl FieldPositionCalculator for TopIPToExtMux {

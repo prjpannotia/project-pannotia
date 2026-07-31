@@ -838,7 +838,9 @@ fn main() -> Result<ExitCode, Error> {
 
                             // TODO: the PLL's "actual" attributes
                         }
-                        // TileType::GCLKSW => todo!(),
+                        TileType::GCLKSW => {
+                            let tile = tile.as_gclksw_tile();
+                        }
                         tile_type => {
                             println!("// WARN: Unimplemented tile type {:?}", tile_type);
                         }
