@@ -460,6 +460,41 @@ impl FieldPositionCalculator for TopBottomIOLocal2IO {
     }
 }
 
+struct LeftRightIOLocal2IO(u8);
+impl FieldPositionCalculator for LeftRightIOLocal2IO {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 36, "local to io index out of range");
+
+        // there are 2 columns, of 16 and 20 entries
+        // they are "mainly" split into blocks of 8,
+        // except the rhs column has a bonus 4 more
+        // this is all simplified because of our custom numbering
+        let (is_rhs_column, ybase) = match self.0 {
+            0..=7 => (false, 2 * (self.0 as u32)),
+            8..=15 => (false, 52 + 2 * (self.0 as u32 - 8)),
+            16..=23 => (true, 2 * (self.0 as u32 - 16)),
+            24..=35 => (true, 44 + 2 * (self.0 as u32 - 24)),
+            _ => unreachable!(),
+        };
+
+        // now we can look up the basic shape
+        let (xbase, y) = bitmux::bittable!(
+            (#x, ybase + #y),
+            .	4	2	0,
+            6	5	3	1,
+        )[biti];
+
+        // the right column is mirrored horizontally
+        let x = if !is_rhs_column {
+            4 + xbase
+        } else {
+            11 - xbase
+        };
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -577,13 +612,13 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         val.set(ref_);
     }
 
-    pub fn set_local_to_io(&mut self, idx: u8, val: LocalToIOMux) {
+    pub fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TopBottomIOLocal2IO {
                 is_bottom: self.p.y == 0,
-                i: idx,
+                i: custom_idx,
             },
             _d: PhantomData,
         };
@@ -645,6 +680,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         };
         IOLocalToClockMux::get(ref_)
     }
+
+    pub fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOLocal2IO(custom_idx),
+            _d: PhantomData,
+        };
+        LocalToIOMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -672,6 +717,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: LeftRightIOLocal2Clk(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOLocal2IO(custom_idx),
             _d: PhantomData,
         };
         val.set(ref_);
