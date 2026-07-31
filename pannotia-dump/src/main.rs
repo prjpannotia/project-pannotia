@@ -620,17 +620,6 @@ fn main() -> Result<ExitCode, Error> {
                                         }
                                     }
 
-                                    // TODO: replace
-                                    for loc2io_i in 0..24 {
-                                        let loc2io_mux = tile.local_to_io(loc2io_i);
-                                        if loc2io_mux != Default::default() {
-                                            println!(
-                                                "tile[{}].loc2io[{}] = {}",
-                                                tile_pos, loc2io_i, loc2io_mux
-                                            );
-                                        }
-                                    }
-
                                     tile
                                 } else {
                                     tile_leftright = tile.as_leftright_io_tile();
@@ -642,17 +631,6 @@ fn main() -> Result<ExitCode, Error> {
                                             println!(
                                                 "tile[{}].local_line[{}] = {}",
                                                 tile_pos, local_line_i, local_line
-                                            );
-                                        }
-                                    }
-
-                                    // TODO: replace
-                                    for loc2io_i in 0..36 {
-                                        let loc2io_mux = tile.local_to_io(loc2io_i);
-                                        if loc2io_mux != Default::default() {
-                                            println!(
-                                                "tile[{}].loc2io[{}] = {}",
-                                                tile_pos, loc2io_i, loc2io_mux
                                             );
                                         }
                                     }
@@ -716,6 +694,20 @@ fn main() -> Result<ExitCode, Error> {
                                 if loc2io_mux != Default::default() {
                                     println!(
                                         "tile[{}].loc_to_in_cen[{}] = {}",
+                                        tile_pos, io_i, loc2io_mux
+                                    );
+                                }
+                                let loc2io_mux = tile.local_to_async_clear(io_i);
+                                if loc2io_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].loc_to_aclr[{}] = {}",
+                                        tile_pos, io_i, loc2io_mux
+                                    );
+                                }
+                                let loc2io_mux = tile.local_to_sync_clear(io_i);
+                                if loc2io_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].loc_to_sclr[{}] = {}",
                                         tile_pos, io_i, loc2io_mux
                                     );
                                 }
