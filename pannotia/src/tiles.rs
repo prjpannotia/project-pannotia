@@ -344,14 +344,7 @@ impl Display for GlobalToLocalMux {
 }
 impl bitmux::BitstreamField for GlobalToLocalMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<6>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<6>(self.to_bits());
-    }
-}
-impl GlobalToLocalMux {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<6>();
         match bits {
             0b000001 => Self::I(0),
             0b000010 => Self::I(1),
@@ -363,9 +356,8 @@ impl GlobalToLocalMux {
             _ => panic!("invalid GlobalToLocalMux {bits:06b}"),
         }
     }
-
-    fn to_bits(self) -> u32 {
-        match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = match self {
             Self::I(0) => 0b000001,
             Self::I(1) => 0b000010,
             Self::I(2) => 0b000100,
@@ -374,7 +366,8 @@ impl GlobalToLocalMux {
             Self::I(5) => 0b100000,
             Self::None => 0b000000,
             _ => panic!("invalid GlobalToLocalMux {}", self),
-        }
+        };
+        b.set_bits::<6>(bits);
     }
 }
 
@@ -406,14 +399,7 @@ impl Display for Mux2Inv {
 }
 impl bitmux::BitstreamField for Mux2Inv {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<3>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<3>(self.to_bits());
-    }
-}
-impl Mux2Inv {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<3>();
         let invert = bits & 0b100 != 0;
         match bits & 0b11 {
             0b01 => Self::I { invert, i: 0 },
@@ -423,15 +409,15 @@ impl Mux2Inv {
             _ => panic!("invalid Mux2Inv {bits:03b}"),
         }
     }
-
-    fn to_bits(self) -> u32 {
-        match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = match self {
             Self::VCC => 0b000,
             Self::GND => 0b100,
-            Self::I { invert, i: 0 } => 0b01 | if invert { 0b100 } else { 0 },
-            Self::I { invert, i: 1 } => 0b10 | if invert { 0b100 } else { 0 },
+            Self::I { invert, i: 0 } => 0b01 | if *invert { 0b100 } else { 0 },
+            Self::I { invert, i: 1 } => 0b10 | if *invert { 0b100 } else { 0 },
             _ => panic!("invalid Mux2Inv {}", self),
-        }
+        };
+        b.set_bits::<3>(bits);
     }
 }
 
@@ -463,14 +449,7 @@ impl Display for Mux3Inv {
 }
 impl bitmux::BitstreamField for Mux3Inv {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<4>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<4>(self.to_bits());
-    }
-}
-impl Mux3Inv {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<4>();
         let invert = bits & 0b1000 != 0;
         match bits & 0b11 {
             0b001 => Self::I { invert, i: 0 },
@@ -481,16 +460,16 @@ impl Mux3Inv {
             _ => panic!("invalid Mux3Inv {bits:04b}"),
         }
     }
-
-    fn to_bits(self) -> u32 {
-        match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = match self {
             Self::VCC => 0b0000,
             Self::GND => 0b1000,
-            Self::I { invert, i: 0 } => 0b001 | if invert { 0b1000 } else { 0 },
-            Self::I { invert, i: 1 } => 0b010 | if invert { 0b1000 } else { 0 },
-            Self::I { invert, i: 2 } => 0b100 | if invert { 0b1000 } else { 0 },
+            Self::I { invert, i: 0 } => 0b001 | if *invert { 0b1000 } else { 0 },
+            Self::I { invert, i: 1 } => 0b010 | if *invert { 0b1000 } else { 0 },
+            Self::I { invert, i: 2 } => 0b100 | if *invert { 0b1000 } else { 0 },
             _ => panic!("invalid Mux3Inv {}", self),
-        }
+        };
+        b.set_bits::<4>(bits);
     }
 }
 

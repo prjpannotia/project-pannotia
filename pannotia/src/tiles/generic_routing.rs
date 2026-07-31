@@ -11,7 +11,7 @@ use std::{
 
 use super::*;
 
-use bitmux::{BitGetter, BitSetter};
+use bitmux::BitstreamField;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct GenericRoutingRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
@@ -112,29 +112,22 @@ impl Display for RMUX {
         }
     }
 }
-impl RMUX {
-    fn from_bits(bits: u32) -> Self {
+impl bitmux::BitstreamField for RMUX {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        let bits = b.get_bits::<10>();
         bitmux::twohot!(3, 7, match bits {
             #bits => RMUX::I(#val),
             0 => RMUX::None,
             _ => panic!("invalid RMUX {bits:010b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
-        bitmux::twohot!(3, 7, match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = bitmux::twohot!(3, 7, match self {
             RMUX::I(#val) => #bits,
             RMUX::None => 0,
             _ => panic!("invalid RMUX {}", self),
-        })
-    }
-}
-impl bitmux::BitstreamField for RMUX {
-    fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<10>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<10>(self.to_bits());
+        });
+        b.set_bits::<10>(bits);
     }
 }
 
@@ -159,7 +152,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRefTrait
             },
             _d: PhantomData,
         };
-        RMUX::from_bits(ref_.get_bits::<10>())
+        RMUX::get(ref_)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
@@ -167,7 +160,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
 {
     fn set_rmux(&mut self, rmux_idx: u8, val: RMUX) {
         let is_bram = self.tile_type() == TileType::BRAM;
-        let mut ref_ = GenericFieldRef {
+        let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: RMUXRef {
@@ -176,6 +169,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
             },
             _d: PhantomData,
         };
-        ref_.set_bits::<10>(val.to_bits());
+        val.set(ref_);
     }
 }

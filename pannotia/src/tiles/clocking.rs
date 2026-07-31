@@ -231,21 +231,11 @@ impl Display for GCLKMux4 {
 }
 impl bitmux::BitstreamField for GCLKMux4 {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<2>())
+        Self(b.get_bits::<2>() as u8)
     }
     fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<2>(self.to_bits());
-    }
-}
-impl GCLKMux4 {
-    fn from_bits(bits: u32) -> Self {
-        assert!(bits < 4, "invalid GCLKMux4");
-        Self(bits as u8)
-    }
-
-    fn to_bits(self) -> u32 {
-        assert!(self.0 < 4, "invalid GCLKMux4");
-        self.0 as u32
+        assert!(self.0 < 4, "invalid GCLKMux4 {}", self);
+        b.set_bits::<2>(self.0 as u32);
     }
 }
 
