@@ -496,14 +496,42 @@ impl FieldPositionCalculator for LeftRightIOLocal2IO {
 }
 
 pub trait IOTileCommon {
+    fn num_ios(&self) -> u8;
+
     fn global_to_local(&self, idx: u8) -> GlobalToLocalMux;
     fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux;
     fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux;
+
+    fn out_clock_global_to_local(&self, io_idx: u8) -> GlobalToLocalMux {
+        self.global_to_local(io_idx * 2 + 0)
+    }
+    fn in_clock_global_to_local(&self, io_idx: u8) -> GlobalToLocalMux {
+        self.global_to_local(io_idx * 2 + 1)
+    }
+    fn out_clock_local_to_clock(&self, io_idx: u8) -> IOLocalToClockMux {
+        self.local_to_clock(io_idx * 2 + 0)
+    }
+    fn in_clock_local_to_clock(&self, io_idx: u8) -> IOLocalToClockMux {
+        self.local_to_clock(io_idx * 2 + 1)
+    }
 }
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
     fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux);
     fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux);
+
+    fn set_out_clock_global_to_local(&mut self, io_idx: u8, val: GlobalToLocalMux) {
+        self.set_global_to_local(io_idx * 2 + 0, val);
+    }
+    fn set_in_clock_global_to_local(&mut self, io_idx: u8, val: GlobalToLocalMux) {
+        self.set_global_to_local(io_idx * 2 + 1, val);
+    }
+    fn set_out_clock_local_to_clock(&mut self, io_idx: u8, val: IOLocalToClockMux) {
+        self.set_local_to_clock(io_idx * 2 + 0, val);
+    }
+    fn set_in_clock_local_to_clock(&mut self, io_idx: u8, val: IOLocalToClockMux) {
+        self.set_local_to_clock(io_idx * 2 + 1, val);
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -545,6 +573,10 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     }
 }
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTileRef<D, Ref> {
+    fn num_ios(&self) -> u8 {
+        4
+    }
+
     fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -675,6 +707,10 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     }
 }
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTileRef<D, Ref> {
+    fn num_ios(&self) -> u8 {
+        6
+    }
+
     fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),

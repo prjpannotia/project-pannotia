@@ -602,90 +602,92 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
                         }
-                        TileType::TopBottomIO => {
-                            let tile = tile.as_topbottom_io_tile();
+                        TileType::TopBottomIO | TileType::LeftRightIO => {
+                            let tile_topbottom;
+                            let tile_leftright;
+                            let tile: &dyn IOTileCommon =
+                                if tile.tile_type() == TileType::TopBottomIO {
+                                    tile_topbottom = tile.as_topbottom_io_tile();
+                                    let tile = &tile_topbottom;
 
-                            for local_line_i in 0..32 {
-                                let local_line = tile.local_line(local_line_i);
-                                if local_line != Default::default() {
-                                    println!(
-                                        "tile[{}].local_line[{}] = {}",
-                                        tile_pos, local_line_i, local_line
-                                    );
-                                }
-                            }
+                                    for local_line_i in 0..32 {
+                                        let local_line = tile.local_line(local_line_i);
+                                        if local_line != Default::default() {
+                                            println!(
+                                                "tile[{}].local_line[{}] = {}",
+                                                tile_pos, local_line_i, local_line
+                                            );
+                                        }
+                                    }
 
-                            for glb2loc_i in 0..8 {
-                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                    // TODO: replace
+                                    for loc2io_i in 0..24 {
+                                        let loc2io_mux = tile.local_to_io(loc2io_i);
+                                        if loc2io_mux != Default::default() {
+                                            println!(
+                                                "tile[{}].loc2io[{}] = {}",
+                                                tile_pos, loc2io_i, loc2io_mux
+                                            );
+                                        }
+                                    }
+
+                                    tile
+                                } else {
+                                    tile_leftright = tile.as_leftright_io_tile();
+                                    let tile = &tile_leftright;
+
+                                    for local_line_i in 0..48 {
+                                        let local_line = tile.local_line(local_line_i);
+                                        if local_line != Default::default() {
+                                            println!(
+                                                "tile[{}].local_line[{}] = {}",
+                                                tile_pos, local_line_i, local_line
+                                            );
+                                        }
+                                    }
+
+                                    // TODO: replace
+                                    for loc2io_i in 0..36 {
+                                        let loc2io_mux = tile.local_to_io(loc2io_i);
+                                        if loc2io_mux != Default::default() {
+                                            println!(
+                                                "tile[{}].loc2io[{}] = {}",
+                                                tile_pos, loc2io_i, loc2io_mux
+                                            );
+                                        }
+                                    }
+
+                                    tile
+                                };
+
+                            for io_i in 0..tile.num_ios() {
+                                let glb2loc_mux = tile.out_clock_global_to_local(io_i);
                                 if glb2loc_mux != Default::default() {
                                     println!(
-                                        "tile[{}].glb2loc[{}] = {}",
-                                        tile_pos, glb2loc_i, glb2loc_mux
+                                        "tile[{}].out_glb2loc[{}] = {}",
+                                        tile_pos, io_i, glb2loc_mux
                                     );
                                 }
-                            }
-
-                            for loc2clk_i in 0..8 {
-                                let loc2clk_mux = tile.local_to_clock(loc2clk_i);
+                                let loc2clk_mux = tile.out_clock_local_to_clock(io_i);
                                 if loc2clk_mux != Default::default() {
                                     println!(
-                                        "tile[{}].loc2clk[{}] = {}",
-                                        tile_pos, loc2clk_i, loc2clk_mux
+                                        "tile[{}].out_loc2clk[{}] = {}",
+                                        tile_pos, io_i, loc2clk_mux
                                     );
                                 }
-                            }
 
-                            // TODO: replace
-                            for loc2io_i in 0..24 {
-                                let loc2io_mux = tile.local_to_io(loc2io_i);
-                                if loc2io_mux != Default::default() {
-                                    println!(
-                                        "tile[{}].loc2io[{}] = {}",
-                                        tile_pos, loc2io_i, loc2io_mux
-                                    );
-                                }
-                            }
-                        }
-                        TileType::LeftRightIO => {
-                            let tile = tile.as_leftright_io_tile();
-
-                            for local_line_i in 0..48 {
-                                let local_line = tile.local_line(local_line_i);
-                                if local_line != Default::default() {
-                                    println!(
-                                        "tile[{}].local_line[{}] = {}",
-                                        tile_pos, local_line_i, local_line
-                                    );
-                                }
-                            }
-
-                            for glb2loc_i in 0..12 {
-                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                let glb2loc_mux = tile.in_clock_global_to_local(io_i);
                                 if glb2loc_mux != Default::default() {
                                     println!(
-                                        "tile[{}].glb2loc[{}] = {}",
-                                        tile_pos, glb2loc_i, glb2loc_mux
+                                        "tile[{}].in_glb2loc[{}] = {}",
+                                        tile_pos, io_i, glb2loc_mux
                                     );
                                 }
-                            }
-
-                            for loc2clk_i in 0..12 {
-                                let loc2clk_mux = tile.local_to_clock(loc2clk_i);
+                                let loc2clk_mux = tile.in_clock_local_to_clock(io_i);
                                 if loc2clk_mux != Default::default() {
                                     println!(
-                                        "tile[{}].loc2clk[{}] = {}",
-                                        tile_pos, loc2clk_i, loc2clk_mux
-                                    );
-                                }
-                            }
-
-                            // TODO: replace
-                            for loc2io_i in 0..36 {
-                                let loc2io_mux = tile.local_to_io(loc2io_i);
-                                if loc2io_mux != Default::default() {
-                                    println!(
-                                        "tile[{}].loc2io[{}] = {}",
-                                        tile_pos, loc2io_i, loc2io_mux
+                                        "tile[{}].in_loc2clk[{}] = {}",
+                                        tile_pos, io_i, loc2clk_mux
                                     );
                                 }
                             }
