@@ -446,30 +446,35 @@ impl FieldPositionCalculator for PortBWidth {
 
 struct OutRegA {}
 impl FieldPositionCalculator for OutRegA {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 34, y: 29 }
     }
 }
 struct OutRegB {}
 impl FieldPositionCalculator for OutRegB {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 39 }
     }
 }
 struct WriteThruA {}
 impl FieldPositionCalculator for WriteThruA {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 9 }
     }
 }
 struct WriteThruB {}
 impl FieldPositionCalculator for WriteThruB {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 34, y: 59 }
     }
 }
 struct UseRstInA {}
 impl FieldPositionCalculator for UseRstInA {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 55 }
     }
@@ -477,18 +482,21 @@ impl FieldPositionCalculator for UseRstInA {
 
 struct UseRstInB {}
 impl FieldPositionCalculator for UseRstInB {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 61 }
     }
 }
 struct UseRstOutA {}
 impl FieldPositionCalculator for UseRstOutA {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 59 }
     }
 }
 struct UseRstOutB {}
 impl FieldPositionCalculator for UseRstOutB {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 65 }
     }
@@ -496,24 +504,28 @@ impl FieldPositionCalculator for UseRstOutB {
 
 struct UseClkEnInA {}
 impl FieldPositionCalculator for UseClkEnInA {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 3 }
     }
 }
 struct UseClkEnInB {}
 impl FieldPositionCalculator for UseClkEnInB {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 19 }
     }
 }
 struct UseClkEnOutA {}
 impl FieldPositionCalculator for UseClkEnOutA {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 7 }
     }
 }
 struct UseClkEnOutB {}
 impl FieldPositionCalculator for UseClkEnOutB {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 35, y: 29 }
     }
@@ -521,6 +533,7 @@ impl FieldPositionCalculator for UseClkEnOutB {
 
 struct RsenDly {}
 impl FieldPositionCalculator for RsenDly {
+    #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         [
             TileRelativeBitPos { x: 34, y: 13 },
@@ -530,6 +543,7 @@ impl FieldPositionCalculator for RsenDly {
 }
 struct DlyTime {}
 impl FieldPositionCalculator for DlyTime {
+    #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         [
             TileRelativeBitPos { x: 34, y: 25 },
@@ -568,6 +582,7 @@ impl Display for ClockMode {
 }
 struct ClkModeRef {}
 impl FieldPositionCalculator for ClkModeRef {
+    #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         [
             TileRelativeBitPos { x: 35, y: 49 },
@@ -578,6 +593,7 @@ impl FieldPositionCalculator for ClkModeRef {
 
 struct PackedModeAddressOverride {}
 impl FieldPositionCalculator for PackedModeAddressOverride {
+    #[inline]
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         TileRelativeBitPos { x: 34, y: 3 }
     }

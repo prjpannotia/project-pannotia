@@ -737,6 +737,13 @@ fn main() -> Result<ExitCode, Error> {
                                         tile_pos, io_i, setting
                                     );
                                 }
+                                let setting = tile.in_reg_delay(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].in_reg_delay[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
+                                }
                             }
                         }
                         // TileType::PLL => todo!(),
