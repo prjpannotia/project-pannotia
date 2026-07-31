@@ -242,6 +242,95 @@ impl FieldPositionCalculator for LeftRightIOGlobal2Local {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum IOLocalToClockMux {
+    None,
+    I(u8),
+}
+impl Default for IOLocalToClockMux {
+    fn default() -> Self {
+        Self::None
+    }
+}
+impl Display for IOLocalToClockMux {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "<unset>"),
+            Self::I(i) => write!(f, "#{i}"),
+        }
+    }
+}
+impl bitmux::BitstreamField for IOLocalToClockMux {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<6>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<6>(self.to_bits());
+    }
+}
+impl IOLocalToClockMux {
+    fn from_bits(bits: u32) -> Self {
+        bitmux::twohot!(2, 4, match bits {
+            #bits => Self::I(#val),
+            0 => Self::None,
+            _ => panic!("invalid IOLocalToClockMux {bits:06b}"),
+        })
+    }
+
+    fn to_bits(self) -> u32 {
+        bitmux::twohot!(2, 4, match self {
+            Self::I(#val) => #bits,
+            Self::None => 0,
+            _ => panic!("invalid IOLocalToClockMux {}", self),
+        })
+    }
+}
+
+struct TopBottomIOLocal2Clk {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomIOLocal2Clk {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 8, "LocalToClockMux index out of range");
+
+        // there are 4 columns of 2 muxes, but they're out of order.
+        // the odd columns are also mirrored horizontally,
+        // and there's a 1-column gap between cols 1 and 2
+        let (xbase, ybase, need_xflip) = [
+            (0, 10, false),
+            (0, 12, false),
+            (7, 10, false),
+            (7, 12, false),
+            (5, 10, true),
+            (5, 12, true),
+            (12, 10, true),
+            (12, 12, true),
+        ][self.i as usize];
+
+        // now we can look up the basic shape
+        let (xoffs, mut y) = bitmux::bittable!(
+            (#x, ybase + #y),
+            4   2   0,
+            5   3   1,
+        )[biti];
+
+        let x = if !need_xflip {
+            xbase + xoffs
+        } else {
+            xbase - xoffs
+        };
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
     pub(super) p: TilePos,
@@ -291,6 +380,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         };
         GlobalToLocalMux::get(ref_)
     }
+
+    pub fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOLocal2Clk {
+                is_bottom: self.p.y == 0,
+                i: idx,
+            },
+            _d: PhantomData,
+        };
+        IOLocalToClockMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -311,6 +413,19 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TopBottomIOGlobal2Local {
+                is_bottom: self.p.y == 0,
+                i: idx,
+            },
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOLocal2Clk {
                 is_bottom: self.p.y == 0,
                 i: idx,
             },
