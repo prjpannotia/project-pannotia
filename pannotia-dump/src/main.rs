@@ -633,6 +633,17 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                             }
+
+                            // TODO: replace
+                            for loc2io_i in 0..24 {
+                                let loc2io_mux = tile.local_to_io(loc2io_i);
+                                if loc2io_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].loc2io[{}] = {}",
+                                        tile_pos, loc2io_i, loc2io_mux
+                                    );
+                                }
+                            }
                         }
                         TileType::LeftRightIO => {
                             let tile = tile.as_leftright_io_tile();

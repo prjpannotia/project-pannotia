@@ -362,6 +362,105 @@ impl FieldPositionCalculator for LeftRightIOLocal2Clk {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum LocalToIOMux {
+    VCC,
+    GND,
+    I { invert: bool, i: u8 },
+}
+impl Default for LocalToIOMux {
+    fn default() -> Self {
+        Self::VCC
+    }
+}
+impl Display for LocalToIOMux {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VCC => write!(f, "VCC"),
+            Self::GND => write!(f, "GND"),
+            Self::I { invert, i } => {
+                if *invert {
+                    write!(f, "!")?;
+                }
+                write!(f, "#{i}")
+            }
+        }
+    }
+}
+impl bitmux::BitstreamField for LocalToIOMux {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<7>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<7>(self.to_bits());
+    }
+}
+impl LocalToIOMux {
+    fn from_bits(bits: u32) -> Self {
+        let invert = bits & 0b1_00_0000 != 0;
+        bitmux::twohot!(2, 4, match bits & 0b11_1111 {
+            #bits => Self::I { invert, i: #val },
+            0 if invert => Self::GND,
+            0 if !invert => Self::VCC,
+            _ => panic!("invalid LocalToIOMux {bits:07b}"),
+        })
+    }
+
+    fn to_bits(self) -> u32 {
+        let mut bits = bitmux::twohot!(2, 4, match self {
+                Self::I { i: #val, .. } => #bits,
+                Self::GND => 0b1_00_0000,
+                Self::VCC => 0,
+            _ => panic!("invalid LocalToIOMux {}", self),
+        });
+        if let Self::I { invert: true, .. } = self {
+            bits |= 0b1_00_0000;
+        }
+        bits
+    }
+}
+
+struct TopBottomIOLocal2IO {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomIOLocal2IO {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 24, "local to io index out of range");
+
+        // there are 3 columns of 8 muxes
+        let col_of_8 = self.i / 8;
+        let idx_within_8 = (self.i % 8) as u32;
+
+        // we are using our own custom numbering,
+        // so each column just counts down.
+        // but there is still a gap of 4 rows in the middle
+        let ybase = 2 + 2 * idx_within_8 + if idx_within_8 >= 4 { 4 } else { 0 };
+
+        // now we can look up the basic shape
+        let (xbase, mut y) = bitmux::bittable!(
+            (#x, ybase + #y),
+            .	4	2	0,
+            6	5	3	1,
+        )[biti];
+
+        // the middle column is mirrored horizontally
+        let x = match col_of_8 {
+            0 => 15 + xbase,
+            1 => 22 - xbase,
+            2 => 23 + xbase,
+            _ => unreachable!(),
+        };
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
     pub(super) p: TilePos,
@@ -424,6 +523,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         };
         IOLocalToClockMux::get(ref_)
     }
+
+    pub fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOLocal2IO {
+                is_bottom: self.p.y == 0,
+                i: custom_idx,
+            },
+            _d: PhantomData,
+        };
+        LocalToIOMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -457,6 +569,19 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TopBottomIOLocal2Clk {
+                is_bottom: self.p.y == 0,
+                i: idx,
+            },
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_local_to_io(&mut self, idx: u8, val: LocalToIOMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOLocal2IO {
                 is_bottom: self.p.y == 0,
                 i: idx,
             },
