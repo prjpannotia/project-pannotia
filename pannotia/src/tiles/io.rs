@@ -330,6 +330,37 @@ impl FieldPositionCalculator for TopBottomIOLocal2Clk {
     }
 }
 
+struct LeftRightIOLocal2Clk(u8);
+impl FieldPositionCalculator for LeftRightIOLocal2Clk {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "LocalToClockMux index out of range");
+
+        // there are *3* (yes, an odd number) chunks of these muxes
+        let (xbase, ybase, need_xflip) = match self.0 {
+            0..=3 => (10, 16 + 2 * (self.0 as u32), true),
+            4..=7 => (5, 16 + 2 * (self.0 as u32 - 4), false),
+            8..=11 => (5, 44 + 2 * (self.0 as u32 - 8), false),
+            _ => unreachable!(),
+        };
+
+        // now we can look up the basic shape
+        let (xoffs, y) = bitmux::bittable!(
+            (#x, ybase + #y),
+            4   2   0,
+            5   3   1,
+        )[biti];
+
+        let x = if !need_xflip {
+            xbase + xoffs
+        } else {
+            xbase - xoffs
+        };
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -479,6 +510,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         };
         GlobalToLocalMux::get(ref_)
     }
+
+    pub fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOLocal2Clk(idx),
+            _d: PhantomData,
+        };
+        IOLocalToClockMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -496,6 +537,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: LeftRightIOGlobal2Local(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOLocal2Clk(idx),
             _d: PhantomData,
         };
         val.set(ref_);

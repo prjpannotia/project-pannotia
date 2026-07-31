@@ -656,6 +656,16 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                             }
+
+                            for loc2clk_i in 0..12 {
+                                let loc2clk_mux = tile.local_to_clock(loc2clk_i);
+                                if loc2clk_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].loc2clk[{}] = {}",
+                                        tile_pos, loc2clk_i, loc2clk_mux
+                                    );
+                                }
+                            }
                         }
                         // TileType::PLL => todo!(),
                         // TileType::GCLKSW => todo!(),
