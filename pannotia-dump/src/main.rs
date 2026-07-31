@@ -657,6 +657,15 @@ fn main() -> Result<ExitCode, Error> {
                                 if clkmux != Default::default() {
                                     println!("tile[{}].out_clk[{}] = {}", tile_pos, io_i, clkmux);
                                 }
+                                let setting = tile.out_use_reg(io_i);
+                                if setting {
+                                    println!("tile[{}].out_use_reg[{}] = 1", tile_pos, io_i);
+                                }
+
+                                let setting = tile.oe_use_reg(io_i);
+                                if setting {
+                                    println!("tile[{}].oe_use_reg[{}] = 1", tile_pos, io_i);
+                                }
 
                                 let glb2loc_mux = tile.in_clock_global_to_local(io_i);
                                 if glb2loc_mux != Default::default() {
@@ -746,10 +755,7 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                                 let setting = tile.out_delay(io_i);
                                 if setting {
-                                    println!(
-                                        "tile[{}].out_delay[{}] = {}",
-                                        tile_pos, io_i, setting
-                                    );
+                                    println!("tile[{}].out_delay[{}] = 1", tile_pos, io_i);
                                 }
                             }
                         }

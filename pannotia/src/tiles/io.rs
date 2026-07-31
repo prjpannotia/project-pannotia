@@ -805,6 +805,72 @@ impl FieldPositionCalculator for LeftRightOutDelay {
     }
 }
 
+struct TopBottomOutReg {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOutReg {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(28, 7), (32, 7), (28, 16), (32, 16)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightOutReg(u8);
+impl FieldPositionCalculator for LeftRightOutReg {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 0,
+            y: self.0 as u32 * 10 + 5,
+        }
+    }
+}
+
+struct TopBottomOEReg {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOEReg {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(28, 5), (32, 5), (28, 18), (32, 18)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightOEReg(u8);
+impl FieldPositionCalculator for LeftRightOEReg {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 0,
+            y: self.0 as u32 * 10 + 3,
+        }
+    }
+}
+
 pub trait IOTileCommon {
     fn num_ios(&self) -> u8;
 
@@ -843,6 +909,9 @@ pub trait IOTileCommon {
     fn in_data_delay(&self, io_idx: u8) -> u8;
     fn in_reg_delay(&self, io_idx: u8) -> u8;
     fn out_delay(&self, io_idx: u8) -> bool;
+
+    fn out_use_reg(&self, io_idx: u8) -> bool;
+    fn oe_use_reg(&self, io_idx: u8) -> bool;
 }
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
@@ -880,6 +949,9 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_in_data_delay(&mut self, io_idx: u8, val: u8);
     fn set_in_reg_delay(&mut self, io_idx: u8, val: u8);
     fn set_out_delay(&mut self, io_idx: u8, val: bool);
+
+    fn set_out_use_reg(&mut self, io_idx: u8, val: bool);
+    fn set_oe_use_reg(&mut self, io_idx: u8, val: bool);
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -1045,6 +1117,31 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
         };
         ref_.get_bit(0)
     }
+
+    fn out_use_reg(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutReg {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    fn oe_use_reg(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOEReg {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -1176,6 +1273,31 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TopBottomOutDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+
+    fn set_out_use_reg(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutReg {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    fn set_oe_use_reg(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOEReg {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
             },
@@ -1321,6 +1443,25 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
         };
         ref_.get_bit(0)
     }
+
+    fn out_use_reg(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutReg(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
+    fn oe_use_reg(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOEReg(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -1428,6 +1569,25 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: LeftRightOutDelay(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+
+    fn set_out_use_reg(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutReg(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
+    }
+    fn set_oe_use_reg(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOEReg(io_idx),
             _d: PhantomData,
         };
         ref_.set_bit(0, val);
