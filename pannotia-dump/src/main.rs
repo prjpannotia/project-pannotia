@@ -705,6 +705,20 @@ fn main() -> Result<ExitCode, Error> {
                                         tile_pos, io_i, loc2io_mux
                                     );
                                 }
+                                let loc2io_mux = tile.local_to_out_clk_en(io_i);
+                                if loc2io_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].loc_to_out_cen[{}] = {}",
+                                        tile_pos, io_i, loc2io_mux
+                                    );
+                                }
+                                let loc2io_mux = tile.local_to_in_clk_en(io_i);
+                                if loc2io_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].loc_to_in_cen[{}] = {}",
+                                        tile_pos, io_i, loc2io_mux
+                                    );
+                                }
                             }
                         }
                         // TileType::PLL => todo!(),
