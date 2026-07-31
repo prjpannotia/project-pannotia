@@ -653,6 +653,10 @@ fn main() -> Result<ExitCode, Error> {
                                         tile_pos, io_i, loc2clk_mux
                                     );
                                 }
+                                let clkmux = tile.out_clock_choice(io_i);
+                                if clkmux != Default::default() {
+                                    println!("tile[{}].out_clk[{}] = {}", tile_pos, io_i, clkmux);
+                                }
 
                                 let glb2loc_mux = tile.in_clock_global_to_local(io_i);
                                 if glb2loc_mux != Default::default() {
@@ -667,6 +671,10 @@ fn main() -> Result<ExitCode, Error> {
                                         "tile[{}].in_loc2clk[{}] = {}",
                                         tile_pos, io_i, loc2clk_mux
                                     );
+                                }
+                                let clkmux = tile.in_clock_choice(io_i);
+                                if clkmux != Default::default() {
+                                    println!("tile[{}].in_clk[{}] = {}", tile_pos, io_i, clkmux);
                                 }
 
                                 let loc2io_mux = tile.local_to_io_out(io_i);

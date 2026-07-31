@@ -439,8 +439,8 @@ impl FieldPositionCalculator for TopBottomIOLocal2IO {
         // now we can look up the basic shape
         let (xbase, mut y) = bitmux::bittable!(
             (#x, ybase + #y),
-            .	4	2	0,
-            6	5	3	1,
+            .   4   2   0,
+            6   5   3   1,
         )[biti];
 
         // the middle column is mirrored horizontally
@@ -480,8 +480,8 @@ impl FieldPositionCalculator for LeftRightIOLocal2IO {
         // now we can look up the basic shape
         let (xbase, y) = bitmux::bittable!(
             (#x, ybase + #y),
-            .	4	2	0,
-            6	5	3	1,
+            .   4   2   0,
+            6   5   3   1,
         )[biti];
 
         // the right column is mirrored horizontally
@@ -495,12 +495,151 @@ impl FieldPositionCalculator for LeftRightIOLocal2IO {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum IOClockMux {
+    VCC,
+    GND,
+    ViaGlobalToLocal { invert: bool },
+    ViaLocalToClock { invert: bool },
+}
+impl Default for IOClockMux {
+    fn default() -> Self {
+        Self::VCC
+    }
+}
+impl Display for IOClockMux {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VCC => write!(f, "VCC"),
+            Self::GND => write!(f, "GND"),
+            Self::ViaGlobalToLocal { invert } => {
+                if *invert {
+                    write!(f, "!")?;
+                }
+                write!(f, "glb2loc")
+            }
+            Self::ViaLocalToClock { invert } => {
+                if *invert {
+                    write!(f, "!")?;
+                }
+                write!(f, "loc2clk")
+            }
+        }
+    }
+}
+impl bitmux::BitstreamField for IOClockMux {
+    fn get(b: impl bitmux::BitGetter) -> Self {
+        Self::from_bits(b.get_bits::<3>())
+    }
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        b.set_bits::<3>(self.to_bits());
+    }
+}
+impl IOClockMux {
+    pub(crate) fn from_bits(bits: u32) -> Self {
+        let invert = bits & 0b100 != 0;
+        match bits & 0b11 {
+            0b01 => Self::ViaLocalToClock { invert },
+            0b10 => Self::ViaGlobalToLocal { invert },
+            0b00 if invert => Self::GND,
+            0b00 if !invert => Self::VCC,
+            _ => panic!("invalid IOClockMux {bits:03b}"),
+        }
+    }
+
+    pub(crate) fn to_bits(self) -> u32 {
+        match self {
+            Self::VCC => 0b000,
+            Self::GND => 0b100,
+            Self::ViaLocalToClock { invert } => 0b01 | if invert { 0b100 } else { 0 },
+            Self::ViaGlobalToLocal { invert } => 0b10 | if invert { 0b100 } else { 0 },
+        }
+    }
+}
+
+struct TopBottomIOClockMux {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomIOClockMux {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 8, "clock mux index out of range");
+
+        // We just have this giant bag of bits
+        let (x, mut y) = bitmux::bittable!(
+            (27 + #x, #y),
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            0   1   .   .   .   7   6,
+            12   13 .   .   .   19  18,
+            .   .   .   .   .   20  8,
+            .   .   .   .   .   14  2,
+            .   .   .   .   .   17  5,
+            .   .   .   .   .   23  11,
+            15  16  .   .   .   22  21,
+            3   4   .   .   .   10  9,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+            .   .   .   .   .   .   .,
+        )[self.i as usize * 3 + biti];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightIOClockMux(u8);
+impl FieldPositionCalculator for LeftRightIOClockMux {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "clock mux index out of range");
+
+        // We just have this giant bag of bits
+        bitmux::bittable!(
+            TileRelativeBitPos { x: 2 + #x, y: 24 + #y },
+            0   1   2   5,
+            3   4   .   .,
+            6   7   .   .,
+            9   10  11  8,
+            12  13  14  17,
+            15  16  .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            .   .   .   .,
+            18  19  .   .,
+            21  22  23  20,
+            24  25  26  29,
+            27  28  .   .,
+            30  31  .   .,
+            33  34  35  32,
+        )[self.0 as usize * 3 + biti]
+    }
+}
+
 pub trait IOTileCommon {
     fn num_ios(&self) -> u8;
 
     fn global_to_local(&self, idx: u8) -> GlobalToLocalMux;
     fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux;
     fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux;
+    fn clock_mux(&self, idx: u8) -> IOClockMux;
 
     fn out_clock_global_to_local(&self, io_idx: u8) -> GlobalToLocalMux {
         self.global_to_local(io_idx * 2 + 0)
@@ -514,6 +653,12 @@ pub trait IOTileCommon {
     fn in_clock_local_to_clock(&self, io_idx: u8) -> IOLocalToClockMux {
         self.local_to_clock(io_idx * 2 + 1)
     }
+    fn out_clock_choice(&self, io_idx: u8) -> IOClockMux {
+        self.clock_mux(io_idx * 2 + 0)
+    }
+    fn in_clock_choice(&self, io_idx: u8) -> IOClockMux {
+        self.clock_mux(io_idx * 2 + 1)
+    }
 
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux;
     fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux;
@@ -526,6 +671,7 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
     fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux);
     fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux);
+    fn set_clock_mux(&mut self, idx: u8, val: IOClockMux);
 
     fn set_out_clock_global_to_local(&mut self, io_idx: u8, val: GlobalToLocalMux) {
         self.set_global_to_local(io_idx * 2 + 0, val);
@@ -538,6 +684,12 @@ pub trait IOTileCommonMut: IOTileCommon {
     }
     fn set_in_clock_local_to_clock(&mut self, io_idx: u8, val: IOLocalToClockMux) {
         self.set_local_to_clock(io_idx * 2 + 1, val);
+    }
+    fn set_out_clock_choice(&mut self, io_idx: u8, val: IOClockMux) {
+        self.set_clock_mux(io_idx * 2 + 0, val);
+    }
+    fn set_in_clock_choice(&mut self, io_idx: u8, val: IOClockMux) {
+        self.set_clock_mux(io_idx * 2 + 1, val);
     }
 
     fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux);
@@ -630,6 +782,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
         LocalToIOMux::get(ref_)
     }
 
+    fn clock_mux(&self, idx: u8) -> IOClockMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOClockMux {
+                is_bottom: self.p.y == 0,
+                i: idx,
+            },
+            _d: PhantomData,
+        };
+        IOClockMux::get(ref_)
+    }
+
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
         self.local_to_io([0, 1, 7, 6][io_idx as usize])
     }
@@ -697,6 +862,19 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
             field_pos: TopBottomIOLocal2IO {
                 is_bottom: self.p.y == 0,
                 i: custom_idx,
+            },
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    fn set_clock_mux(&mut self, idx: u8, val: IOClockMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOClockMux {
+                is_bottom: self.p.y == 0,
+                i: idx,
             },
             _d: PhantomData,
         };
@@ -793,6 +971,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
         LocalToIOMux::get(ref_)
     }
 
+    fn clock_mux(&self, idx: u8) -> IOClockMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOClockMux(idx),
+            _d: PhantomData,
+        };
+        IOClockMux::get(ref_)
+    }
+
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
         self.local_to_io(16 + io_idx)
     }
@@ -852,6 +1040,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    fn set_clock_mux(&mut self, idx: u8, val: IOClockMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOClockMux(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_)
     }
 
     fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
