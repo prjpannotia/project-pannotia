@@ -729,6 +729,14 @@ fn main() -> Result<ExitCode, Error> {
                                         );
                                     }
                                 }
+
+                                let setting = tile.in_data_delay(io_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].in_data_delay[{}] = {}",
+                                        tile_pos, io_i, setting
+                                    );
+                                }
                             }
                         }
                         // TileType::PLL => todo!(),

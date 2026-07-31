@@ -672,6 +672,48 @@ impl FieldPositionCalculator for LeftRightIOOutMux {
     }
 }
 
+struct TopBottomIOInDaDelay {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomIOInDaDelay {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 8, "io instance index out of range");
+
+        let (xbase, mut y) = [(4, 0), (4, 1), (21, 0), (21, 1)][self.i as usize];
+
+        let x = xbase - biti as u32;
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightIOInDaDelay(u8);
+impl FieldPositionCalculator for LeftRightIOInDaDelay {
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "io instance index out of range");
+
+        bitmux::bittable!(
+            TileRelativeBitPos { x: #x, y: self.0 as u32 * 10 + #y },
+            .   .,
+            .   .,
+            .   .,
+            .   .,
+            .   .,
+            .   .,
+            1   0,
+            .   2,
+            .   .,
+            .   .,
+        )[biti]
+    }
+}
+
 pub trait IOTileCommon {
     fn num_ios(&self) -> u8;
 
@@ -706,6 +748,8 @@ pub trait IOTileCommon {
     fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux;
     fn local_to_async_clear(&self, io_idx: u8) -> LocalToIOMux;
     fn local_to_sync_clear(&self, io_idx: u8) -> LocalToIOMux;
+
+    fn in_data_delay(&self, io_idx: u8) -> u8;
 }
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
@@ -739,6 +783,8 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_local_to_in_clk_en(&mut self, io_idx: u8, val: LocalToIOMux);
     fn set_local_to_async_clear(&mut self, io_idx: u8, val: LocalToIOMux);
     fn set_local_to_sync_clear(&mut self, io_idx: u8, val: LocalToIOMux);
+
+    fn set_in_data_delay(&mut self, io_idx: u8, val: u8);
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -867,6 +913,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
     fn local_to_sync_clear(&self, io_idx: u8) -> LocalToIOMux {
         self.local_to_io([18, 19, 21, 20][io_idx as usize])
     }
+
+    fn in_data_delay(&self, io_idx: u8) -> u8 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOInDaDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bits::<3>() as u8
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -965,6 +1024,20 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
     }
     fn set_local_to_sync_clear(&mut self, io_idx: u8, val: LocalToIOMux) {
         self.set_local_to_io([18, 19, 21, 20][io_idx as usize], val)
+    }
+
+    fn set_in_data_delay(&mut self, io_idx: u8, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOInDaDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bits::<3>(val as u32);
     }
 }
 
@@ -1076,6 +1149,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
     fn local_to_sync_clear(&self, io_idx: u8) -> LocalToIOMux {
         self.local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize])
     }
+
+    fn in_data_delay(&self, io_idx: u8) -> u8 {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOInDaDelay(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bits::<3>() as u8
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -1156,5 +1239,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
     }
     fn set_local_to_sync_clear(&mut self, io_idx: u8, val: LocalToIOMux) {
         self.set_local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize], val)
+    }
+
+    fn set_in_data_delay(&mut self, io_idx: u8, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOInDaDelay(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bits::<3>(val as u32);
     }
 }
