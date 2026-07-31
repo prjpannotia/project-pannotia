@@ -857,6 +857,23 @@ fn main() -> Result<ExitCode, Error> {
                                     println!("tile[{}].ce[{}] = {}", tile_pos, ce_i, ce);
                                 }
                             }
+
+                            for glb2loc_i in 0..12 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
+
+                            for out_i in 0..4 {
+                                let outp = tile.clock_to_fabric(out_i);
+                                if outp != Default::default() {
+                                    println!("tile[{}].clk2fab[{}] = {}", tile_pos, out_i, outp);
+                                }
+                            }
                         }
                         tile_type => {
                             println!("// WARN: Unimplemented tile type {:?}", tile_type);
