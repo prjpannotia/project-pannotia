@@ -71,27 +71,20 @@ impl Display for IMUX {
 }
 impl bitmux::BitstreamField for IMUX {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<12>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<12>(self.to_bits());
-    }
-}
-impl IMUX {
-    fn from_bits(bits: u32) -> Self {
+        let bits = b.get_bits::<12>();
         bitmux::twohot!(3, 9, match bits {
             #bits => Self::I(#val),
             0 => Self::None,
             _ => panic!("invalid IMUX {bits:012b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
-        bitmux::twohot!(3, 9, match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = bitmux::twohot!(3, 9, match self {
             Self::I(#val) => #bits,
             Self::None => 0,
             _ => panic!("invalid IMUX {}", self),
-        })
+        });
+        b.set_bits::<12>(bits);
     }
 }
 
@@ -153,26 +146,19 @@ impl Display for CtrlMux {
 }
 impl bitmux::BitstreamField for CtrlMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
-        Self::from_bits(b.get_bits::<12>())
-    }
-    fn set(&self, mut b: impl bitmux::BitSetter) {
-        b.set_bits::<12>(self.to_bits());
-    }
-}
-impl CtrlMux {
-    fn from_bits(bits: u32) -> Self {
-        bitmux::twohot!(3, 9, match bits {
+        let bits = b.get_bits::<12>();
+        bitmux::twohot!(4, 8, match bits {
             #bits => Self::I(#val),
             0 => Self::None,
             _ => panic!("invalid CtrlMux {bits:012b}"),
         })
     }
-
-    fn to_bits(self) -> u32 {
-        bitmux::twohot!(3, 9, match self {
+    fn set(&self, mut b: impl bitmux::BitSetter) {
+        let bits = bitmux::twohot!(4, 8, match self {
             Self::I(#val) => #bits,
             Self::None => 0,
             _ => panic!("invalid CtrlMux {}", self),
-        })
+        });
+        b.set_bits::<12>(bits);
     }
 }
