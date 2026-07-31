@@ -687,7 +687,7 @@ struct TopBottomIOInDaDelay {
 impl FieldPositionCalculator for TopBottomIOInDaDelay {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
-        assert!(self.i < 8, "io instance index out of range");
+        assert!(self.i < 4, "io instance index out of range");
 
         let (xbase, mut y) = [(4, 0), (4, 1), (21, 0), (21, 1)][self.i as usize];
 
@@ -706,7 +706,7 @@ struct LeftRightIOInDaDelay(u8);
 impl FieldPositionCalculator for LeftRightIOInDaDelay {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
-        assert!(self.0 < 12, "io instance index out of range");
+        assert!(self.0 < 6, "io instance index out of range");
 
         bitmux::bittable!(
             TileRelativeBitPos { x: #x, y: self.0 as u32 * 10 + #y },
@@ -731,7 +731,7 @@ struct TopBottomIOInRegDelay {
 impl FieldPositionCalculator for TopBottomIOInRegDelay {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
-        assert!(self.i < 8, "io instance index out of range");
+        assert!(self.i < 4, "io instance index out of range");
 
         let (xbase, mut y) = [(6, 0), (6, 1), (23, 0), (23, 1)][self.i as usize];
 
@@ -754,7 +754,7 @@ struct LeftRightIOInRegDelay(u8);
 impl FieldPositionCalculator for LeftRightIOInRegDelay {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
-        assert!(self.0 < 12, "io instance index out of range");
+        assert!(self.0 < 6, "io instance index out of range");
 
         bitmux::bittable!(
             TileRelativeBitPos { x: #x, y: self.0 as u32 * 10 + #y },
@@ -769,6 +769,39 @@ impl FieldPositionCalculator for LeftRightIOInRegDelay {
             1   2,
             .   .,
         )[biti]
+    }
+}
+
+struct TopBottomOutDelay {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomOutDelay {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 4, "io instance index out of range");
+
+        let (x, mut y) = [(15, 0), (15, 1), (26, 0), (26, 1)][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightOutDelay(u8);
+impl FieldPositionCalculator for LeftRightOutDelay {
+    #[inline]
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "io instance index out of range");
+
+        TileRelativeBitPos {
+            x: 0,
+            y: self.0 as u32 * 10 + 9,
+        }
     }
 }
 
@@ -809,6 +842,7 @@ pub trait IOTileCommon {
 
     fn in_data_delay(&self, io_idx: u8) -> u8;
     fn in_reg_delay(&self, io_idx: u8) -> u8;
+    fn out_delay(&self, io_idx: u8) -> bool;
 }
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
@@ -845,6 +879,7 @@ pub trait IOTileCommonMut: IOTileCommon {
 
     fn set_in_data_delay(&mut self, io_idx: u8, val: u8);
     fn set_in_reg_delay(&mut self, io_idx: u8, val: u8);
+    fn set_out_delay(&mut self, io_idx: u8, val: bool);
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -998,6 +1033,18 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
         };
         ref_.get_bits::<3>() as u8
     }
+    fn out_delay(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
@@ -1123,6 +1170,18 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
             _d: PhantomData,
         };
         ref_.set_bits::<3>(val as u32);
+    }
+    fn set_out_delay(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomOutDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
     }
 }
 
@@ -1253,6 +1312,15 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
         };
         ref_.get_bits::<3>() as u8
     }
+    fn out_delay(&self, io_idx: u8) -> bool {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutDelay(io_idx),
+            _d: PhantomData,
+        };
+        ref_.get_bit(0)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -1354,5 +1422,14 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
             _d: PhantomData,
         };
         ref_.set_bits::<3>(val as u32);
+    }
+    fn set_out_delay(&mut self, io_idx: u8, val: bool) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightOutDelay(io_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val);
     }
 }
