@@ -840,6 +840,16 @@ fn main() -> Result<ExitCode, Error> {
                         }
                         TileType::GCLKSW => {
                             let tile = tile.as_gclksw_tile();
+
+                            for fab2clk_i in 0..6 {
+                                let fab2clk = tile.fabric_to_clock(fab2clk_i);
+                                if fab2clk != Default::default() {
+                                    println!(
+                                        "tile[{}].fab2clk[{}] = {}",
+                                        tile_pos, fab2clk_i, fab2clk
+                                    );
+                                }
+                            }
                         }
                         tile_type => {
                             println!("// WARN: Unimplemented tile type {:?}", tile_type);
