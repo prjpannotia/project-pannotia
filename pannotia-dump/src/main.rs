@@ -850,6 +850,13 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                             }
+
+                            for ce_i in 0..6 {
+                                let ce = tile.clock_enable(ce_i);
+                                if ce != Default::default() {
+                                    println!("tile[{}].ce[{}] = {}", tile_pos, ce_i, ce);
+                                }
+                            }
                         }
                         tile_type => {
                             println!("// WARN: Unimplemented tile type {:?}", tile_type);

@@ -157,6 +157,28 @@ impl FieldPositionCalculator for GCLKSWFabricToClock {
     }
 }
 
+struct GCLKSWEnable(u8);
+impl FieldPositionCalculator for GCLKSWEnable {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 6, "IOMUX index out of range");
+
+        let mut ybase = 17 + 6 * self.0 as u32;
+        if self.0 >= 3 {
+            // there is a gap in the middle
+            ybase += 4;
+        }
+
+        bitmux::bittable!(
+            TileRelativeBitPos { x: 6 + #x, y: ybase + #y },
+            9	4	5	2	0,
+            .	.	.	.	.,
+            8	7	6	3	1,
+
+        )[biti]
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
     pub fn fabric_to_clock(&self, idx: u8) -> super::hard_ip::Mux17Inv {
         let ref_ = GenericFieldRef {
@@ -167,6 +189,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
         };
         super::hard_ip::Mux17Inv::get(ref_)
     }
+
+    pub fn clock_enable(&self, idx: u8) -> InvertedMux17Inv {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: GCLKSWEnable(idx),
+            _d: PhantomData,
+        };
+        InvertedMux17Inv::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
     pub fn set_fabric_to_clock(&mut self, idx: u8, val: super::hard_ip::Mux17Inv) {
@@ -174,6 +206,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: GCLKSWFabricToClock(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_clock_enable(&mut self, idx: u8, val: InvertedMux17Inv) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: GCLKSWEnable(idx),
             _d: PhantomData,
         };
         val.set(ref_);
