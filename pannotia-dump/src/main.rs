@@ -10,6 +10,7 @@ use bitvec::prelude::*;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
+use pannotia::tiles::io::IOTileCommon;
 use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]

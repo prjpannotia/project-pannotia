@@ -495,6 +495,17 @@ impl FieldPositionCalculator for LeftRightIOLocal2IO {
     }
 }
 
+pub trait IOTileCommon {
+    fn global_to_local(&self, idx: u8) -> GlobalToLocalMux;
+    fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux;
+    fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux;
+}
+pub trait IOTileCommonMut: IOTileCommon {
+    fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
+    fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux);
+    fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux);
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -532,8 +543,9 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         };
         TopBottomIOLocalMux::get(ref_)
     }
-
-    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+}
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTileRef<D, Ref> {
+    fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
@@ -546,7 +558,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         GlobalToLocalMux::get(ref_)
     }
 
-    pub fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
+    fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
@@ -559,7 +571,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         IOLocalToClockMux::get(ref_)
     }
 
-    pub fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
+    fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
@@ -585,8 +597,9 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         };
         val.set(ref_);
     }
-
-    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
+}
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottomIOTileRef<D, Ref> {
+    fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
@@ -599,7 +612,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         val.set(ref_);
     }
 
-    pub fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
+    fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
@@ -612,7 +625,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         val.set(ref_);
     }
 
-    pub fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
+    fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
@@ -660,8 +673,9 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         };
         LeftRightIOLocalMux::get(ref_)
     }
-
-    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+}
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTileRef<D, Ref> {
+    fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
@@ -671,7 +685,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         GlobalToLocalMux::get(ref_)
     }
 
-    pub fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
+    fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
@@ -681,7 +695,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         IOLocalToClockMux::get(ref_)
     }
 
-    pub fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
+    fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
@@ -701,8 +715,9 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         };
         val.set(ref_);
     }
-
-    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
+}
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRightIOTileRef<D, Ref> {
+    fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
@@ -712,7 +727,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         val.set(ref_);
     }
 
-    pub fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
+    fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
@@ -722,7 +737,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         val.set(ref_);
     }
 
-    pub fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
+    fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
