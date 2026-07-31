@@ -633,6 +633,45 @@ impl FieldPositionCalculator for LeftRightIOClockMux {
     }
 }
 
+struct TopBottomIOOutMux {
+    is_bottom: bool,
+    i: u8,
+}
+impl FieldPositionCalculator for TopBottomIOOutMux {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.i < 8, "out mux index out of range");
+
+        let (x, mut y) = [
+            (27, 0),
+            (27, 1),
+            (33, 0),
+            (32, 0),
+            (28, 0),
+            (28, 1),
+            (33, 1),
+            (32, 1),
+        ][self.i as usize];
+
+        // a bottom IO is entirely mirrored
+        if self.is_bottom {
+            y = 21 - y;
+        }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightIOOutMux(u8);
+impl FieldPositionCalculator for LeftRightIOOutMux {
+    fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "out mux index out of range");
+
+        let y = [0, 2, 10, 12, 18, 20, 44, 46, 48, 50, 58, 60][self.0 as usize];
+
+        TileRelativeBitPos { y, x: 3 }
+    }
+}
+
 pub trait IOTileCommon {
     fn num_ios(&self) -> u8;
 
@@ -640,6 +679,7 @@ pub trait IOTileCommon {
     fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux;
     fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux;
     fn clock_mux(&self, idx: u8) -> IOClockMux;
+    fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX;
 
     fn out_clock_global_to_local(&self, io_idx: u8) -> GlobalToLocalMux {
         self.global_to_local(io_idx * 2 + 0)
@@ -672,6 +712,7 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux);
     fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux);
     fn set_clock_mux(&mut self, idx: u8, val: IOClockMux);
+    fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX);
 
     fn set_out_clock_global_to_local(&mut self, io_idx: u8, val: GlobalToLocalMux) {
         self.set_global_to_local(io_idx * 2 + 0, val);
@@ -795,6 +836,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
         IOClockMux::get(ref_)
     }
 
+    fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOOutMux {
+                is_bottom: self.p.y == 0,
+                i: io_idx * 2 + out_idx,
+            },
+            _d: PhantomData,
+        };
+        super::logic::OMUX::from(ref_.get_bit(0))
+    }
+
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
         self.local_to_io([0, 1, 7, 6][io_idx as usize])
     }
@@ -879,6 +933,19 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: TopBottomIOOutMux {
+                is_bottom: self.p.y == 0,
+                i: io_idx * 2 + out_idx,
+            },
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into())
     }
 
     fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
@@ -981,6 +1048,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
         IOClockMux::get(ref_)
     }
 
+    fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOOutMux(io_idx * 2 + out_idx),
+            _d: PhantomData,
+        };
+        super::logic::OMUX::from(ref_.get_bit(0))
+    }
+
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
         self.local_to_io(16 + io_idx)
     }
@@ -1050,6 +1127,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
             _d: PhantomData,
         };
         val.set(ref_)
+    }
+
+    fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX) {
+        let mut ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOOutMux(io_idx * 2 + out_idx),
+            _d: PhantomData,
+        };
+        ref_.set_bit(0, val.into())
     }
 
     fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {

@@ -719,6 +719,16 @@ fn main() -> Result<ExitCode, Error> {
                                         tile_pos, io_i, loc2io_mux
                                     );
                                 }
+
+                                for out_i in 0..2 {
+                                    let outp = tile.out_mux(io_i, out_i);
+                                    if outp != Default::default() {
+                                        println!(
+                                            "tile[{}].omux{}[{}] = {}",
+                                            tile_pos, out_i, io_i, outp
+                                        );
+                                    }
+                                }
                             }
                         }
                         // TileType::PLL => todo!(),
