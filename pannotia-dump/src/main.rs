@@ -636,6 +636,16 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                             }
+
+                            for glb2loc_i in 0..12 {
+                                let glb2loc_mux = tile.global_to_local(glb2loc_i);
+                                if glb2loc_mux != Default::default() {
+                                    println!(
+                                        "tile[{}].glb2loc[{}] = {}",
+                                        tile_pos, glb2loc_i, glb2loc_mux
+                                    );
+                                }
+                            }
                         }
                         // TileType::PLL => todo!(),
                         // TileType::GCLKSW => todo!(),

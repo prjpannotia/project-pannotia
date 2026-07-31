@@ -184,11 +184,11 @@ impl FieldPositionCalculator for LeftRightIOLocalLine {
     }
 }
 
-struct TopBottoomIOGlobal2Local {
+struct TopBottomIOGlobal2Local {
     is_bottom: bool,
     i: u8,
 }
-impl FieldPositionCalculator for TopBottoomIOGlobal2Local {
+impl FieldPositionCalculator for TopBottomIOGlobal2Local {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 8, "GlobalToLocalMux index out of range");
@@ -212,6 +212,30 @@ impl FieldPositionCalculator for TopBottoomIOGlobal2Local {
         if self.is_bottom {
             y = 21 - y;
         }
+
+        TileRelativeBitPos { y, x }
+    }
+}
+
+struct LeftRightIOGlobal2Local(u8);
+impl FieldPositionCalculator for LeftRightIOGlobal2Local {
+    #[inline]
+    fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
+        assert!(self.0 < 12, "GlobalToLocalMux index out of range");
+
+        // there are two columns, they are mirrored horizontally
+        // the RHS column has the evens, the LHS column has the odds
+        let is_rhs_column = self.0 % 2 == 0;
+
+        // the rows are as follows
+        let y = [24, 27, 28, 39, 40, 43][self.0 as usize / 2];
+
+        // straight line blocks, "fanning out" from the center
+        let x = if is_rhs_column {
+            12 + biti as u32
+        } else {
+            11 - biti as u32
+        };
 
         TileRelativeBitPos { y, x }
     }
@@ -259,7 +283,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
             tile_pos: self.p,
-            field_pos: TopBottoomIOGlobal2Local {
+            field_pos: TopBottomIOGlobal2Local {
                 is_bottom: self.p.y == 0,
                 i: idx,
             },
@@ -286,7 +310,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
-            field_pos: TopBottoomIOGlobal2Local {
+            field_pos: TopBottomIOGlobal2Local {
                 is_bottom: self.p.y == 0,
                 i: idx,
             },
@@ -330,6 +354,16 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
         };
         LeftRightIOLocalMux::get(ref_)
     }
+
+    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOGlobal2Local(idx),
+            _d: PhantomData,
+        };
+        GlobalToLocalMux::get(ref_)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
     pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
@@ -337,6 +371,16 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: LeftRightIOLocalLine(idx),
+            _d: PhantomData,
+        };
+        val.set(ref_);
+    }
+
+    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
+        let ref_ = GenericFieldRef {
+            bitstream: self.r.borrow_mut(),
+            tile_pos: self.p,
+            field_pos: LeftRightIOGlobal2Local(idx),
             _d: PhantomData,
         };
         val.set(ref_);
