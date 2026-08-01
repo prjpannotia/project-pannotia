@@ -185,6 +185,32 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn in_div_bypass(&self) -> bool {
         self._clkdiv_bypass(6)
     }
+
+    pub fn vco_div2(&self) -> bool {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bit(1, 1, 229)
+    }
+
+    pub fn analog_icp(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 221..221 + 3) as u8
+    }
+    pub fn analog_rlpf(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 230..230 + 2) as u8
+    }
+    pub fn analog_rref(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 232..232 + 2) as u8
+    }
+    pub fn analog_rvi(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 234..234 + 2) as u8
+    }
+    pub fn analog_ivco(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 236..236 + 3) as u8
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn set_to_pll(&mut self, idx: u8, val: Mux13Inv) {
@@ -305,6 +331,37 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     }
     pub fn set_in_div_bypass(&mut self, val: bool) {
         self._set_clkdiv_bypass(6, val);
+    }
+
+    pub fn set_vco_div2(&mut self, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bit(1, 1, 229, val);
+    }
+
+    pub fn set_analog_icp(&mut self, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 221..221 + 3, val as u32);
+    }
+    pub fn set_analog_rlpf(&mut self, val: u8) {
+        assert!(val & !0b11 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 230..230 + 2, val as u32);
+    }
+    pub fn set_analog_rref(&mut self, val: u8) {
+        assert!(val & !0b11 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 232..232 + 2, val as u32);
+    }
+    pub fn set_analog_rvi(&mut self, val: u8) {
+        assert!(val & !0b11 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 234..234 + 2, val as u32);
+    }
+    pub fn set_analog_ivco(&mut self, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 236..236 + 3, val as u32);
     }
 }
 

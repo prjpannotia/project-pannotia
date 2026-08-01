@@ -932,6 +932,32 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
 
+                            let setting = tile.vco_div2();
+                            if setting {
+                                println!("tile[{}].vco_div2 = 1", tile_pos,);
+                            }
+
+                            let setting = tile.analog_icp();
+                            if setting != Default::default() {
+                                println!("tile[{}].analog_icp = {}", tile_pos, setting);
+                            }
+                            let setting = tile.analog_rlpf();
+                            if setting != Default::default() {
+                                println!("tile[{}].analog_rlpf = {}", tile_pos, setting);
+                            }
+                            let setting = tile.analog_rref();
+                            if setting != Default::default() {
+                                println!("tile[{}].analog_rref = {}", tile_pos, setting);
+                            }
+                            let setting = tile.analog_rvi();
+                            if setting != Default::default() {
+                                println!("tile[{}].analog_rvi = {}", tile_pos, setting);
+                            }
+                            let setting = tile.analog_ivco();
+                            if setting != Default::default() {
+                                println!("tile[{}].analog_ivco = {}", tile_pos, setting);
+                            }
+
                             // TODO: the PLL's "actual" attributes
                         }
                         TileType::GCLKSW => {
