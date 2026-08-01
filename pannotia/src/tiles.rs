@@ -8,6 +8,11 @@
 //!
 //! The "generic" tile reference is [TileRef], and it is constructed by calling
 //! [Bitstream::tile{_mut}](Bitstream::tile)
+//!
+//! To understand the FPGA's architecture, it is recommended
+//! to read the documentation in the following order:
+//!
+//! 1. [generic_routing]
 
 use std::borrow::Borrow;
 use std::fmt::Display;

@@ -1,13 +1,64 @@
 //! General-purpose interconnect
 //!
-//! These muxes are found in logic, BRAM, and routing-only tiles.
-//! The exact connectivity may vary slightly, but the routing is
-//! generic enough that it makes sense to abstract it via a common interface.
+//! These muxes are found in the "main" section of the array
+//! (i.e. in logic, BRAM, and routing-only tiles, and not at the edges).
+//!
+//! The exact set of inputs at each mux varies slightly depending on the tile type,
+//! but the routing is generic enough that it makes sense to abstract it via a common interface.
+//!
+//! General-purpose routing wires travel along the x/y-axis (i.e. no diagonals nor turns).
+//! They are unidirectional and driven from exactly one place,
+//! and the specific input that is chosen is controlled by the associated [RMUX].
+//! These wires also have a fixed length (or "span") (in units of tiles)
+//! and pass "over/through" the intermediate tiles before finally terminating.
+//!
+//! In the vendor toolchain, these wires are named `Tn{X|Y}_{N|S|E|W}_…`.
+//! This indicates the length of the wire (`n`), the axis it travels along,
+//! and the direction (using compass directions) the signal flows _towards_.
+//! For example, a `T4X_E_…` wire is a horizontal span-4 wire traveling right.
+//!
+//! Wires are grouped into bundles according to the tile from which it originates,
+//! and so a full name of such a _bundle_ is `Tn{X|Y}_{N|S|E|W}_I{0..=3}`.
+//! For example, the `T4X_E_I1` bundle comes from two tiles to the _left_ of this one
+//! (the signal is _traveling_ east, so it comes _from_ the west/left).
+//! Within each bundle, a numeric index selects one specific wire.
+//!
+//! Visually, the general-purpose interconnect looks something like this:
+//! ```text
+//!                +----------------+
+//!                |                |
+//! >-- T4X_E_I0 -->-------+---\  /->-- T4X_E_O ----->
+//! >-- T4X_E_I1 -->-----+-|--\ \-|->-- T4X_E_I1_O -->
+//! >-- T4X_E_I2 -->---+-|-|-\ \--|->-- T4X_E_I2_O -->
+//! >-- T4X_E_I3 -->-\ | | |  \---|->-- T4X_E_I3_O -->
+//!                | | | | |      | |
+//!                | ∨ ∨ ∨ ∨      ∧ |
+//!                | tile internals |
+//!                +----------------+
+//! ```
+//! A similar pattern repeats for each of the four directions.
+//! On parts with long wires, a similar pattern also repeats for those.
+//!
+//! In addition to these wires that have been depicted and explained,
+//! tiles also have span-1/`T1`/"neighbor" wires and span-0/`T0`/"self" wires.
+//! Neighbor wires are very similar to other wires except that they never
+//! pass "through" tiles and only ever terminate into the adjacent tile.
+//! They also only exist along the x-axis. There are no neighbor wires going up/down.
+//! Self wires can only ever route further into "tile internals" and cannot leave the tile.
+//!
+//! There are:
+//! * 16 `T1` wires in each direction left/right
+//! * 12 `T4` wires in each direction left/right/up/down
+//!   (except for the AG16K where there are 16 wires going left/right)
+//! * in the AG16K, one long wire in each direction
+//! * 96 `RMUX` per tile
+//!
+//! As a quirk, left-going neighbor wires are controlled by `RMUX`,
+//! but right-going neighbor wires are controlled by tile-specific output muxes.
+//! "Whatever is left" of the `RMUX`es control `T0` wires.
 
-use std::{
-    borrow::{Borrow, BorrowMut},
-    fmt::Display,
-};
+use std::borrow::{Borrow, BorrowMut};
+use std::fmt::Display;
 
 use super::*;
 
