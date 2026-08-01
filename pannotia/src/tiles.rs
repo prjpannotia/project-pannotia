@@ -15,7 +15,8 @@
 //! 1. [generic_routing]
 //! 2. [logic]
 //! 3. [bram9k]
-//! 3. everything else
+//! 4. [io]
+//! 5. everything else
 
 use std::borrow::Borrow;
 use std::fmt::Display;

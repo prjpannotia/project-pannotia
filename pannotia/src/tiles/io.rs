@@ -1,4 +1,25 @@
 //! I/O tiles
+//!
+//! Because I/O tiles are on the edge of the array,
+//! they integrate a bit differently into the general routing.
+//! The biggest difference is that wires which would normally
+//! go "over"/"through" the tile instead "fold back around"
+//! and exit in the opposite direction from which they came.
+//! (These wires _can_ also be used as inputs into the tile's function.)
+//!
+//! All I/O elements contain embedded registers
+//! which can be bypassed on the output path. On the input path,
+//! both the registered and unregistered signals can be used.
+//!
+//! ## Left/right IOs
+//!
+//! These tiles contain 6 I/Os. Outputs are driven onto neighbor wires (wasting 4 of 16).
+//!
+//! Supposedly, `T4X` wires are driven by a `LoopMUX`, but it is not clear if this actually exists.
+//!
+//! # Top/bottom IOs
+//!
+//! These tiles contain 4 I/Os. Outputs are driven onto `T4Y` wires (wasting 4 of 12).
 
 use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
@@ -1168,6 +1189,7 @@ impl FieldPositionCalculator for LeftRightOEAMode {
     }
 }
 
+/// Read (via possibly-dynamic dispatch) generic IO tile functionality
 pub trait IOTileCommon {
     fn num_ios(&self) -> u8;
 
@@ -1222,6 +1244,7 @@ pub trait IOTileCommon {
     fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode;
     fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode;
 }
+/// Write (via possibly-dynamic dispatch) generic IO tile functionality
 pub trait IOTileCommonMut: IOTileCommon {
     fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux);
     fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux);
@@ -1275,6 +1298,7 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_oe_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode);
 }
 
+/// Access to a top/bottom IO tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TopBottomIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -1850,6 +1874,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
     }
 }
 
+/// Access to a left/right IO tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct LeftRightIOTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -2303,4 +2328,12 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
         };
         ref_.set_bit(0, val.into());
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const _ENSURE_DYN_SAFE_0: Option<&dyn IOTileCommon> = None;
+    const _ENSURE_DYN_SAFE_1: Option<&dyn IOTileCommonMut> = None;
 }
