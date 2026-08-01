@@ -9,6 +9,7 @@ use base64::prelude::*;
 use bitvec::prelude::*;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
+use pannotia::padring::PadRingExt;
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
 use pannotia::tiles::io::IOTileCommon;
 use pannotia::tiles::{TileRefTrait, TileType};
@@ -1056,6 +1057,19 @@ fn main() -> Result<ExitCode, Error> {
                         }
                     }
                 }
+            }
+        }
+
+        println!();
+        for pad_i in 0..79 {
+            let setting = b.pad_input_en(pad_i);
+            if setting {
+                println!("pad[{}].input_en = 1", pad_i);
+            }
+
+            let setting = b.pad_drive_strength(pad_i);
+            if setting != Default::default() {
+                println!("pad[{}].drive_strength = {}", pad_i, setting);
             }
         }
 
