@@ -856,6 +856,14 @@ fn main() -> Result<ExitCode, Error> {
                                     }
                                 }
 
+                                let setting = tile.out_div_lo_time(out_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].out_div_lo_time[{}] = {}",
+                                        tile_pos, out_i, setting
+                                    );
+                                }
+
                                 let setting = tile.out_phase_coarse(out_i);
                                 if setting != Default::default() {
                                     println!(

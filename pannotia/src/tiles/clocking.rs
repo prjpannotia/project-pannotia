@@ -121,6 +121,31 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
         let biti = 30 + 13 * idx as usize;
         bitstream.get_aux_array_bit(1, 1, biti)
     }
+
+    fn _clkdiv_lo_time(&self, idx: u8) -> u8 {
+        let bitstream = self.r.borrow();
+        let biti = 95 + 18 * idx as usize;
+        bitstream.get_aux_array_bits(1, 1, biti..biti + 8) as u8
+    }
+    fn _clkdiv_hi_time(&self, idx: u8) -> u8 {
+        let bitstream = self.r.borrow();
+        let biti = 95 + 9 + 18 * idx as usize;
+        bitstream.get_aux_array_bits(1, 1, biti..biti + 8) as u8
+    }
+    fn _clkdiv_trim(&self, idx: u8) -> bool {
+        let bitstream = self.r.borrow();
+        let biti = 95 + 8 + 18 * idx as usize;
+        bitstream.get_aux_array_bit(1, 1, biti)
+    }
+    fn _clkdiv_bypass(&self, idx: u8) -> bool {
+        let bitstream = self.r.borrow();
+        let biti = 95 + 17 + 18 * idx as usize;
+        bitstream.get_aux_array_bit(1, 1, biti)
+    }
+    pub fn out_div_lo_time(&self, idx: u8) -> u8 {
+        assert!(idx < 5, "invalid output index");
+        self._clkdiv_lo_time(4 - idx)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn set_to_pll(&mut self, idx: u8, val: Mux13Inv) {
@@ -177,6 +202,31 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
         let bitstream = self.r.borrow_mut();
         let biti = 30 + 13 * idx as usize;
         bitstream.set_aux_array_bit(1, 1, biti, val);
+    }
+
+    fn _set_clkdiv_lo_time(&mut self, idx: u8, val: u8) {
+        let bitstream = self.r.borrow_mut();
+        let biti = 95 + 18 * idx as usize;
+        bitstream.set_aux_array_bits(1, 1, biti..biti + 8, val as u32);
+    }
+    fn _set_clkdiv_hi_time(&mut self, idx: u8, val: u8) {
+        let bitstream = self.r.borrow_mut();
+        let biti = 95 + 9 + 18 * idx as usize;
+        bitstream.set_aux_array_bits(1, 1, biti..biti + 8, val as u32);
+    }
+    fn _set_clkdiv_trim(&mut self, idx: u8, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        let biti = 95 + 8 + 18 * idx as usize;
+        bitstream.set_aux_array_bit(1, 1, biti, val);
+    }
+    fn _set_clkdiv_bypass(&mut self, idx: u8, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        let biti = 95 + 17 + 18 * idx as usize;
+        bitstream.set_aux_array_bit(1, 1, biti, val);
+    }
+    pub fn set_out_div_lo_time(&mut self, idx: u8, val: u8) {
+        assert!(idx < 5, "invalid output index");
+        self._set_clkdiv_lo_time(4 - idx, val);
     }
 }
 
