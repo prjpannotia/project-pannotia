@@ -8,6 +8,7 @@ use std::fmt::Display;
 
 use super::*;
 
+/// (Helper) access to IMUX
 pub(crate) struct IMUXRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,
@@ -51,6 +52,10 @@ impl FieldPositionCalculator for IMUXRef {
     }
 }
 
+/// A routing mux to a tile function's inputs
+///
+/// This mux can either be unprogrammed or have 27 choices.
+/// The exact set of inputs depends on the specific mux.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum IMUX {
     None,
@@ -88,6 +93,7 @@ impl bitmux::BitstreamField for IMUX {
     }
 }
 
+/// (Helper) access to CtrlMux
 pub(crate) struct CtrlMuxRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,
@@ -126,6 +132,10 @@ impl FieldPositionCalculator for CtrlMuxRef {
     }
 }
 
+/// A routing mux to preselect control signals for a tile
+///
+/// This mux can either be unprogrammed or have 32 choices.
+/// The exact set of inputs depends on the specific mux.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum CtrlMux {
     None,

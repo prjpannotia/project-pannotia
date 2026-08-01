@@ -14,6 +14,7 @@
 //!
 //! 1. [generic_routing]
 //! 2. [logic]
+//! 3. [bram9k]
 //! 3. everything else
 
 use std::borrow::Borrow;
@@ -279,6 +280,7 @@ impl From<Mux2> for bool {
     }
 }
 
+/// (Helper) access to global2local, only in the core
 pub(crate) struct GlobalToLocalMuxRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,

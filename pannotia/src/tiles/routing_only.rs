@@ -1,4 +1,8 @@
 //! Routing-only tiles
+//!
+//! This tile behaves like a logic tile without any logic cells inside.
+//! This means that there are no `IMUX` nor control signals.
+//! Right-going neighbor wires instead select from the `RMUX` self-wires.
 
 use std::borrow::{Borrow, BorrowMut};
 
@@ -8,6 +12,7 @@ use super::*;
 
 use bitmux::{BitGetter, BitSetter, BitstreamField};
 
+/// Access to a routing-only tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct RoutingOnlyTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,

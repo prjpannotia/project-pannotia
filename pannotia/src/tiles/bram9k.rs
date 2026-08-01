@@ -1,4 +1,18 @@
 //! Block RAM tiles (9216 bits)
+//!
+//! A block RAM tile is also similar to a logic tile, with the obvious difference
+//! that a block RAM requires many more signals than a single logic cell.
+//!
+//! Because a block RAM has 36 output wires which is approximately equal to 2x16
+//! (looping the output back into the input is also much less useful),
+//! there are no output muxes in a BRAM tile. Instead, all output wiring is fixed.
+//!
+//! Address and data inputs can use a similar set of `IMUX` as LE inputs.
+//! However, this does not cover the control signals and also does not
+//! give the ability to invert control signals where desired.
+//! BRAM tiles thus contain an additional layer of [TMUX] followed by [KMUX] for these signals.
+//! A [TMUX] preselects from (mostly) the various `T*` wires found in the tile.
+//! A [KMUX] then selects from amongst the `TMUX` outputs, optionally including an invert bit.
 
 use std::borrow::{Borrow, BorrowMut};
 
@@ -9,6 +23,7 @@ use super::*;
 
 use bitmux::{BitGetter, BitSetter, BitstreamField};
 
+/// Access to a BRAM tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct BRAMTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -31,6 +46,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for BRAMTil
     }
 }
 
+/// (Helper) access to BRAM preloaded data
 struct InitVal {}
 impl FieldPositionCalculator for InitVal {
     #[inline]
@@ -55,6 +71,7 @@ impl FieldPositionCalculator for InitVal {
     }
 }
 
+/// (Helper) access to TMUX
 struct TMUXRef(u8);
 impl FieldPositionCalculator for TMUXRef {
     #[inline]
@@ -76,6 +93,10 @@ impl FieldPositionCalculator for TMUXRef {
     }
 }
 
+/// A routing mux to preselect control signals for a BRAM
+///
+/// This mux can either be unprogrammed or have 15 choices.
+/// The exact set of inputs depends on the specific mux.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum TMUX {
     None,
@@ -113,6 +134,7 @@ impl bitmux::BitstreamField for TMUX {
     }
 }
 
+/// (Helper) access to KMUX
 struct KMUXRef(u8);
 impl FieldPositionCalculator for KMUXRef {
     #[inline]
@@ -141,6 +163,12 @@ impl FieldPositionCalculator for KMUXRef {
     }
 }
 
+/// A routing mux to select control signals for a BRAM
+///
+/// This mux can either be unprogrammed or have 15 choices.
+/// The exact set of inputs depends on the specific mux.
+///
+/// This also supports programmable inversion
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum KMUX {
     VCC,
@@ -191,6 +219,7 @@ impl bitmux::BitstreamField for KMUX {
     }
 }
 
+/// (Helper) access to clock mux
 struct TileClk(u8);
 impl FieldPositionCalculator for TileClk {
     #[inline]
@@ -206,6 +235,7 @@ impl FieldPositionCalculator for TileClk {
         )[biti]
     }
 }
+/// (Helper) access to clock enable mux
 struct TileClkEn(u8);
 impl FieldPositionCalculator for TileClkEn {
     #[inline]
@@ -224,6 +254,7 @@ impl FieldPositionCalculator for TileClkEn {
         }
     }
 }
+/// (Helper) access to async control signal mux
 struct TileAsync(u8);
 impl FieldPositionCalculator for TileAsync {
     #[inline]
@@ -243,6 +274,7 @@ impl FieldPositionCalculator for TileAsync {
     }
 }
 
+/// Block RAM port data width in bits
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 #[bitmux::bitenum]
 pub enum PortWidth {
@@ -270,6 +302,7 @@ impl Display for PortWidth {
         }
     }
 }
+/// (Helper) access to BRAM port A width
 struct PortAWidth {}
 impl FieldPositionCalculator for PortAWidth {
     #[inline]
@@ -347,6 +380,7 @@ impl FieldPositionCalculator for PortAWidth {
         )[biti]
     }
 }
+/// (Helper) access to BRAM port B width
 struct PortBWidth {}
 impl FieldPositionCalculator for PortBWidth {
     #[inline]
@@ -425,6 +459,7 @@ impl FieldPositionCalculator for PortBWidth {
     }
 }
 
+/// (Helper) access to BRAM port A output reg enable
 struct OutRegA {}
 impl FieldPositionCalculator for OutRegA {
     #[inline]
@@ -432,6 +467,7 @@ impl FieldPositionCalculator for OutRegA {
         TileRelativeBitPos { x: 34, y: 29 }
     }
 }
+/// (Helper) access to BRAM port B output reg enable
 struct OutRegB {}
 impl FieldPositionCalculator for OutRegB {
     #[inline]
@@ -439,6 +475,7 @@ impl FieldPositionCalculator for OutRegB {
         TileRelativeBitPos { x: 35, y: 39 }
     }
 }
+/// (Helper) access to BRAM port A write thru mode
 struct WriteThruA {}
 impl FieldPositionCalculator for WriteThruA {
     #[inline]
@@ -446,6 +483,7 @@ impl FieldPositionCalculator for WriteThruA {
         TileRelativeBitPos { x: 35, y: 9 }
     }
 }
+/// (Helper) access to BRAM port B write thru mode
 struct WriteThruB {}
 impl FieldPositionCalculator for WriteThruB {
     #[inline]
@@ -453,6 +491,7 @@ impl FieldPositionCalculator for WriteThruB {
         TileRelativeBitPos { x: 34, y: 59 }
     }
 }
+/// (Helper) access to BRAM port A in reg reset enable
 struct UseRstInA {}
 impl FieldPositionCalculator for UseRstInA {
     #[inline]
@@ -460,7 +499,7 @@ impl FieldPositionCalculator for UseRstInA {
         TileRelativeBitPos { x: 35, y: 55 }
     }
 }
-
+/// (Helper) access to BRAM port B in reg reset enable
 struct UseRstInB {}
 impl FieldPositionCalculator for UseRstInB {
     #[inline]
@@ -468,6 +507,7 @@ impl FieldPositionCalculator for UseRstInB {
         TileRelativeBitPos { x: 35, y: 61 }
     }
 }
+/// (Helper) access to BRAM port A out reg reset enable
 struct UseRstOutA {}
 impl FieldPositionCalculator for UseRstOutA {
     #[inline]
@@ -475,6 +515,7 @@ impl FieldPositionCalculator for UseRstOutA {
         TileRelativeBitPos { x: 35, y: 59 }
     }
 }
+/// (Helper) access to BRAM port B out reg reset enable
 struct UseRstOutB {}
 impl FieldPositionCalculator for UseRstOutB {
     #[inline]
@@ -482,7 +523,7 @@ impl FieldPositionCalculator for UseRstOutB {
         TileRelativeBitPos { x: 35, y: 65 }
     }
 }
-
+/// (Helper) access to BRAM port A in reg clock enable
 struct UseClkEnInA {}
 impl FieldPositionCalculator for UseClkEnInA {
     #[inline]
@@ -490,6 +531,7 @@ impl FieldPositionCalculator for UseClkEnInA {
         TileRelativeBitPos { x: 35, y: 3 }
     }
 }
+/// (Helper) access to BRAM port B in reg clock enable
 struct UseClkEnInB {}
 impl FieldPositionCalculator for UseClkEnInB {
     #[inline]
@@ -497,6 +539,7 @@ impl FieldPositionCalculator for UseClkEnInB {
         TileRelativeBitPos { x: 35, y: 19 }
     }
 }
+/// (Helper) access to BRAM port A out reg clock enable
 struct UseClkEnOutA {}
 impl FieldPositionCalculator for UseClkEnOutA {
     #[inline]
@@ -504,6 +547,7 @@ impl FieldPositionCalculator for UseClkEnOutA {
         TileRelativeBitPos { x: 35, y: 7 }
     }
 }
+/// (Helper) access to BRAM port B out reg clock enable
 struct UseClkEnOutB {}
 impl FieldPositionCalculator for UseClkEnOutB {
     #[inline]
@@ -533,6 +577,7 @@ impl FieldPositionCalculator for DlyTime {
     }
 }
 
+/// Block RAM port clocking mode
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 #[bitmux::bitenum]
 pub enum ClockMode {
@@ -561,6 +606,7 @@ impl Display for ClockMode {
         }
     }
 }
+/// (Helper) access to BRAM clocking mode
 struct ClkModeRef {}
 impl FieldPositionCalculator for ClkModeRef {
     #[inline]
@@ -572,6 +618,7 @@ impl FieldPositionCalculator for ClkModeRef {
     }
 }
 
+/// (Helper) access to BRAM "packed" mode
 struct PackedModeAddressOverride {}
 impl FieldPositionCalculator for PackedModeAddressOverride {
     #[inline]
