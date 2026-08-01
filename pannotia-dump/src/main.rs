@@ -10,6 +10,7 @@ use bitvec::prelude::*;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::padring::PadRingExt;
+use pannotia::routedb::{RMUXSource, RoutingWire};
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
 use pannotia::tiles::io::IOTileCommon;
 use pannotia::tiles::{TileRefTrait, TileType};
@@ -167,8 +168,37 @@ fn main() -> Result<ExitCode, Error> {
                             let tile = tile.as_generic_routing_tile();
                             for rmux_i in 0..96 {
                                 let rmux = tile.rmux(rmux_i);
-                                if rmux != RMUX::None {
-                                    println!("tile[{}].rmux[{}] = {}", tile_pos, rmux_i, rmux);
+                                if let RMUX::I(rmux_inp_i) = rmux {
+                                    print!("tile[{}].rmux[{}] = {}", tile_pos, rmux_i, rmux);
+
+                                    let rmux_src = pannotia::routedb::rmux_input(
+                                        rmux_i,
+                                        rmux_inp_i,
+                                        tile.tile_type() == TileType::BRAM,
+                                    );
+                                    match rmux_src {
+                                        RMUXSource::GlobalToLocal(i) => {
+                                            println!("\t// glb2loc[{i}]")
+                                        }
+                                        RMUXSource::RMUX(i) => {
+                                            println!("\t// rmux[{i}]")
+                                        }
+                                        RMUXSource::CellOutput(i) => {
+                                            println!("\t// this_output[{i}]")
+                                        }
+                                        RMUXSource::RoutingWire(src_wire) => {
+                                            let abs_wire =
+                                                src_wire.to_absolute(b.family(), tile.pos());
+                                            println!(
+                                                "\t// tile[{}] {} going {} [{}]",
+                                                abs_wire.tile,
+                                                abs_wire.ty,
+                                                abs_wire.going_dir,
+                                                abs_wire.wire_idx
+                                            );
+                                        }
+                                        _ => unreachable!(),
+                                    }
                                 }
                             }
                         }
@@ -1114,22 +1144,22 @@ fn main() -> Result<ExitCode, Error> {
                 let inp = pannotia::routedb::rmux_input(rmux_i, inp_i, true);
                 print!("    .I{inp_i}(");
                 match inp {
-                    pannotia::routedb::RMUXSource::GlobalToLocal(i) => {
+                    RMUXSource::GlobalToLocal(i) => {
                         print!("IsoMUXPseudo{:02}_O", i);
                     }
-                    pannotia::routedb::RMUXSource::RMUX(i) => {
+                    RMUXSource::RMUX(i) => {
                         print!("RMUX{:02}_O", i);
                     }
-                    pannotia::routedb::RMUXSource::CellOutput(i) => {
+                    RMUXSource::CellOutput(i) => {
                         // print!("OMUX{:02}_O", i * 3 + 2);   // For a logic tile
                         print!("BufMUX{:02}_O", i); // For a BRAM tile
                     }
-                    pannotia::routedb::RMUXSource::RoutingWire {
+                    RMUXSource::RoutingWire(RoutingWire {
                         ty,
                         going_dir,
                         bundle,
                         wire_idx,
-                    } => {
+                    }) => {
                         let xy =
                             match going_dir {
                                 pannotia::routedb::Direction::N

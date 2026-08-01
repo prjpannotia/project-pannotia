@@ -1,6 +1,11 @@
 //! Routing database
 
-use std::fmt::Display;
+use std::{
+    fmt::Display,
+    ops::{Add, AddAssign},
+};
+
+use crate::coordinates::TilePos;
 
 #[non_exhaustive]
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -13,6 +18,30 @@ impl Display for WireType {
         match self {
             Self::T1 => write!(f, "T1"),
             Self::T4 => write!(f, "T4"),
+        }
+    }
+}
+impl From<WireType> for u8 {
+    fn from(value: WireType) -> Self {
+        match value {
+            WireType::T1 => 1,
+            WireType::T4 => 4,
+        }
+    }
+}
+impl From<WireType> for u32 {
+    fn from(value: WireType) -> Self {
+        match value {
+            WireType::T1 => 1,
+            WireType::T4 => 4,
+        }
+    }
+}
+impl From<WireType> for usize {
+    fn from(value: WireType) -> Self {
+        match value {
+            WireType::T1 => 1,
+            WireType::T4 => 4,
         }
     }
 }
@@ -33,6 +62,107 @@ impl Display for Direction {
             Self::W => write!(f, "W"),
         }
     }
+}
+impl Direction {
+    pub fn flip(self) -> Self {
+        match self {
+            Self::N => Self::S,
+            Self::S => Self::N,
+            Self::E => Self::W,
+            Self::W => Self::E,
+        }
+    }
+}
+impl Add<Direction> for crate::coordinates::TilePos {
+    type Output = Self;
+    fn add(self, rhs: Direction) -> Self::Output {
+        match rhs {
+            Direction::N => TilePos {
+                x: self.x,
+                y: self.y + 1,
+            },
+            Direction::S => TilePos {
+                x: self.x,
+                y: self.y - 1,
+            },
+            Direction::E => TilePos {
+                x: self.x + 1,
+                y: self.y,
+            },
+            Direction::W => TilePos {
+                x: self.x - 1,
+                y: self.y,
+            },
+        }
+    }
+}
+impl AddAssign<Direction> for crate::coordinates::TilePos {
+    fn add_assign(&mut self, rhs: Direction) {
+        *self = *self + rhs;
+    }
+}
+
+/// A general-purpose routing wire, tile-relative numbering
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub struct RoutingWire {
+    pub ty: WireType,
+    pub going_dir: Direction,
+    pub bundle: u8,
+    pub wire_idx: u8,
+}
+impl RoutingWire {
+    pub fn to_absolute(
+        self,
+        family: crate::chips::Family,
+        tile_pos: TilePos,
+    ) -> AbsoluteRoutingWire {
+        let max_bundle = match self.ty {
+            WireType::T1 => match self.going_dir {
+                Direction::N | Direction::S => 0, // not valid at all
+                Direction::E | Direction::W => 1,
+            },
+            WireType::T4 => 4,
+        };
+        assert!(self.bundle < max_bundle, "invalid wire bundle");
+
+        let mut src_pos = tile_pos;
+        let mut dir = self.going_dir.flip();
+        let (tile_w, tile_h) = family.tile_dims();
+        for _ in 0..self.bundle + 1 {
+            // handle flipping wires around the edges
+            let flip_at_edge = match dir {
+                Direction::N if src_pos.y == tile_h - 1 => true,
+                Direction::S if src_pos.y == 0 => true,
+                Direction::E if src_pos.x == tile_w - 1 => true,
+                Direction::W if src_pos.x == 0 => true,
+                _ => false,
+            };
+            if flip_at_edge {
+                dir = dir.flip();
+                // because the signals don't go "through" the edge tiles,
+                // we have to do an additional add in order to take that into account
+                src_pos += dir;
+            }
+
+            src_pos += dir;
+        }
+
+        AbsoluteRoutingWire {
+            tile: src_pos,
+            ty: self.ty,
+            going_dir: self.going_dir,
+            wire_idx: self.wire_idx,
+        }
+    }
+}
+
+/// A general-purpose routing wire, absolute numbering
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub struct AbsoluteRoutingWire {
+    pub tile: TilePos,
+    pub ty: WireType,
+    pub going_dir: Direction,
+    pub wire_idx: u8,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -58,12 +188,7 @@ pub enum RMUXSource {
     /// The output of the internals of this tile
     CellOutput(u8),
     /// A routing wire coming into this tile
-    RoutingWire {
-        ty: WireType,
-        going_dir: Direction,
-        bundle: u8,
-        wire_idx: u8,
-    },
+    RoutingWire(RoutingWire),
 }
 impl From<RMUXSourceInternal> for RMUXSource {
     fn from(value: RMUXSourceInternal) -> Self {
@@ -75,12 +200,12 @@ impl From<RMUXSourceInternal> for RMUXSource {
                 going_dir,
                 bundle,
                 wire_idx,
-            } => Self::RoutingWire {
+            } => Self::RoutingWire(RoutingWire {
                 ty,
                 going_dir,
                 bundle,
                 wire_idx,
-            },
+            }),
         }
     }
 }
