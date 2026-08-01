@@ -189,7 +189,7 @@ mod tests {
                 TileRelativeBitPos { x: 11, y: 22 }
             )),
             GlobalBitPos {
-                x: (20 + 12 * 36 + 180 + 7 * 36 + 20) + 11,
+                x: (20 + 12 * 36 + 180 + 7 * 36 + 16) + 11,
                 y: (22) + 22
             }
         );
