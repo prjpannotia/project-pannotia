@@ -836,6 +836,42 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
 
+                            let setting = tile.fb_phase_coarse();
+                            if setting != Default::default() {
+                                println!("tile[{}].fb_phase_coarse = {}", tile_pos, setting);
+                            }
+                            let setting = tile.fb_phase_fine();
+                            if setting != Default::default() {
+                                println!("tile[{}].fb_phase_fine = {}", tile_pos, setting);
+                            }
+                            for out_i in 0..5 {
+                                let setting = tile.out_enable(out_i);
+                                if setting {
+                                    println!("tile[{}].out_enable[{}] = 1", tile_pos, out_i,);
+                                }
+                                if out_i != 0 {
+                                    let setting = tile.out_cascade(out_i);
+                                    if setting {
+                                        println!("tile[{}].out_cascade[{}] = 1", tile_pos, out_i,);
+                                    }
+                                }
+
+                                let setting = tile.out_phase_coarse(out_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].out_phase_coarse[{}] = {}",
+                                        tile_pos, out_i, setting
+                                    );
+                                }
+                                let setting = tile.out_phase_fine(out_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].out_phase_fine[{}] = {}",
+                                        tile_pos, out_i, setting
+                                    );
+                                }
+                            }
+
                             // TODO: the PLL's "actual" attributes
                         }
                         TileType::GCLKSW => {

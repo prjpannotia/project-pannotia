@@ -87,6 +87,40 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
         };
         GlobalToLocalMux::get(ref_)
     }
+
+    pub fn fb_phase_coarse(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 23..23 + 8) as u8
+    }
+    pub fn fb_phase_fine(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 20..20 + 3) as u8
+    }
+    pub fn out_phase_coarse(&self, idx: u8) -> u8 {
+        assert!(idx < 5, "invalid output index");
+        let bitstream = self.r.borrow();
+        let biti = 35 + 13 * idx as usize;
+        bitstream.get_aux_array_bits(1, 1, biti..biti + 8) as u8
+    }
+    pub fn out_phase_fine(&self, idx: u8) -> u8 {
+        assert!(idx < 5, "invalid output index");
+        let bitstream = self.r.borrow();
+        let biti = 31 + 13 * idx as usize;
+        bitstream.get_aux_array_bits(1, 1, biti..biti + 3) as u8
+    }
+
+    pub fn out_enable(&self, idx: u8) -> bool {
+        assert!(idx < 5, "invalid output index");
+        let bitstream = self.r.borrow();
+        let biti = 34 + 13 * idx as usize;
+        bitstream.get_aux_array_bit(1, 1, biti)
+    }
+    pub fn out_cascade(&self, idx: u8) -> bool {
+        assert!(idx > 0 && idx < 5, "invalid output index");
+        let bitstream = self.r.borrow();
+        let biti = 30 + 13 * idx as usize;
+        bitstream.get_aux_array_bit(1, 1, biti)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn set_to_pll(&mut self, idx: u8, val: Mux13Inv) {
@@ -107,6 +141,42 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
             _d: PhantomData,
         };
         val.set(ref_);
+    }
+
+    pub fn set_fb_phase_coarse(&mut self, val: u8) {
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 23..23 + 8, val as u32);
+    }
+    pub fn set_fb_phase_fine(&mut self, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 20..20 + 3, val as u32);
+    }
+    pub fn set_out_phase_coarse(&mut self, idx: u8, val: u8) {
+        assert!(idx < 5, "invalid output index");
+        let bitstream = self.r.borrow_mut();
+        let biti = 35 + 13 * idx as usize;
+        bitstream.set_aux_array_bits(1, 1, biti..biti + 8, val as u32);
+    }
+    pub fn set_out_phase_fine(&mut self, idx: u8, val: u8) {
+        assert!(idx < 5, "invalid output index");
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        let biti = 31 + 13 * idx as usize;
+        bitstream.set_aux_array_bits(1, 1, biti..biti + 3, val as u32);
+    }
+
+    pub fn set_out_enable(&mut self, idx: u8, val: bool) {
+        assert!(idx < 5, "invalid output index");
+        let bitstream = self.r.borrow_mut();
+        let biti = 34 + 13 * idx as usize;
+        bitstream.set_aux_array_bit(1, 1, biti, val);
+    }
+    pub fn set_out_cascade(&mut self, idx: u8, val: bool) {
+        assert!(idx > 0 && idx < 5, "invalid output index");
+        let bitstream = self.r.borrow_mut();
+        let biti = 30 + 13 * idx as usize;
+        bitstream.set_aux_array_bit(1, 1, biti, val);
     }
 }
 

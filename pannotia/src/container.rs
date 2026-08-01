@@ -437,6 +437,26 @@ impl<D: DebugTracer> Bitstream<D> {
     pub fn set_aux_array_bit(&mut self, group: u32, chain: u32, biti: usize, val: bool) {
         self.config_arrays[group as usize][chain as usize].set(biti, val);
     }
+    #[inline]
+    pub fn get_aux_array_bits(&self, group: u32, chain: u32, bits: std::ops::Range<usize>) -> u32 {
+        assert!(bits.len() <= 32, "bitfield cannot use >32 bits");
+        let mut ret: BitArr!(for 32, in u32, Lsb0) = BitArray::ZERO;
+        ret[..bits.len()]
+            .clone_from_bitslice(&self.config_arrays[group as usize][chain as usize][bits]);
+        ret.into_inner()[0]
+    }
+    #[inline]
+    pub fn set_aux_array_bits(
+        &mut self,
+        group: u32,
+        chain: u32,
+        bits: std::ops::Range<usize>,
+        val: u32,
+    ) {
+        assert!(bits.len() <= 32, "bitfield cannot use >32 bits");
+        let val = &BitSlice::<_, Lsb0>::from_element(&val)[..bits.len()];
+        self.config_arrays[group as usize][chain as usize][bits].clone_from_bitslice(&val);
+    }
 
     #[inline]
     pub fn get_logic_array_bit(&self, bit: GlobalBitPos) -> bool {
