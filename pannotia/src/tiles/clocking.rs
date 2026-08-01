@@ -142,6 +142,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
         let biti = 95 + 17 + 18 * idx as usize;
         bitstream.get_aux_array_bit(1, 1, biti)
     }
+
     pub fn out_div_lo_time(&self, idx: u8) -> u8 {
         assert!(idx < 5, "invalid output index");
         self._clkdiv_lo_time(4 - idx)
@@ -157,6 +158,32 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn out_div_bypass(&self, idx: u8) -> bool {
         assert!(idx < 5, "invalid output index");
         self._clkdiv_bypass(4 - idx)
+    }
+
+    pub fn fb_div_lo_time(&self) -> u8 {
+        self._clkdiv_lo_time(5)
+    }
+    pub fn fb_div_hi_time(&self) -> u8 {
+        self._clkdiv_hi_time(5)
+    }
+    pub fn fb_div_duty_cycle_adjust(&self) -> bool {
+        self._clkdiv_trim(5)
+    }
+    pub fn fb_div_bypass(&self) -> bool {
+        self._clkdiv_bypass(5)
+    }
+
+    pub fn in_div_lo_time(&self) -> u8 {
+        self._clkdiv_lo_time(6)
+    }
+    pub fn in_div_hi_time(&self) -> u8 {
+        self._clkdiv_hi_time(6)
+    }
+    pub fn in_div_duty_cycle_adjust(&self) -> bool {
+        self._clkdiv_trim(6)
+    }
+    pub fn in_div_bypass(&self) -> bool {
+        self._clkdiv_bypass(6)
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
@@ -236,6 +263,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
         let biti = 95 + 17 + 18 * idx as usize;
         bitstream.set_aux_array_bit(1, 1, biti, val);
     }
+
     pub fn set_out_div_lo_time(&mut self, idx: u8, val: u8) {
         assert!(idx < 5, "invalid output index");
         self._set_clkdiv_lo_time(4 - idx, val);
@@ -251,6 +279,32 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn set_out_div_bypass(&mut self, idx: u8, val: bool) {
         assert!(idx < 5, "invalid output index");
         self._set_clkdiv_bypass(4 - idx, val);
+    }
+
+    pub fn set_fb_div_lo_time(&mut self, val: u8) {
+        self._set_clkdiv_lo_time(5, val);
+    }
+    pub fn set_fb_div_hi_time(&mut self, val: u8) {
+        self._set_clkdiv_hi_time(5, val);
+    }
+    pub fn set_fb_div_duty_cycle_adjust(&mut self, val: bool) {
+        self._set_clkdiv_trim(5, val);
+    }
+    pub fn set_fb_div_bypass(&mut self, val: bool) {
+        self._set_clkdiv_bypass(5, val);
+    }
+
+    pub fn set_in_div_lo_time(&mut self, val: u8) {
+        self._set_clkdiv_lo_time(6, val);
+    }
+    pub fn set_in_div_hi_time(&mut self, val: u8) {
+        self._set_clkdiv_hi_time(6, val);
+    }
+    pub fn set_in_div_duty_cycle_adjust(&mut self, val: bool) {
+        self._set_clkdiv_trim(6, val);
+    }
+    pub fn set_in_div_bypass(&mut self, val: bool) {
+        self._set_clkdiv_bypass(6, val);
     }
 }
 

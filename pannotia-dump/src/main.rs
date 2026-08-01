@@ -836,6 +836,39 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
 
+                            let setting = tile.in_div_lo_time();
+                            if setting != Default::default() {
+                                println!("tile[{}].in_div_lo_time = {}", tile_pos, setting);
+                            }
+                            let setting = tile.in_div_hi_time();
+                            if setting != Default::default() {
+                                println!("tile[{}].in_div_hi_time = {}", tile_pos, setting);
+                            }
+                            let setting = tile.in_div_duty_cycle_adjust();
+                            if setting {
+                                println!("tile[{}].in_div_duty_cycle_adjust = 1", tile_pos,);
+                            }
+                            let setting = tile.in_div_bypass();
+                            if setting {
+                                println!("tile[{}].in_div_bypass = 1", tile_pos,);
+                            }
+
+                            let setting = tile.fb_div_lo_time();
+                            if setting != Default::default() {
+                                println!("tile[{}].fb_div_lo_time = {}", tile_pos, setting);
+                            }
+                            let setting = tile.fb_div_hi_time();
+                            if setting != Default::default() {
+                                println!("tile[{}].fb_div_hi_time = {}", tile_pos, setting);
+                            }
+                            let setting = tile.fb_div_duty_cycle_adjust();
+                            if setting {
+                                println!("tile[{}].fb_div_duty_cycle_adjust = 1", tile_pos,);
+                            }
+                            let setting = tile.fb_div_bypass();
+                            if setting {
+                                println!("tile[{}].fb_div_bypass = 1", tile_pos,);
+                            }
                             let setting = tile.fb_phase_coarse();
                             if setting != Default::default() {
                                 println!("tile[{}].fb_phase_coarse = {}", tile_pos, setting);
@@ -844,6 +877,7 @@ fn main() -> Result<ExitCode, Error> {
                             if setting != Default::default() {
                                 println!("tile[{}].fb_phase_fine = {}", tile_pos, setting);
                             }
+
                             for out_i in 0..5 {
                                 let setting = tile.out_enable(out_i);
                                 if setting {
