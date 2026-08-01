@@ -1107,8 +1107,55 @@ fn main() -> Result<ExitCode, Error> {
             }
             println!();
         }
-        // b.tile(123, 456).unwrap().as_logic_tile().lut();
-        // b.tile_mut(123, 456).unwrap().as_logic_tile().set_lut(123);
+    } else if args[1].eq_ignore_ascii_case("debug_routing") {
+        for rmux_i in 0..96 {
+            println!("RMUX_21_1 m_RMUX{rmux_i:02} (");
+            for inp_i in (0..21).rev() {
+                let inp = pannotia::routedb::rmux_input(rmux_i, inp_i, true);
+                print!("    .I{inp_i}(");
+                match inp {
+                    pannotia::routedb::RMUXSource::GlobalToLocal(i) => {
+                        print!("IsoMUXPseudo{:02}_O", i);
+                    }
+                    pannotia::routedb::RMUXSource::RMUX(i) => {
+                        print!("RMUX{:02}_O", i);
+                    }
+                    pannotia::routedb::RMUXSource::CellOutput(i) => {
+                        // print!("OMUX{:02}_O", i * 3 + 2);   // For a logic tile
+                        print!("BufMUX{:02}_O", i); // For a BRAM tile
+                    }
+                    pannotia::routedb::RMUXSource::RoutingWire {
+                        ty,
+                        going_dir,
+                        bundle,
+                        wire_idx,
+                    } => {
+                        let xy =
+                            match going_dir {
+                                pannotia::routedb::Direction::N
+                                | pannotia::routedb::Direction::S => "Y",
+                                pannotia::routedb::Direction::E
+                                | pannotia::routedb::Direction::W => "X",
+                            };
+                        print!(
+                            "{}{}_{}_I{}[{}]",
+                            ty,
+                            if ty != pannotia::routedb::WireType::T1 {
+                                xy
+                            } else {
+                                ""
+                            },
+                            going_dir,
+                            bundle,
+                            wire_idx,
+                        );
+                    }
+                    _ => unreachable!(),
+                }
+                println!("),")
+            }
+            println!("    .O0(RMUX{rmux_i:02}_O));\n");
+        }
     } else {
         return Err(Error::InvalidMode);
     }
