@@ -1067,6 +1067,21 @@ fn main() -> Result<ExitCode, Error> {
                 println!("pad[{}].input_en = 1", pad_i);
             }
 
+            let setting = b.pad_open_drain(pad_i);
+            if setting {
+                println!("pad[{}].open_drain = 1", pad_i);
+            }
+
+            let setting = b.pad_reduced_slew(pad_i);
+            if setting {
+                println!("pad[{}].reduced_slew = 1", pad_i);
+            }
+
+            let setting = b.pad_pullup_to_fabric(pad_i);
+            if setting {
+                println!("pad[{}].pullup_to_fabric = 1", pad_i);
+            }
+
             let setting = b.pad_drive_strength(pad_i);
             if setting != Default::default() {
                 println!("pad[{}].drive_strength = {}", pad_i, setting);
