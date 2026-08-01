@@ -1071,6 +1071,11 @@ fn main() -> Result<ExitCode, Error> {
             if setting != Default::default() {
                 println!("pad[{}].drive_strength = {}", pad_i, setting);
             }
+
+            let setting = b.pad_termination(pad_i);
+            if setting != Default::default() {
+                println!("pad[{}].term = {}", pad_i, setting);
+            }
         }
 
         println!("\n// access mask");

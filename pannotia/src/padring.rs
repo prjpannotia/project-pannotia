@@ -72,12 +72,56 @@ impl Default for DriveStrength {
 impl Display for DriveStrength {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DriveStrength::_0MA => write!(f, "0 mA"),
-            DriveStrength::_2MA => write!(f, "2 mA"),
-            DriveStrength::_4MA => write!(f, "4 mA"),
-            DriveStrength::_8MA => write!(f, "8 mA"),
-            DriveStrength::_16MA => write!(f, "16 mA"),
-            DriveStrength::_30MA => write!(f, "30 mA"),
+            Self::_0MA => write!(f, "0 mA"),
+            Self::_2MA => write!(f, "2 mA"),
+            Self::_4MA => write!(f, "4 mA"),
+            Self::_8MA => write!(f, "8 mA"),
+            Self::_16MA => write!(f, "16 mA"),
+            Self::_30MA => write!(f, "30 mA"),
+        }
+    }
+}
+
+struct TerminationBits<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+    r: Ref,
+    pad_i: u8,
+    _d: PhantomData<D>,
+}
+impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> bitmux::BitGetter for TerminationBits<D, Ref> {
+    fn get_bit(&self, biti: usize) -> bool {
+        let bitstream = self.r.borrow();
+        let biti_base = pad_i_to_bit_i(self.pad_i) - 8;
+        bitstream.get_aux_array_bit(1, 0, biti_base - biti)
+    }
+}
+impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> bitmux::BitSetter for TerminationBits<D, Ref> {
+    fn set_bit(&mut self, biti: usize, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        let biti_base = pad_i_to_bit_i(self.pad_i) - 8;
+        bitstream.set_aux_array_bit(1, 0, biti_base - biti, val);
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[bitmux::bitenum]
+pub enum PullUpDown {
+    None = "00",
+    Down = "01",
+    Up = "10",
+    Keeper = "11",
+}
+impl Default for PullUpDown {
+    fn default() -> Self {
+        Self::None
+    }
+}
+impl Display for PullUpDown {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "none"),
+            Self::Down => write!(f, "pulldown"),
+            Self::Up => write!(f, "pullup"),
+            Self::Keeper => write!(f, "keeper"),
         }
     }
 }
@@ -85,6 +129,11 @@ impl Display for DriveStrength {
 pub trait PadRingExt {
     fn pad_input_en(&self, pad_i: u8) -> bool;
     fn pad_drive_strength(&self, pad_i: u8) -> DriveStrength;
+    fn pad_termination(&self, pad_i: u8) -> PullUpDown;
+
+    fn set_pad_input_en(&mut self, pad_i: u8, val: bool);
+    fn set_pad_drive_strength(&mut self, pad_i: u8, val: DriveStrength);
+    fn set_pad_termination(&mut self, pad_i: u8, val: PullUpDown);
 }
 impl<D: DebugTracer> PadRingExt for Bitstream<D> {
     fn pad_input_en(&self, pad_i: u8) -> bool {
@@ -97,5 +146,31 @@ impl<D: DebugTracer> PadRingExt for Bitstream<D> {
             pad_i,
             _d: PhantomData,
         })
+    }
+    fn pad_termination(&self, pad_i: u8) -> PullUpDown {
+        PullUpDown::get(TerminationBits {
+            r: self,
+            pad_i,
+            _d: PhantomData,
+        })
+    }
+
+    fn set_pad_input_en(&mut self, pad_i: u8, val: bool) {
+        let biti = pad_i_to_bit_i(pad_i) - 0;
+        self.set_aux_array_bit(1, 0, biti, val);
+    }
+    fn set_pad_drive_strength(&mut self, pad_i: u8, val: DriveStrength) {
+        val.set(DriveStrengthBits {
+            r: self,
+            pad_i,
+            _d: PhantomData,
+        });
+    }
+    fn set_pad_termination(&mut self, pad_i: u8, val: PullUpDown) {
+        val.set(TerminationBits {
+            r: self,
+            pad_i,
+            _d: PhantomData,
+        });
     }
 }
