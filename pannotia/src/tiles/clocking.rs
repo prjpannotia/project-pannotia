@@ -146,6 +146,18 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
         assert!(idx < 5, "invalid output index");
         self._clkdiv_lo_time(4 - idx)
     }
+    pub fn out_div_hi_time(&self, idx: u8) -> u8 {
+        assert!(idx < 5, "invalid output index");
+        self._clkdiv_hi_time(4 - idx)
+    }
+    pub fn out_div_duty_cycle_adjust(&self, idx: u8) -> bool {
+        assert!(idx < 5, "invalid output index");
+        self._clkdiv_trim(4 - idx)
+    }
+    pub fn out_div_bypass(&self, idx: u8) -> bool {
+        assert!(idx < 5, "invalid output index");
+        self._clkdiv_bypass(4 - idx)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn set_to_pll(&mut self, idx: u8, val: Mux13Inv) {
@@ -227,6 +239,18 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn set_out_div_lo_time(&mut self, idx: u8, val: u8) {
         assert!(idx < 5, "invalid output index");
         self._set_clkdiv_lo_time(4 - idx, val);
+    }
+    pub fn set_out_div_hi_time(&mut self, idx: u8, val: u8) {
+        assert!(idx < 5, "invalid output index");
+        self._set_clkdiv_hi_time(4 - idx, val);
+    }
+    pub fn set_out_div_duty_cycle_adjust(&mut self, idx: u8, val: bool) {
+        assert!(idx < 5, "invalid output index");
+        self._set_clkdiv_trim(4 - idx, val);
+    }
+    pub fn set_out_div_bypass(&mut self, idx: u8, val: bool) {
+        assert!(idx < 5, "invalid output index");
+        self._set_clkdiv_bypass(4 - idx, val);
     }
 }
 

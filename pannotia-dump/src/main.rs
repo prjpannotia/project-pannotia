@@ -863,6 +863,24 @@ fn main() -> Result<ExitCode, Error> {
                                         tile_pos, out_i, setting
                                     );
                                 }
+                                let setting = tile.out_div_hi_time(out_i);
+                                if setting != Default::default() {
+                                    println!(
+                                        "tile[{}].out_div_hi_time[{}] = {}",
+                                        tile_pos, out_i, setting
+                                    );
+                                }
+                                let setting = tile.out_div_duty_cycle_adjust(out_i);
+                                if setting {
+                                    println!(
+                                        "tile[{}].out_div_duty_cycle_adjust[{}] = 1",
+                                        tile_pos, out_i
+                                    );
+                                }
+                                let setting = tile.out_div_bypass(out_i);
+                                if setting {
+                                    println!("tile[{}].out_div_bypass[{}] = 1", tile_pos, out_i);
+                                }
 
                                 let setting = tile.out_phase_coarse(out_i);
                                 if setting != Default::default() {
