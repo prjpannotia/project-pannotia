@@ -836,6 +836,14 @@ fn main() -> Result<ExitCode, Error> {
                                 }
                             }
 
+                            let setting = tile.gclk_mux();
+                            if setting != Default::default() {
+                                println!("tile[{}].gclk_mux = {}", tile_pos, setting);
+                            }
+                            let setting = tile.clock_mux_0();
+                            if setting != Default::default() {
+                                println!("tile[{}].clock_mux_0 = {}", tile_pos, setting);
+                            }
                             let setting = tile.in_div_lo_time();
                             if setting != Default::default() {
                                 println!("tile[{}].in_div_lo_time = {}", tile_pos, setting);
@@ -853,6 +861,18 @@ fn main() -> Result<ExitCode, Error> {
                                 println!("tile[{}].in_div_bypass = 1", tile_pos,);
                             }
 
+                            let setting = tile.clock_feedback_mux();
+                            if setting != Default::default() {
+                                println!("tile[{}].clock_feedback_mux = {}", tile_pos, setting);
+                            }
+                            let setting = tile.use_internal_fb();
+                            if setting {
+                                println!("tile[{}].use_internal_fb = 1", tile_pos,);
+                            }
+                            let setting = tile.feedback_delay();
+                            if setting != Default::default() {
+                                println!("tile[{}].feedback_delay = {}", tile_pos, setting);
+                            }
                             let setting = tile.fb_div_lo_time();
                             if setting != Default::default() {
                                 println!("tile[{}].fb_div_lo_time = {}", tile_pos, setting);
@@ -935,6 +955,23 @@ fn main() -> Result<ExitCode, Error> {
                             let setting = tile.vco_div2();
                             if setting {
                                 println!("tile[{}].vco_div2 = 1", tile_pos,);
+                            }
+
+                            let setting = tile.reg_ctrl();
+                            if setting != Default::default() {
+                                println!("tile[{}].reg_ctrl = {}", tile_pos, setting);
+                            }
+                            let setting = tile.enabled();
+                            if setting {
+                                println!("tile[{}].enabled = 1", tile_pos,);
+                            }
+                            let setting = tile.enable_dedicated_out_n();
+                            if setting {
+                                println!("tile[{}].enable_dedicated_out_n = 1", tile_pos,);
+                            }
+                            let setting = tile.enable_dedicated_out_p();
+                            if setting {
+                                println!("tile[{}].enable_dedicated_out_p = 1", tile_pos,);
                             }
 
                             let setting = tile.analog_icp();

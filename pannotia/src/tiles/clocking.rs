@@ -211,6 +211,49 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
         let bitstream = self.r.borrow();
         bitstream.get_aux_array_bits(1, 1, 236..236 + 3) as u8
     }
+
+    // FIXME: This is totally undocumented
+    pub fn reg_ctrl(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 0..0 + 2) as u8
+    }
+    pub fn enabled(&self) -> bool {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bit(1, 1, 2)
+    }
+    pub fn clock_feedback_mux(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 3..3 + 2) as u8
+    }
+    pub fn feedback_delay(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 5..5 + 3) as u8
+    }
+    pub fn clock_mux_0(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 8..8 + 3) as u8
+    }
+    // AGRV2K doesn't have this
+    pub fn clock_mux_1(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 11..11 + 3) as u8
+    }
+    pub fn gclk_mux(&self) -> u8 {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, 14..14 + 3) as u8
+    }
+    pub fn use_internal_fb(&self) -> bool {
+        let bitstream = self.r.borrow();
+        bitstream.get_aux_array_bit(1, 1, 17)
+    }
+    pub fn enable_dedicated_out_n(&self) -> bool {
+        let bitstream = self.r.borrow();
+        !bitstream.get_aux_array_bit(1, 1, 18)
+    }
+    pub fn enable_dedicated_out_p(&self) -> bool {
+        let bitstream = self.r.borrow();
+        !bitstream.get_aux_array_bit(1, 1, 19)
+    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
     pub fn set_to_pll(&mut self, idx: u8, val: Mux13Inv) {
@@ -362,6 +405,55 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
         assert!(val & !0b111 == 0, "invalid setting");
         let bitstream = self.r.borrow_mut();
         bitstream.set_aux_array_bits(1, 1, 236..236 + 3, val as u32);
+    }
+
+    // FIXME: This is totally undocumented
+    pub fn set_reg_ctrl(&mut self, val: u8) {
+        assert!(val & !0b11 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 0..0 + 2, val as u32);
+    }
+    pub fn set_enabled(&mut self, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bit(1, 1, 2, val);
+    }
+    pub fn set_clock_feedback_mux(&mut self, val: u8) {
+        assert!(val & !0b11 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 3..3 + 2, val as u32);
+    }
+    pub fn set_feedback_delay(&mut self, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 5..5 + 3, val as u32);
+    }
+    pub fn set_clock_mux_0(&mut self, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 8..8 + 3, val as u32);
+    }
+    // AGRV2K doesn't have this
+    pub fn set_clock_mux_1(&mut self, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 11..11 + 3, val as u32);
+    }
+    pub fn set_gclk_mux(&mut self, val: u8) {
+        assert!(val & !0b111 == 0, "invalid setting");
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, 14..14 + 3, val as u32);
+    }
+    pub fn set_use_internal_fb(&mut self, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bit(1, 1, 17, val);
+    }
+    pub fn set_enable_dedicated_out_n(&mut self, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bit(1, 1, 18, !val);
+    }
+    pub fn set_enable_dedicated_out_p(&mut self, val: bool) {
+        let bitstream = self.r.borrow_mut();
+        bitstream.set_aux_array_bit(1, 1, 19, !val);
     }
 }
 
