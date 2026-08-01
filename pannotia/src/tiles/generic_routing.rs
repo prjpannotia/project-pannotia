@@ -64,6 +64,7 @@ use super::*;
 
 use bitmux::BitstreamField;
 
+/// Access to only the generic routing muxes of a (non-boundary) tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct GenericRoutingRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -87,6 +88,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for Generic
     }
 }
 
+/// (Helper) access to RMUX
 pub(crate) struct RMUXRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,
@@ -145,6 +147,10 @@ impl FieldPositionCalculator for RMUXRef {
     }
 }
 
+/// A routing mux within a (non-boundary) tile
+///
+/// This mux can either be unprogrammed or have 21 choices.
+/// The exact set of inputs depends on the specific mux.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum RMUX {
     None,
@@ -182,9 +188,11 @@ impl bitmux::BitstreamField for RMUX {
     }
 }
 
+/// Read (via possibly-dynamic dispatch) only generic routing muxes
 pub trait GenericRoutingRefTrait {
     fn rmux(&self, rmux_idx: u8) -> RMUX;
 }
+/// Write (via possibly-dynamic dispatch) only generic routing muxes
 pub trait GenericRoutingRefMutTrait: GenericRoutingRefTrait {
     fn set_rmux(&mut self, rmux_idx: u8, val: RMUX);
 }
@@ -222,4 +230,12 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
         };
         val.set(ref_);
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const _ENSURE_DYN_SAFE_0: Option<&dyn GenericRoutingRefTrait> = None;
+    const _ENSURE_DYN_SAFE_1: Option<&dyn GenericRoutingRefMutTrait> = None;
 }

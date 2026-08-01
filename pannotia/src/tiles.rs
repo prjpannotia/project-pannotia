@@ -13,6 +13,8 @@
 //! to read the documentation in the following order:
 //!
 //! 1. [generic_routing]
+//! 2. [logic]
+//! 3. everything else
 
 use std::borrow::Borrow;
 use std::fmt::Display;

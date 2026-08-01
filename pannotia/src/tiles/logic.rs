@@ -1,4 +1,45 @@
 //! Logic tiles
+//!
+//! A logic tile contains 16 individual logic elements (LEs), which
+//! each consist of a LUT4 and a register (flip-flop).
+//! The tile also contains input selection muxes for each LE
+//! and a number of control signal muxes shared by all LEs.
+//!
+//! ## Routing
+//!
+//! Each LE's input has an [IMUX] to select a signal.
+//! Inputs `A` and `C` have a similar signal mix available,
+//! as do inputs `B` and `D`. The input mix is also very similar
+//! between each LE in a tile. In general, this allows for
+//! input swapping and LE swapping. However, the sites are not _exactly_
+//! identical, so care must be taken.
+//!
+//! `IMUX` can select from amongst the following choices:
+//! - `RMUX` self-wires (from where it likely came from the interconnect)
+//! - neighbor wires from the tile on the right
+//!   (typically an output from another `RMUX` and thus also from the interconnect)
+//! - LE outputs from within this tile (but via an `OMUX`, so only
+//!   _either_ the LUT or the flip-flop's output is available, but not both _via this path_)
+//!
+//! Both the combinatorial output and the registered output of
+//! each LE can be used simultaneously, and each LE has _three_
+//! [OMUX]es independently selecting from the two. These muxes then drive:
+//! 1. right-going neighbor wires
+//!    (where the signal typically enters an `RMUX` to drive it further)
+//! 2. LUT inputs within this tile (via `IMUX`)
+//! 3. `RMUX` within this tile
+//!
+//! TODO: This following bit of the documentation should be improved
+//!
+//! A logic tile also has a number of "control signal" wires which are shared by all LEs.
+//! The input to these wires can either come from a global net or from the general routing.
+//! If it comes from a global net, a global net must first be selected via a "global to local" mux.
+//! If it comes from general routing, a signal must be selected with a [CtrlMux],
+//! which is similar to an `IMUX` but with more choices.
+//!
+//! ## Logic elements
+//!
+//! TODO: This documentation should be stolen from Altera and fixed accordingly
 
 use std::borrow::{Borrow, BorrowMut};
 
@@ -8,6 +49,7 @@ use super::*;
 
 use bitmux::{BitGetter, BitSetter, BitstreamField};
 
+/// Access to a logic tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct LogicTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -30,6 +72,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for LogicTi
     }
 }
 
+/// (Helper) access to clock mux
 struct TileClk(u8);
 impl FieldPositionCalculator for TileClk {
     #[inline]
@@ -40,6 +83,7 @@ impl FieldPositionCalculator for TileClk {
         TileRelativeBitPos { y, x }
     }
 }
+/// (Helper) access to clock enable mux
 struct TileClkEn(u8);
 impl FieldPositionCalculator for TileClkEn {
     #[inline]
@@ -50,6 +94,7 @@ impl FieldPositionCalculator for TileClkEn {
         TileRelativeBitPos { y, x }
     }
 }
+/// (Helper) access to async control signal mux
 struct TileAsync(u8);
 impl FieldPositionCalculator for TileAsync {
     #[inline]
@@ -60,6 +105,7 @@ impl FieldPositionCalculator for TileAsync {
         TileRelativeBitPos { y, x }
     }
 }
+/// (Helper) access to sync load mux
 struct TileSLoad {}
 impl FieldPositionCalculator for TileSLoad {
     #[inline]
@@ -69,6 +115,7 @@ impl FieldPositionCalculator for TileSLoad {
         TileRelativeBitPos { y, x }
     }
 }
+/// (Helper) access to sync clear mux
 struct TileSClr {}
 impl FieldPositionCalculator for TileSClr {
     #[inline]
@@ -79,6 +126,7 @@ impl FieldPositionCalculator for TileSClr {
     }
 }
 
+/// (Helper) access to LUT bits
 struct LogicLUT(u8);
 impl FieldPositionCalculator for LogicLUT {
     #[inline]
@@ -112,6 +160,7 @@ impl Default for InputCMode {
     }
 }
 
+/// (Helper) access to LE input-C setting
 struct LogicInputC(u8);
 impl FieldPositionCalculator for LogicInputC {
     #[inline]
@@ -123,6 +172,7 @@ impl FieldPositionCalculator for LogicInputC {
         }
     }
 }
+/// (Helper) access to LE carry setting
 struct LogicCarryEn(u8);
 impl FieldPositionCalculator for LogicCarryEn {
     #[inline]
@@ -135,6 +185,7 @@ impl FieldPositionCalculator for LogicCarryEn {
     }
 }
 
+/// (Helper) access to LE async control mux
 struct LogicAsyncMux(u8);
 impl FieldPositionCalculator for LogicAsyncMux {
     #[inline]
@@ -146,6 +197,7 @@ impl FieldPositionCalculator for LogicAsyncMux {
         }
     }
 }
+/// (Helper) access to LE clock+enable mux
 struct LogicClkMux(u8);
 impl FieldPositionCalculator for LogicClkMux {
     #[inline]
@@ -157,6 +209,7 @@ impl FieldPositionCalculator for LogicClkMux {
         }
     }
 }
+/// (Helper) access to LE shift-register setting
 struct LogicShiftMode(u8);
 impl FieldPositionCalculator for LogicShiftMode {
     #[inline]
@@ -168,6 +221,7 @@ impl FieldPositionCalculator for LogicShiftMode {
         }
     }
 }
+/// (Helper) access to LE LUT-bypass setting
 struct LogicBypassMode(u8);
 impl FieldPositionCalculator for LogicBypassMode {
     #[inline]
@@ -180,29 +234,29 @@ impl FieldPositionCalculator for LogicBypassMode {
     }
 }
 
-/// A choice between the LUT's output and the flip-flop's output
+/// A choice between an unregistered output and the flip-flop's output
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum OMUX {
-    LUT,
+    Combinatorial,
     FlipFlop,
 }
 impl Display for OMUX {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::LUT => write!(f, "LUT"),
-            Self::FlipFlop => write!(f, "FF"),
+            Self::Combinatorial => write!(f, "comb"),
+            Self::FlipFlop => write!(f, "ff"),
         }
     }
 }
 impl Default for OMUX {
     fn default() -> Self {
-        Self::LUT
+        Self::Combinatorial
     }
 }
 impl From<bool> for OMUX {
     fn from(value: bool) -> Self {
         match value {
-            false => Self::LUT,
+            false => Self::Combinatorial,
             true => Self::FlipFlop,
         }
     }
@@ -210,12 +264,13 @@ impl From<bool> for OMUX {
 impl From<OMUX> for bool {
     fn from(value: OMUX) -> Self {
         match value {
-            OMUX::LUT => false,
+            OMUX::Combinatorial => false,
             OMUX::FlipFlop => true,
         }
     }
 }
 
+/// (Helper) access to LE OMUX setting
 struct LogicOut {
     lc: u8,
     i: u8,
