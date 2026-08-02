@@ -1,11 +1,8 @@
 //! Interface to external hard IP blocks
 
-use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
 
 use super::*;
-
-use bitmux::{BitGetter, BitSetter, BitstreamField};
 
 /// A mux with 13 choices and an optional invert
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -229,66 +226,19 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for TopIPTi
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopIPTileRef<D, Ref> {
-    pub fn to_ip(&self, idx: u8) -> Mux13Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopIPToExtMux(idx),
-            _d: PhantomData,
-        };
-        Mux13Inv::get(ref_)
-    }
+magic_tile_impl_gen! {
+    impl TopIPTileRef {
+        pub fn to_ip(&self, idx: u8) -> Mux13Inv {
+            TopIPToExtMux(idx)
+        }
 
-    pub fn from_ip(&self, idx: u8) -> Mux2 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopIPFromExtMux(idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
+        pub fn from_ip(&self, idx: u8) -> Mux2 {
+            TopIPFromExtMux(idx)
+        }
 
-    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopIPGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopIPTileRef<D, Ref> {
-    pub fn set_to_ip(&mut self, idx: u8, val: Mux13Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopIPToExtMux(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_from_ip(&mut self, idx: u8, val: Mux2) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopIPFromExtMux(idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-
-    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopIPGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
+        pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+            TopIPGlobal2Local(idx)
+        }
     }
 }
 
@@ -396,83 +346,21 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
-    pub fn to_ip_13(&self, idx: u8) -> Mux13Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPToExtMux13(idx),
-            _d: PhantomData,
-        };
-        Mux13Inv::get(ref_)
-    }
-    pub fn to_ip_17(&self, idx: u8) -> Mux17Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPToExtMux17(idx),
-            _d: PhantomData,
-        };
-        Mux17Inv::get(ref_)
-    }
+magic_tile_impl_gen! {
+    impl LeftRightIPTileRef {
+        pub fn to_ip_13(&self, idx: u8) -> Mux13Inv {
+            LeftRightIPToExtMux13(idx)
+        }
+        pub fn to_ip_17(&self, idx: u8) -> Mux17Inv {
+            LeftRightIPToExtMux17(idx)
+        }
 
-    pub fn from_ip(&self, idx: u8) -> Mux2 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPFromExtMux(idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
+        pub fn from_ip(&self, idx: u8) -> Mux2 {
+            LeftRightIPFromExtMux(idx)
+        }
 
-    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIPTileRef<D, Ref> {
-    pub fn set_to_ip_13(&mut self, idx: u8, val: Mux13Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPToExtMux13(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_to_ip_17(&mut self, idx: u8, val: Mux17Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPToExtMux17(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_from_ip(&mut self, idx: u8, val: Mux2) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPFromExtMux(idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-
-    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIPGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
+        pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+            LeftRightIPGlobal2Local(idx)
+        }
     }
 }
