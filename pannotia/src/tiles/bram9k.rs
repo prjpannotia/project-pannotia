@@ -687,25 +687,6 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         assert!(bit < 2, "invalid byte enable bit index");
         self.kmux(8 + bit)
     }
-
-    pub fn rsen_delay(&self) -> u8 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: RsenDly {},
-            _d: PhantomData,
-        };
-        ref_.get_bits::<2>() as u8
-    }
-    pub fn delay_time(&self) -> u8 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: DlyTime {},
-            _d: PhantomData,
-        };
-        ref_.get_bits::<2>() as u8
-    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn set_addr_a(&mut self, bit: u8, val: IMUX) {
@@ -766,27 +747,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
     pub fn set_byte_en_b(&mut self, bit: u8, val: KMUX) {
         assert!(bit < 2, "invalid byte enable bit index");
         self.set_kmux(8 + bit, val)
-    }
-
-    pub fn set_rsen_delay(&mut self, val: u8) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: RsenDly {},
-            _d: PhantomData,
-        };
-        assert!(val & !0b11 == 0, "invalid setting");
-        ref_.set_bits::<2>(val as u32);
-    }
-    pub fn set_delay_time(&mut self, val: u8) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: DlyTime {},
-            _d: PhantomData,
-        };
-        assert!(val & !0b11 == 0, "invalid setting");
-        ref_.set_bits::<2>(val as u32);
     }
 }
 
@@ -879,6 +839,13 @@ magic_tile_impl_gen! {
         }
         pub fn write_thru_b(&self) -> bool {
             WriteThruB {}
+        }
+
+        pub fn rsen_delay(&self) -> 2 bits in u8 {
+            RsenDly {}
+        }
+        pub fn delay_time(&self) -> 2 bits in u8 {
+            DlyTime {}
         }
     }
 }

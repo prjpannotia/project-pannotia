@@ -518,37 +518,73 @@ impl BitSource for &[bool] {
     }
 }
 
+macro_rules! _magic_tile_impl_gen_one_item {
+    // as a BitstreamField
+    (read $self:ident $r:ty $body:block) => {
+        let field_pos = $body;
+        let ref_ = crate::coordinates::GenericFieldRef {
+            bitstream: $self.r.borrow(),
+            tile_pos: $self.p,
+            field_pos,
+            _d: std::marker::PhantomData,
+        };
+        <_ as ::bitmux::BitstreamField>::get(ref_)
+    };
+    (write $self:ident $val:ident $r:ty $body:block) => {
+        let field_pos = $body;
+        let ref_ = crate::coordinates::GenericFieldRef {
+            bitstream: $self.r.borrow_mut(),
+            tile_pos: $self.p,
+            field_pos,
+            _d: std::marker::PhantomData,
+        };
+        ::bitmux::BitstreamField::set(&$val, ref_);
+    };
+
+    // as a raw integer
+    (read $self:ident $nbits:literal bits in $r:ty $body:block) => {
+        let field_pos = $body;
+        let ref_ = crate::coordinates::GenericFieldRef {
+            bitstream: $self.r.borrow(),
+            tile_pos: $self.p,
+            field_pos,
+            _d: std::marker::PhantomData,
+        };
+        ::bitmux::BitGetter::get_bits::<$nbits>(&ref_) as $r
+    };
+    (write $self:ident $val:ident $nbits:literal bits in $r:ty $body:block) => {
+        assert!(
+            $val & !(((1u64 << $nbits) - 1) as $r) == 0,
+            "invalid setting"
+        );
+        let field_pos = $body;
+        let mut ref_ = crate::coordinates::GenericFieldRef {
+            bitstream: $self.r.borrow_mut(),
+            tile_pos: $self.p,
+            field_pos,
+            _d: std::marker::PhantomData,
+        };
+        ::bitmux::BitSetter::set_bits::<$nbits>(&mut ref_, $val as u32)
+    };
+}
+
 macro_rules! _magic_tile_impl_gen_items {
-    (read $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
+    (read $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $r:ty $body:block)* ) => {
         $(
             #[doc = concat!("Read the field `", stringify!($f), "`\n\n")]
             $(#[$attr])*
             $v fn $f(&$self $($args)* ) -> $r {
-                let field_pos = $body;
-                let ref_ = crate::coordinates::GenericFieldRef {
-                    bitstream: $self.r.borrow(),
-                    tile_pos: $self.p,
-                    field_pos,
-                    _d: std::marker::PhantomData,
-                };
-                <_ as ::bitmux::BitstreamField>::get(ref_)
+                _magic_tile_impl_gen_one_item! { read $self $($nbits bits in)? $r $body }
             }
         )*
     };
-    (write $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
+    (write $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $r:ty $body:block)* ) => {
         mident::mident!{
             $(
                 #[doc = concat!("Write the field `", stringify!($f), "`\n\n")]
                 $(#[$attr])*
                 $v fn #concat(set_ $f)(&mut $self $($args)*, val: $r ) {
-                    let field_pos = $body;
-                    let ref_ = crate::coordinates::GenericFieldRef {
-                        bitstream: $self.r.borrow_mut(),
-                        tile_pos: $self.p,
-                        field_pos,
-                        _d: std::marker::PhantomData,
-                    };
-                    ::bitmux::BitstreamField::set(&val, ref_);
+                    _magic_tile_impl_gen_one_item! { write $self val $($nbits bits in)? $r $body }
                 }
             )*
         }
