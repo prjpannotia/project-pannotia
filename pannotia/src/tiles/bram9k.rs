@@ -21,7 +21,7 @@ use super::local_lines::{CtrlMux, CtrlMuxRef, IMUX, IMUXRef};
 
 use super::*;
 
-use bitmux::{BitGetter, BitSetter, BitstreamField};
+use bitmux::{BitGetter, BitSetter};
 
 /// Access to a BRAM tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -628,41 +628,6 @@ impl FieldPositionCalculator for PackedModeAddressOverride {
 }
 
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
-    pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GlobalToLocalMuxRef {
-                is_bram: true,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
-
-    pub fn control_signal_preselect(&self, inp_idx: u8) -> CtrlMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: CtrlMuxRef {
-                is_bram: true,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        CtrlMux::get(ref_)
-    }
-
-    pub fn imux(&self, i: u8) -> IMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: IMUXRef { is_bram: true, i },
-            _d: PhantomData,
-        };
-        IMUX::get(ref_)
-    }
     pub fn addr_a(&self, bit: u8) -> IMUX {
         assert!(bit < 13, "invalid address bit index");
         self.imux(12 - bit)
@@ -696,24 +661,6 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         }
     }
 
-    pub fn tmux(&self, i: u8) -> TMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TMUXRef(i),
-            _d: PhantomData,
-        };
-        TMUX::get(ref_)
-    }
-    pub fn kmux(&self, i: u8) -> KMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: KMUXRef(i),
-            _d: PhantomData,
-        };
-        KMUX::get(ref_)
-    }
     pub fn read_en_a(&self) -> KMUX {
         self.kmux(6)
     }
@@ -741,184 +688,6 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
         self.kmux(8 + bit)
     }
 
-    pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileClk(clk_idx),
-            _d: PhantomData,
-        };
-        Mux3Inv::get(ref_)
-    }
-    pub fn clock_en_mux(&self, clk_idx: u8) -> Mux3Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileClkEn(clk_idx),
-            _d: PhantomData,
-        };
-        Mux3Inv::get(ref_)
-    }
-    pub fn async_mux(&self, clk_idx: u8) -> Mux3Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileAsync(clk_idx),
-            _d: PhantomData,
-        };
-        Mux3Inv::get(ref_)
-    }
-
-    pub fn use_packed_mode_address_override(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: PackedModeAddressOverride {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn clock_choices_mode(&self) -> ClockMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: ClkModeRef {},
-            _d: PhantomData,
-        };
-        ClockMode::get(ref_)
-    }
-
-    pub fn width_a(&self) -> PortWidth {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: PortAWidth {},
-            _d: PhantomData,
-        };
-        PortWidth::get(ref_)
-    }
-    pub fn width_b(&self) -> PortWidth {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: PortBWidth {},
-            _d: PhantomData,
-        };
-        PortWidth::get(ref_)
-    }
-
-    pub fn use_output_register_a(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: OutRegA {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn use_output_register_b(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: OutRegB {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-
-    pub fn use_rst_in_a(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseRstInA {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn use_rst_in_b(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseRstInB {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn use_rst_out_a(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseRstOutA {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn use_rst_out_b(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseRstOutB {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-
-    pub fn use_clk_en_in_a(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseClkEnInA {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn use_clk_en_in_b(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseClkEnInB {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn use_clk_en_out_a(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseClkEnOutA {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn use_clk_en_out_b(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: UseClkEnOutB {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-
-    pub fn write_thru_a(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: WriteThruA {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn write_thru_b(&self) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: WriteThruB {},
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-
     pub fn rsen_delay(&self) -> u8 {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -939,41 +708,6 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
-    pub fn set_global_to_local(&mut self, inp_idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GlobalToLocalMuxRef {
-                is_bram: true,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_control_signal_preselect(&mut self, inp_idx: u8, val: CtrlMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: CtrlMuxRef {
-                is_bram: true,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_imux(&mut self, i: u8, val: IMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: IMUXRef { is_bram: true, i },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
     pub fn set_addr_a(&mut self, bit: u8, val: IMUX) {
         assert!(bit < 13, "invalid address bit index");
         self.set_imux(12 - bit, val);
@@ -1007,24 +741,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
         }
     }
 
-    pub fn set_tmux(&mut self, i: u8, val: TMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TMUXRef(i),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_kmux(&mut self, i: u8, val: KMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: KMUXRef(i),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
     pub fn set_read_en_a(&mut self, val: KMUX) {
         self.set_kmux(6, val);
     }
@@ -1052,184 +768,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
         self.set_kmux(8 + bit, val)
     }
 
-    pub fn set_clock_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileClk(clk_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_clock_en_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileClkEn(clk_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_async_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileAsync(clk_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_use_packed_mode_address_override(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: PackedModeAddressOverride {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_clock_choices_mode(&mut self, val: ClockMode) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: ClkModeRef {},
-            _d: PhantomData,
-        };
-        val.set(ref_)
-    }
-
-    pub fn set_width_a(&mut self, val: PortWidth) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: PortAWidth {},
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_width_b(&mut self, val: PortWidth) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: PortBWidth {},
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_use_output_register_a(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: OutRegA {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_use_output_register_b(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: OutRegB {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    pub fn set_use_rst_in_a(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseRstInA {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_use_rst_in_b(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseRstInB {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_use_rst_out_a(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseRstOutA {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_use_rst_out_b(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseRstOutB {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    pub fn set_use_clk_en_in_a(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseClkEnInA {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_use_clk_en_in_b(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseClkEnInB {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_use_clk_en_out_a(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseClkEnOutA {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_use_clk_en_out_b(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: UseClkEnOutB {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    pub fn set_write_thru_a(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: WriteThruA {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_write_thru_b(&mut self, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: WriteThruB {},
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
     pub fn set_rsen_delay(&mut self, val: u8) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
@@ -1252,33 +790,106 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRefTrait for BRAMTileRef<D, Ref> {
-    fn rmux(&self, rmux_idx: u8) -> RMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: RMUXRef {
-                is_bram: false,
-                i: rmux_idx,
-            },
-            _d: PhantomData,
-        };
-        RMUX::get(ref_)
+magic_tile_impl_gen! {
+    impl BRAMTileRef {
+        pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
+            GlobalToLocalMuxRef {
+                is_bram: true,
+                i: inp_idx,
+            }
+        }
+
+        pub fn control_signal_preselect(&self, inp_idx: u8) -> CtrlMux {
+            CtrlMuxRef {
+                is_bram: true,
+                i: inp_idx,
+            }
+        }
+
+        pub fn imux(&self, i: u8) -> IMUX {
+            IMUXRef { is_bram: true, i }
+        }
+
+        pub fn tmux(&self, i: u8) -> TMUX {
+            TMUXRef(i)
+        }
+        pub fn kmux(&self, i: u8) -> KMUX {
+            KMUXRef(i)
+        }
+
+        pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
+            TileClk(clk_idx)
+        }
+        pub fn clock_en_mux(&self, clk_idx: u8) -> Mux3Inv {
+            TileClkEn(clk_idx)
+        }
+        pub fn async_mux(&self, clk_idx: u8) -> Mux3Inv {
+            TileAsync(clk_idx)
+        }
+
+        pub fn use_packed_mode_address_override(&self) -> bool {
+            PackedModeAddressOverride {}
+        }
+        pub fn clock_choices_mode(&self) -> ClockMode {
+            ClkModeRef {}
+        }
+
+        pub fn width_a(&self) -> PortWidth {
+            PortAWidth {}
+        }
+        pub fn width_b(&self) -> PortWidth {
+            PortBWidth {}
+        }
+
+        pub fn use_output_register_a(&self) -> bool {
+            OutRegA {}
+        }
+        pub fn use_output_register_b(&self) -> bool {
+            OutRegB {}
+        }
+
+        pub fn use_rst_in_a(&self) -> bool {
+            UseRstInA {}
+        }
+        pub fn use_rst_in_b(&self) -> bool {
+            UseRstInB {}
+        }
+        pub fn use_rst_out_a(&self) -> bool {
+            UseRstOutA {}
+        }
+        pub fn use_rst_out_b(&self) -> bool {
+            UseRstOutB {}
+        }
+
+        pub fn use_clk_en_in_a(&self) -> bool {
+            UseClkEnInA {}
+        }
+        pub fn use_clk_en_in_b(&self) -> bool {
+            UseClkEnInB {}
+        }
+        pub fn use_clk_en_out_a(&self) -> bool {
+            UseClkEnOutA {}
+        }
+        pub fn use_clk_en_out_b(&self) -> bool {
+            UseClkEnOutB {}
+        }
+
+        pub fn write_thru_a(&self) -> bool {
+            WriteThruA {}
+        }
+        pub fn write_thru_b(&self) -> bool {
+            WriteThruB {}
+        }
     }
 }
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
-    for BRAMTileRef<D, Ref>
-{
-    fn set_rmux(&mut self, rmux_idx: u8, val: RMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: RMUXRef {
-                is_bram: false,
+
+magic_tile_impl_gen! {
+    impl on BRAMTileRef trait GenericRoutingRefTrait, GenericRoutingRefMutTrait {
+        fn rmux(&self, rmux_idx: u8) -> RMUX {
+            RMUXRef {
+                is_bram: true,
                 i: rmux_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
+            }
+        }
     }
 }
