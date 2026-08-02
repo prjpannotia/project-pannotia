@@ -518,6 +518,21 @@ impl BitSource for &[bool] {
     }
 }
 
+macro_rules! _magic_replace_set_redirect_fn {
+    // shift one statement at a time
+    ($self:ident $val:ident $s0:stmt; $($rest:tt)*) => {
+        $s0
+        _magic_replace_set_redirect_fn! { $self $val $($rest)* }
+    };
+    // this should only apply to the last statement
+    ($self:ident $val:ident self.$redir_to:ident($($args:tt)*)) => {
+        mident::mident! {
+            $self.#concat(set_ $redir_to)($($args)*, $val);
+            panic!("test test {:?}", $val);
+        }
+    };
+}
+
 macro_rules! _magic_tile_impl_gen_one_item {
     // as a BitstreamField
     (read $self:ident $r:ty $body:block) => {
@@ -566,25 +581,33 @@ macro_rules! _magic_tile_impl_gen_one_item {
         };
         ::bitmux::BitSetter::set_bits::<$nbits>(&mut ref_, $val as u32)
     };
+
+    // redirect to another function
+    (read $self:ident $r:ty = redir $($inside:tt)*) => {
+        $($inside)*
+    };
+    (write $self:ident $val:ident $r:ty = redir $($inside:tt)*) => {
+        _magic_replace_set_redirect_fn! { $self $val $($inside)* }
+    };
 }
 
 macro_rules! _magic_tile_impl_gen_items {
-    (read $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $r:ty $body:block)* ) => {
+    (read $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $r:ty $(= { $($redir_tt:tt)* })? $($body:block)?)* ) => {
         $(
             #[doc = concat!("Read the field `", stringify!($f), "`\n\n")]
             $(#[$attr])*
             $v fn $f(&$self $($args)* ) -> $r {
-                _magic_tile_impl_gen_one_item! { read $self $($nbits bits in)? $r $body }
+                _magic_tile_impl_gen_one_item! { read $self $($nbits bits in)? $r $(= redir $($redir_tt)*)? $($body)? }
             }
         )*
     };
-    (write $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $r:ty $body:block)* ) => {
-        mident::mident!{
+    (write $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $r:ty $(= { $($redir_tt:tt)* })? $($body:block)?)* ) => {
+        mident::mident! {
             $(
                 #[doc = concat!("Write the field `", stringify!($f), "`\n\n")]
                 $(#[$attr])*
                 $v fn #concat(set_ $f)(&mut $self $($args)*, val: $r ) {
-                    _magic_tile_impl_gen_one_item! { write $self val $($nbits bits in)? $r $body }
+                    _magic_tile_impl_gen_one_item! { write $self val $($nbits bits in)? $r $(= redir $($redir_tt)*)? $($body)? }
                 }
             )*
         }
@@ -594,15 +617,13 @@ macro_rules! _magic_tile_impl_gen_items {
 macro_rules! magic_tile_impl_gen {
     // impl a trait
     (impl on $impl_on:ident trait $trait:ty, $trait_mut:ty $(, get { $($get_item:item)* })? $(, set { $($set_item:item)* })? { $($inside:tt)* }) => {
-        mident::mident! {
-            impl<D: DebugTracer, Ref: std::borrow::Borrow<Bitstream<D>>> $trait for $impl_on<D, Ref> {
-                _magic_tile_impl_gen_items!{ read $($inside)* }
-                $($( $get_item )*)?
-            }
-            impl<D: DebugTracer, Ref: std::borrow::BorrowMut<Bitstream<D>>> $trait_mut for $impl_on<D, Ref> {
-                _magic_tile_impl_gen_items!{ write $($inside)* }
-                $($( $set_item )*)?
-            }
+        impl<D: DebugTracer, Ref: std::borrow::Borrow<Bitstream<D>>> $trait for $impl_on<D, Ref> {
+            _magic_tile_impl_gen_items!{ read $($inside)* }
+            $($( $get_item )*)?
+        }
+        impl<D: DebugTracer, Ref: std::borrow::BorrowMut<Bitstream<D>>> $trait_mut for $impl_on<D, Ref> {
+            _magic_tile_impl_gen_items!{ write $($inside)* }
+            $($( $set_item )*)?
         }
     };
 

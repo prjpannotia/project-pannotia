@@ -610,27 +610,6 @@ impl FieldPositionCalculator for PackedModeAddressOverride {
 }
 
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
-    pub fn addr_a(&self, bit: u8) -> IMUX {
-        assert!(bit < 13, "invalid address bit index");
-        self.imux(12 - bit)
-    }
-    pub fn addr_b(&self, bit: u8) -> IMUX {
-        assert!(bit < 13, "invalid address bit index");
-        self.imux(51 + bit)
-    }
-    pub fn data_in_a(&self, bit: u8) -> IMUX {
-        assert!(bit < 18, "invalid data bit index");
-        self.imux(30 - bit)
-    }
-    pub fn data_in_b(&self, bit: u8) -> IMUX {
-        assert!(bit < 18, "invalid data bit index");
-        self.imux(33 + bit)
-    }
-    pub fn imux_xtra(&self, idx: u8) -> IMUX {
-        assert!(idx < 2, "invalid extra IMUX index");
-        self.imux(31 + idx)
-    }
-
     pub fn init_data(&self, sink: &mut impl BitSink) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -642,56 +621,8 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> BRAMTileRef<D, Ref> {
             sink.set(i, ref_.get_bit(i));
         }
     }
-
-    pub fn read_en_a(&self) -> KMUX {
-        self.kmux(6)
-    }
-    pub fn read_en_b(&self) -> KMUX {
-        self.kmux(7)
-    }
-    pub fn write_en_a(&self) -> KMUX {
-        self.kmux(3)
-    }
-    pub fn write_en_b(&self) -> KMUX {
-        self.kmux(0)
-    }
-    pub fn addr_stall_a(&self) -> KMUX {
-        self.kmux(4)
-    }
-    pub fn addr_stall_b(&self) -> KMUX {
-        self.kmux(5)
-    }
-    pub fn byte_en_a(&self, bit: u8) -> KMUX {
-        assert!(bit < 2, "invalid byte enable bit index");
-        self.kmux(1 + bit)
-    }
-    pub fn byte_en_b(&self, bit: u8) -> KMUX {
-        assert!(bit < 2, "invalid byte enable bit index");
-        self.kmux(8 + bit)
-    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
-    pub fn set_addr_a(&mut self, bit: u8, val: IMUX) {
-        assert!(bit < 13, "invalid address bit index");
-        self.set_imux(12 - bit, val);
-    }
-    pub fn set_addr_b(&mut self, bit: u8, val: IMUX) {
-        assert!(bit < 13, "invalid address bit index");
-        self.set_imux(51 + bit, val);
-    }
-    pub fn set_data_in_a(&mut self, bit: u8, val: IMUX) {
-        assert!(bit < 18, "invalid data bit index");
-        self.set_imux(30 - bit, val);
-    }
-    pub fn set_data_in_b(&mut self, bit: u8, val: IMUX) {
-        assert!(bit < 18, "invalid data bit index");
-        self.set_imux(33 + bit, val);
-    }
-    pub fn set_imux_xtra(&mut self, idx: u8, val: IMUX) {
-        assert!(idx < 2, "invalid extra IMUX index");
-        self.set_imux(31 + idx, val);
-    }
-
     pub fn set_init_data(&mut self, source: &impl BitSource) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
@@ -702,33 +633,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> BRAMTileRef<D, Ref> {
         for i in 0..9216 {
             ref_.set_bit(i, source.get(i));
         }
-    }
-
-    pub fn set_read_en_a(&mut self, val: KMUX) {
-        self.set_kmux(6, val);
-    }
-    pub fn set_read_en_b(&mut self, val: KMUX) {
-        self.set_kmux(7, val);
-    }
-    pub fn set_write_en_a(&mut self, val: KMUX) {
-        self.set_kmux(3, val);
-    }
-    pub fn set_write_en_b(&mut self, val: KMUX) {
-        self.set_kmux(0, val);
-    }
-    pub fn set_addr_stall_a(&mut self, val: KMUX) {
-        self.set_kmux(4, val);
-    }
-    pub fn set_addr_stall_b(&mut self, val: KMUX) {
-        self.set_kmux(5, val);
-    }
-    pub fn set_byte_en_a(&mut self, bit: u8, val: KMUX) {
-        assert!(bit < 2, "invalid byte enable bit index");
-        self.set_kmux(1 + bit, val)
-    }
-    pub fn set_byte_en_b(&mut self, bit: u8, val: KMUX) {
-        assert!(bit < 2, "invalid byte enable bit index");
-        self.set_kmux(8 + bit, val)
     }
 }
 
@@ -751,12 +655,58 @@ magic_tile_impl_gen! {
         pub fn imux(&self, i: u8) -> IMUX {
             IMUXRef { is_bram: true, i }
         }
+        pub fn addr_a(&self, bit: u8) -> IMUX = {
+            assert!(bit < 13, "invalid address bit index");
+            self.imux(12 - bit)
+        }
+        pub fn addr_b(&self, bit: u8) -> IMUX = {
+            assert!(bit < 13, "invalid address bit index");
+            self.imux(51 + bit)
+        }
+        pub fn data_in_a(&self, bit: u8) -> IMUX = {
+            assert!(bit < 18, "invalid data bit index");
+            self.imux(30 - bit)
+        }
+        pub fn data_in_b(&self, bit: u8) -> IMUX = {
+            assert!(bit < 18, "invalid data bit index");
+            self.imux(33 + bit)
+        }
+        pub fn imux_xtra(&self, idx: u8) -> IMUX = {
+            assert!(idx < 2, "invalid extra IMUX index");
+            self.imux(31 + idx)
+        }
 
         pub fn tmux(&self, i: u8) -> TMUX {
             TMUXRef(i)
         }
         pub fn kmux(&self, i: u8) -> KMUX {
             KMUXRef(i)
+        }
+        pub fn read_en_a(&self) -> KMUX = {
+            self.kmux(6)
+        }
+        pub fn read_en_b(&self) -> KMUX = {
+            self.kmux(7)
+        }
+        pub fn write_en_a(&self) -> KMUX = {
+            self.kmux(3)
+        }
+        pub fn write_en_b(&self) -> KMUX = {
+            self.kmux(0)
+        }
+        pub fn addr_stall_a(&self) -> KMUX = {
+            self.kmux(4)
+        }
+        pub fn addr_stall_b(&self) -> KMUX = {
+            self.kmux(5)
+        }
+        pub fn byte_en_a(&self, bit: u8) -> KMUX = {
+            assert!(bit < 2, "invalid byte enable bit index");
+            self.kmux(1 + bit)
+        }
+        pub fn byte_en_b(&self, bit: u8) -> KMUX = {
+            assert!(bit < 2, "invalid byte enable bit index");
+            self.kmux(8 + bit)
         }
 
         pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {

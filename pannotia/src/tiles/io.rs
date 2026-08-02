@@ -1316,44 +1316,6 @@ magic_tile_impl_gen! {
         fn num_ios(&self) -> u8 {
             4
         }
-
-        fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([0, 1, 7, 6][io_idx as usize])
-        }
-        fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([2, 3, 5, 4][io_idx as usize])
-        }
-        fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([10, 11, 13, 12][io_idx as usize])
-        }
-        fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([8, 9, 15, 14][io_idx as usize])
-        }
-        fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([16, 17, 23, 22][io_idx as usize])
-        }
-        fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([18, 19, 21, 20][io_idx as usize])
-        }
-    }, set {
-        fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([0, 1, 7, 6][io_idx as usize], val)
-        }
-        fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([2, 3, 5, 4][io_idx as usize], val)
-        }
-        fn set_local_to_out_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([10, 11, 13, 12][io_idx as usize], val)
-        }
-        fn set_local_to_in_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([8, 9, 15, 14][io_idx as usize], val)
-        }
-        fn set_local_to_async_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([16, 17, 23, 22][io_idx as usize], val)
-        }
-        fn set_local_to_sync_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([18, 19, 21, 20][io_idx as usize], val)
-        }
     } {
         fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
             TopBottomIOGlobal2Local {
@@ -1374,6 +1336,24 @@ magic_tile_impl_gen! {
                 is_bottom: self.p.y == 0,
                 i: custom_idx,
             }
+        }
+        fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([0, 1, 7, 6][io_idx as usize])
+        }
+        fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([2, 3, 5, 4][io_idx as usize])
+        }
+        fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([10, 11, 13, 12][io_idx as usize])
+        }
+        fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([8, 9, 15, 14][io_idx as usize])
+        }
+        fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([16, 17, 23, 22][io_idx as usize])
+        }
+        fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([18, 19, 21, 20][io_idx as usize])
         }
 
         fn clock_mux(&self, idx: u8) -> IOClockMux {
@@ -1498,44 +1478,6 @@ magic_tile_impl_gen! {
         fn num_ios(&self) -> u8 {
             6
         }
-
-        fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io(16 + io_idx)
-        }
-        fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize])
-        }
-        fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([4, 5, 6, 7, 28, 29][io_idx as usize])
-        }
-        fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io(30 + io_idx)
-        }
-        fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io(8 + io_idx)
-        }
-        fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-            self.local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize])
-        }
-    }, set {
-        fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io(16 + io_idx, val)
-        }
-        fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize], val)
-        }
-        fn set_local_to_out_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([4, 5, 6, 7, 28, 29][io_idx as usize], val)
-        }
-        fn set_local_to_in_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io(30 + io_idx, val)
-        }
-        fn set_local_to_async_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io(8 + io_idx, val)
-        }
-        fn set_local_to_sync_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-            self.set_local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize], val)
-        }
     } {
         fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
             LeftRightIOGlobal2Local(idx)
@@ -1547,6 +1489,24 @@ magic_tile_impl_gen! {
 
         fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
             LeftRightIOLocal2IO(custom_idx)
+        }
+        fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io(16 + io_idx)
+        }
+        fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize])
+        }
+        fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([4, 5, 6, 7, 28, 29][io_idx as usize])
+        }
+        fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io(30 + io_idx)
+        }
+        fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io(8 + io_idx)
+        }
+        fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux = {
+            self.local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize])
         }
 
         fn clock_mux(&self, idx: u8) -> IOClockMux {
