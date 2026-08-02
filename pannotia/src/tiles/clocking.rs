@@ -1,7 +1,5 @@
 //! Clocking resources (PLL, clock distribution)
 
-use std::borrow::{Borrow, BorrowMut};
-
 use super::hard_ip::Mux13Inv;
 use super::*;
 
@@ -57,356 +55,222 @@ magic_tile_impl_gen! {
         pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
             PLLGlobal2Local(idx)
         }
+
+        // get specific divider's parameters
+
+        pub fn out_div_lo_time(&self, idx: u8) -> u8 = {
+            assert!(idx < 5, "invalid output index");
+            self.clkdiv_lo_time(4 - idx)
+        }
+        pub fn out_div_hi_time(&self, idx: u8) -> u8 = {
+            assert!(idx < 5, "invalid output index");
+            self.clkdiv_hi_time(4 - idx)
+        }
+        pub fn out_div_duty_cycle_adjust(&self, idx: u8) -> bool = {
+            assert!(idx < 5, "invalid output index");
+            self.clkdiv_trim(4 - idx)
+        }
+        pub fn out_div_bypass(&self, idx: u8) -> bool = {
+            assert!(idx < 5, "invalid output index");
+            self.clkdiv_bypass(4 - idx)
+        }
+
+        pub fn fb_div_lo_time(&self) -> u8 = {
+            self.clkdiv_lo_time(5)
+        }
+        pub fn fb_div_hi_time(&self) -> u8 = {
+            self.clkdiv_hi_time(5)
+        }
+        pub fn fb_div_duty_cycle_adjust(&self) -> bool = {
+            self.clkdiv_trim(5)
+        }
+        pub fn fb_div_bypass(&self) -> bool = {
+            self.clkdiv_bypass(5)
+        }
+
+        pub fn in_div_lo_time(&self) -> u8 = {
+            self.clkdiv_lo_time(6)
+        }
+        pub fn in_div_hi_time(&self) -> u8 = {
+            self.clkdiv_hi_time(6)
+        }
+        pub fn in_div_duty_cycle_adjust(&self) -> bool = {
+            self.clkdiv_trim(6)
+        }
+        pub fn in_div_bypass(&self) -> bool = {
+            self.clkdiv_bypass(6)
+        }
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
-    pub fn fb_phase_coarse(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 23..23 + 8) as u8
-    }
-    pub fn fb_phase_fine(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 20..20 + 3) as u8
-    }
-    pub fn out_phase_coarse(&self, idx: u8) -> u8 {
-        assert!(idx < 5, "invalid output index");
-        let bitstream = self.r.borrow();
-        let biti = 35 + 13 * idx as usize;
-        bitstream.get_aux_array_bits(1, 1, biti..biti + 8) as u8
-    }
-    pub fn out_phase_fine(&self, idx: u8) -> u8 {
-        assert!(idx < 5, "invalid output index");
-        let bitstream = self.r.borrow();
-        let biti = 31 + 13 * idx as usize;
-        bitstream.get_aux_array_bits(1, 1, biti..biti + 3) as u8
-    }
+macro_rules! _magic_pll_impl_gen_one_item {
+    // as an integer
+    (read $self:ident $nbits:literal bits in $r:ty $body:block) => {
+        let bit_start = $body;
+        let bits_range = bit_start..bit_start + $nbits;
+        let bitstream = $self.r.borrow();
+        bitstream.get_aux_array_bits(1, 1, bits_range) as $r
+    };
+    (write $self:ident $val:ident $nbits:literal bits in $r:ty $body:block) => {
+        assert!(
+            $val & !(((1u64 << $nbits) - 1) as $r) == 0,
+            "invalid setting"
+        );
+        let bit_start = $body;
+        let bits_range = bit_start..bit_start + $nbits;
+        let bitstream = $self.r.borrow_mut();
+        bitstream.set_aux_array_bits(1, 1, bits_range, $val as u32);
+    };
 
-    pub fn out_enable(&self, idx: u8) -> bool {
-        assert!(idx < 5, "invalid output index");
-        let bitstream = self.r.borrow();
-        let biti = 34 + 13 * idx as usize;
+    // as a single bit
+    (read $self:ident bool $body:block) => {
+        let biti = $body;
+        let bitstream = $self.r.borrow();
         bitstream.get_aux_array_bit(1, 1, biti)
-    }
-    pub fn out_cascade(&self, idx: u8) -> bool {
-        assert!(idx > 0 && idx < 5, "invalid output index");
-        let bitstream = self.r.borrow();
-        let biti = 30 + 13 * idx as usize;
-        bitstream.get_aux_array_bit(1, 1, biti)
-    }
+    };
+    (write $self:ident $val:ident bool $body:block) => {
+        let biti = $body;
+        let bitstream = $self.r.borrow_mut();
+        bitstream.set_aux_array_bit(1, 1, biti, $val);
+    };
 
-    fn _clkdiv_lo_time(&self, idx: u8) -> u8 {
-        let bitstream = self.r.borrow();
-        let biti = 95 + 18 * idx as usize;
-        bitstream.get_aux_array_bits(1, 1, biti..biti + 8) as u8
-    }
-    fn _clkdiv_hi_time(&self, idx: u8) -> u8 {
-        let bitstream = self.r.borrow();
-        let biti = 95 + 9 + 18 * idx as usize;
-        bitstream.get_aux_array_bits(1, 1, biti..biti + 8) as u8
-    }
-    fn _clkdiv_trim(&self, idx: u8) -> bool {
-        let bitstream = self.r.borrow();
-        let biti = 95 + 8 + 18 * idx as usize;
-        bitstream.get_aux_array_bit(1, 1, biti)
-    }
-    fn _clkdiv_bypass(&self, idx: u8) -> bool {
-        let bitstream = self.r.borrow();
-        let biti = 95 + 17 + 18 * idx as usize;
-        bitstream.get_aux_array_bit(1, 1, biti)
-    }
-
-    pub fn out_div_lo_time(&self, idx: u8) -> u8 {
-        assert!(idx < 5, "invalid output index");
-        self._clkdiv_lo_time(4 - idx)
-    }
-    pub fn out_div_hi_time(&self, idx: u8) -> u8 {
-        assert!(idx < 5, "invalid output index");
-        self._clkdiv_hi_time(4 - idx)
-    }
-    pub fn out_div_duty_cycle_adjust(&self, idx: u8) -> bool {
-        assert!(idx < 5, "invalid output index");
-        self._clkdiv_trim(4 - idx)
-    }
-    pub fn out_div_bypass(&self, idx: u8) -> bool {
-        assert!(idx < 5, "invalid output index");
-        self._clkdiv_bypass(4 - idx)
-    }
-
-    pub fn fb_div_lo_time(&self) -> u8 {
-        self._clkdiv_lo_time(5)
-    }
-    pub fn fb_div_hi_time(&self) -> u8 {
-        self._clkdiv_hi_time(5)
-    }
-    pub fn fb_div_duty_cycle_adjust(&self) -> bool {
-        self._clkdiv_trim(5)
-    }
-    pub fn fb_div_bypass(&self) -> bool {
-        self._clkdiv_bypass(5)
-    }
-
-    pub fn in_div_lo_time(&self) -> u8 {
-        self._clkdiv_lo_time(6)
-    }
-    pub fn in_div_hi_time(&self) -> u8 {
-        self._clkdiv_hi_time(6)
-    }
-    pub fn in_div_duty_cycle_adjust(&self) -> bool {
-        self._clkdiv_trim(6)
-    }
-    pub fn in_div_bypass(&self) -> bool {
-        self._clkdiv_bypass(6)
-    }
-
-    pub fn vco_div2(&self) -> bool {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bit(1, 1, 229)
-    }
-
-    pub fn analog_icp(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 221..221 + 3) as u8
-    }
-    pub fn analog_rlpf(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 230..230 + 2) as u8
-    }
-    pub fn analog_rref(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 232..232 + 2) as u8
-    }
-    pub fn analog_rvi(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 234..234 + 2) as u8
-    }
-    pub fn analog_ivco(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 236..236 + 3) as u8
-    }
-
-    // FIXME: This is totally undocumented
-    pub fn reg_ctrl(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 0..0 + 2) as u8
-    }
-    pub fn enabled(&self) -> bool {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bit(1, 1, 2)
-    }
-    pub fn clock_feedback_mux(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 3..3 + 2) as u8
-    }
-    pub fn feedback_delay(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 5..5 + 3) as u8
-    }
-    pub fn clock_mux_0(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 8..8 + 3) as u8
-    }
-    // AGRV2K doesn't have this
-    pub fn clock_mux_1(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 11..11 + 3) as u8
-    }
-    pub fn gclk_mux(&self) -> u8 {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bits(1, 1, 14..14 + 3) as u8
-    }
-    pub fn use_internal_fb(&self) -> bool {
-        let bitstream = self.r.borrow();
-        bitstream.get_aux_array_bit(1, 1, 17)
-    }
-    pub fn enable_dedicated_out_n(&self) -> bool {
-        let bitstream = self.r.borrow();
-        !bitstream.get_aux_array_bit(1, 1, 18)
-    }
-    pub fn enable_dedicated_out_p(&self) -> bool {
-        let bitstream = self.r.borrow();
-        !bitstream.get_aux_array_bit(1, 1, 19)
-    }
+    (read $self:ident invert bool $body:block) => {
+        let biti = $body;
+        let bitstream = $self.r.borrow();
+        !bitstream.get_aux_array_bit(1, 1, biti)
+    };
+    (write $self:ident $val:ident invert bool $body:block) => {
+        let biti = $body;
+        let bitstream = $self.r.borrow_mut();
+        bitstream.set_aux_array_bit(1, 1, biti, !$val);
+    };
 }
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
-    pub fn set_fb_phase_coarse(&mut self, val: u8) {
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 23..23 + 8, val as u32);
-    }
-    pub fn set_fb_phase_fine(&mut self, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 20..20 + 3, val as u32);
-    }
-    pub fn set_out_phase_coarse(&mut self, idx: u8, val: u8) {
-        assert!(idx < 5, "invalid output index");
-        let bitstream = self.r.borrow_mut();
-        let biti = 35 + 13 * idx as usize;
-        bitstream.set_aux_array_bits(1, 1, biti..biti + 8, val as u32);
-    }
-    pub fn set_out_phase_fine(&mut self, idx: u8, val: u8) {
-        assert!(idx < 5, "invalid output index");
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        let biti = 31 + 13 * idx as usize;
-        bitstream.set_aux_array_bits(1, 1, biti..biti + 3, val as u32);
-    }
 
-    pub fn set_out_enable(&mut self, idx: u8, val: bool) {
-        assert!(idx < 5, "invalid output index");
-        let bitstream = self.r.borrow_mut();
-        let biti = 34 + 13 * idx as usize;
-        bitstream.set_aux_array_bit(1, 1, biti, val);
-    }
-    pub fn set_out_cascade(&mut self, idx: u8, val: bool) {
-        assert!(idx > 0 && idx < 5, "invalid output index");
-        let bitstream = self.r.borrow_mut();
-        let biti = 30 + 13 * idx as usize;
-        bitstream.set_aux_array_bit(1, 1, biti, val);
-    }
+macro_rules! _magic_pll_impl_gen_items {
+    (read $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $(!$invert:ident)? $($r:ident)? $body:block)* ) => {
+        $(
+            #[doc = concat!("Read the field `", stringify!($f), "`\n\n")]
+            $(#[$attr])*
+            $v fn $f(&$self $($args)* ) -> $($invert)? $($r)? {
+                _magic_pll_impl_gen_one_item! { read $self $($nbits bits in)? $(invert $invert)? $($r)? $body }
+            }
+        )*
+    };
+    (write $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $(!$invert:ident)? $($r:ident)? $body:block)* ) => {
+        mident::mident! {
+            $(
+                #[doc = concat!("Write the field `", stringify!($f), "`\n\n")]
+                $(#[$attr])*
+                $v fn #concat(set_ $f)(&mut $self $($args)*, val: $($invert)? $($r)? ) {
+                    _magic_pll_impl_gen_one_item! { write $self val $($nbits bits in)? $(invert $invert)? $($r)? $body }
+                }
+            )*
+        }
+    };
+}
 
-    fn _set_clkdiv_lo_time(&mut self, idx: u8, val: u8) {
-        let bitstream = self.r.borrow_mut();
-        let biti = 95 + 18 * idx as usize;
-        bitstream.set_aux_array_bits(1, 1, biti..biti + 8, val as u32);
-    }
-    fn _set_clkdiv_hi_time(&mut self, idx: u8, val: u8) {
-        let bitstream = self.r.borrow_mut();
-        let biti = 95 + 9 + 18 * idx as usize;
-        bitstream.set_aux_array_bits(1, 1, biti..biti + 8, val as u32);
-    }
-    fn _set_clkdiv_trim(&mut self, idx: u8, val: bool) {
-        let bitstream = self.r.borrow_mut();
-        let biti = 95 + 8 + 18 * idx as usize;
-        bitstream.set_aux_array_bit(1, 1, biti, val);
-    }
-    fn _set_clkdiv_bypass(&mut self, idx: u8, val: bool) {
-        let bitstream = self.r.borrow_mut();
-        let biti = 95 + 17 + 18 * idx as usize;
-        bitstream.set_aux_array_bit(1, 1, biti, val);
-    }
+macro_rules! magic_pll_impl {
+    (impl $impl_on:ident { $($inside:tt)* }) => {
+        impl<D: DebugTracer, Ref: std::borrow::Borrow<Bitstream<D>>> $impl_on<D, Ref> {
+            _magic_pll_impl_gen_items!{ read $($inside)* }
+        }
+        impl<D: DebugTracer, Ref: std::borrow::BorrowMut<Bitstream<D>>> $impl_on<D, Ref> {
+            _magic_pll_impl_gen_items!{ write $($inside)* }
+        }
+    };
+}
+magic_pll_impl! {
+    impl PLLTileRef {
+        pub fn fb_phase_coarse(&self) -> 8 bits in u8 {
+            23
+        }
+        pub fn fb_phase_fine(&self) -> 3 bits in u8 {
+            20
+        }
+        pub fn out_phase_coarse(&self, idx: u8) -> 8 bits in u8 {
+            assert!(idx < 5, "invalid output index");
+            35 + 13 * idx as usize
+        }
+        pub fn out_phase_fine(&self, idx: u8) -> 3 bits in u8 {
+            assert!(idx < 5, "invalid output index");
+            31 + 13 * idx as usize
+        }
 
-    pub fn set_out_div_lo_time(&mut self, idx: u8, val: u8) {
-        assert!(idx < 5, "invalid output index");
-        self._set_clkdiv_lo_time(4 - idx, val);
-    }
-    pub fn set_out_div_hi_time(&mut self, idx: u8, val: u8) {
-        assert!(idx < 5, "invalid output index");
-        self._set_clkdiv_hi_time(4 - idx, val);
-    }
-    pub fn set_out_div_duty_cycle_adjust(&mut self, idx: u8, val: bool) {
-        assert!(idx < 5, "invalid output index");
-        self._set_clkdiv_trim(4 - idx, val);
-    }
-    pub fn set_out_div_bypass(&mut self, idx: u8, val: bool) {
-        assert!(idx < 5, "invalid output index");
-        self._set_clkdiv_bypass(4 - idx, val);
-    }
+        pub fn out_enable(&self, idx: u8) -> bool {
+            assert!(idx < 5, "invalid output index");
+            34 + 13 * idx as usize
+        }
+        pub fn out_cascade(&self, idx: u8) -> bool {
+            assert!(idx > 0 && idx < 5, "invalid output index");
+            30 + 13 * idx as usize
+        }
 
-    pub fn set_fb_div_lo_time(&mut self, val: u8) {
-        self._set_clkdiv_lo_time(5, val);
-    }
-    pub fn set_fb_div_hi_time(&mut self, val: u8) {
-        self._set_clkdiv_hi_time(5, val);
-    }
-    pub fn set_fb_div_duty_cycle_adjust(&mut self, val: bool) {
-        self._set_clkdiv_trim(5, val);
-    }
-    pub fn set_fb_div_bypass(&mut self, val: bool) {
-        self._set_clkdiv_bypass(5, val);
-    }
+        // generic clk div functions, where index is magically assumed
+        fn clkdiv_lo_time(&self, idx: u8) -> 8 bits in u8 {
+            95 + 18 * idx as usize
+        }
+        fn clkdiv_hi_time(&self, idx: u8) -> 8 bits in u8 {
+            95 + 9 + 18 * idx as usize
+        }
+        fn clkdiv_trim(&self, idx: u8) -> bool {
+            5 + 8 + 18 * idx as usize
+        }
+        fn clkdiv_bypass(&self, idx: u8) -> bool {
+            5 + 17 + 18 * idx as usize
+        }
 
-    pub fn set_in_div_lo_time(&mut self, val: u8) {
-        self._set_clkdiv_lo_time(6, val);
-    }
-    pub fn set_in_div_hi_time(&mut self, val: u8) {
-        self._set_clkdiv_hi_time(6, val);
-    }
-    pub fn set_in_div_duty_cycle_adjust(&mut self, val: bool) {
-        self._set_clkdiv_trim(6, val);
-    }
-    pub fn set_in_div_bypass(&mut self, val: bool) {
-        self._set_clkdiv_bypass(6, val);
-    }
+        pub fn vco_div2(&self) -> bool {
+            229
+        }
 
-    pub fn set_vco_div2(&mut self, val: bool) {
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bit(1, 1, 229, val);
-    }
+        pub fn analog_icp(&self) -> 3 bits in u8 {
+            221
+        }
+        pub fn analog_rlpf(&self) -> 2 bits in u8 {
+            230
+        }
+        pub fn analog_rref(&self) -> 2 bits in u8 {
+            232
+        }
+        pub fn analog_rvi(&self) -> 2 bits in u8 {
+            234
+        }
+        pub fn analog_ivco(&self) -> 3 bits in u8 {
+            236
+        }
 
-    pub fn set_analog_icp(&mut self, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 221..221 + 3, val as u32);
-    }
-    pub fn set_analog_rlpf(&mut self, val: u8) {
-        assert!(val & !0b11 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 230..230 + 2, val as u32);
-    }
-    pub fn set_analog_rref(&mut self, val: u8) {
-        assert!(val & !0b11 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 232..232 + 2, val as u32);
-    }
-    pub fn set_analog_rvi(&mut self, val: u8) {
-        assert!(val & !0b11 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 234..234 + 2, val as u32);
-    }
-    pub fn set_analog_ivco(&mut self, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 236..236 + 3, val as u32);
-    }
-
-    // FIXME: This is totally undocumented
-    pub fn set_reg_ctrl(&mut self, val: u8) {
-        assert!(val & !0b11 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 0..0 + 2, val as u32);
-    }
-    pub fn set_enabled(&mut self, val: bool) {
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bit(1, 1, 2, val);
-    }
-    pub fn set_clock_feedback_mux(&mut self, val: u8) {
-        assert!(val & !0b11 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 3..3 + 2, val as u32);
-    }
-    pub fn set_feedback_delay(&mut self, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 5..5 + 3, val as u32);
-    }
-    pub fn set_clock_mux_0(&mut self, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 8..8 + 3, val as u32);
-    }
-    // AGRV2K doesn't have this
-    pub fn set_clock_mux_1(&mut self, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 11..11 + 3, val as u32);
-    }
-    pub fn set_gclk_mux(&mut self, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bits(1, 1, 14..14 + 3, val as u32);
-    }
-    pub fn set_use_internal_fb(&mut self, val: bool) {
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bit(1, 1, 17, val);
-    }
-    pub fn set_enable_dedicated_out_n(&mut self, val: bool) {
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bit(1, 1, 18, !val);
-    }
-    pub fn set_enable_dedicated_out_p(&mut self, val: bool) {
-        let bitstream = self.r.borrow_mut();
-        bitstream.set_aux_array_bit(1, 1, 19, !val);
+        // FIXME: This is totally undocumented
+        pub fn reg_ctrl(&self) -> 2 bits in u8 {
+            0
+        }
+        pub fn enabled(&self) -> bool {
+            2
+        }
+        pub fn clock_feedback_mux(&self) -> 2 bits in u8 {
+            3
+        }
+        pub fn feedback_delay(&self) -> 3 bits in u8 {
+            5
+        }
+        pub fn clock_mux_0(&self) -> 3 bits in u8 {
+            8
+        }
+        // AGRV2K doesn't have this
+        pub fn clock_mux_1(&self) -> 3 bits in u8 {
+            11
+        }
+        pub fn gclk_mux(&self) -> 3 bits in u8 {
+            14
+        }
+        pub fn use_internal_fb(&self) -> bool {
+            17
+        }
+        pub fn enable_dedicated_out_n(&self) -> !bool {
+            18
+        }
+        pub fn enable_dedicated_out_p(&self) -> !bool {
+            19
+        }
     }
 }
 
