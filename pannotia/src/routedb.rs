@@ -278,10 +278,10 @@ pub use rmux::rmux_idx_for_span4;
 
 mod rmux;
 
-/// Possible sources to drive a (LUT/BRAM) IMUX
+/// Possible sources to drive a (LUT/BRAM) input signal
 #[non_exhaustive]
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub enum IMUXSource {
+pub enum FunctionInputSource {
     /// The output of an RMUX in this tile
     ///
     /// This will be a T0 self-wire
@@ -293,7 +293,7 @@ pub enum IMUXSource {
 }
 
 /// Map of IMUX inputs for a logic tile
-pub fn logic_imux_input(le_idx: u8, le_inp_idx: u8, imux_inp_idx: u8) -> IMUXSource {
+pub fn logic_imux_input(le_idx: u8, le_inp_idx: u8, imux_inp_idx: u8) -> FunctionInputSource {
     assert!(le_idx < 16, "LE index out of range");
     assert!(le_inp_idx < 4, "LE input index out of range");
     assert!(imux_inp_idx < 27, "IMUX input index out of range");
@@ -308,36 +308,56 @@ pub fn logic_imux_input(le_idx: u8, le_inp_idx: u8, imux_inp_idx: u8) -> IMUXSou
                 // LUT inputs A/C have access to even LE outputs, with one extra odd output
                 let xtra_idx = le_idx / 2 + 1;
                 if imux_inp_idx == xtra_idx {
-                    IMUXSource::LEOutput(le_idx / 2 * 2 + 1)
+                    FunctionInputSource::LEOutput(le_idx / 2 * 2 + 1)
                 } else if imux_inp_idx > xtra_idx {
-                    IMUXSource::LEOutput((imux_inp_idx - 1) * 2)
+                    FunctionInputSource::LEOutput((imux_inp_idx - 1) * 2)
                 } else {
-                    IMUXSource::LEOutput(imux_inp_idx * 2)
+                    FunctionInputSource::LEOutput(imux_inp_idx * 2)
                 }
             }
             1 | 3 => {
                 // LUT inputs B/D have access to odd LE outputs, with one extra odd output
                 let xtra_idx = le_idx / 2;
                 if imux_inp_idx == xtra_idx {
-                    IMUXSource::LEOutput(le_idx / 2 * 2)
+                    FunctionInputSource::LEOutput(le_idx / 2 * 2)
                 } else if imux_inp_idx > xtra_idx {
-                    IMUXSource::LEOutput((imux_inp_idx - 1) * 2 + 1)
+                    FunctionInputSource::LEOutput((imux_inp_idx - 1) * 2 + 1)
                 } else {
-                    IMUXSource::LEOutput(imux_inp_idx * 2 + 1)
+                    FunctionInputSource::LEOutput(imux_inp_idx * 2 + 1)
                 }
             }
             _ => unreachable!(),
         },
         // Input 9 has access to the "top" half of the neighbor wires
-        9 => IMUXSource::RightNeighborWire(le_idx % 2 * 4 + le_inp_idx),
+        9 => FunctionInputSource::RightNeighborWire(le_idx % 2 * 4 + le_inp_idx),
         // Input 10 has access to the "bottom" half of the neighbor wires
-        10 => IMUXSource::RightNeighborWire(le_idx % 2 * 4 + le_inp_idx + 8),
+        10 => FunctionInputSource::RightNeighborWire(le_idx % 2 * 4 + le_inp_idx + 8),
         11..=26 => match le_inp_idx {
             // LUT inputs A/C have access to the "first of the two in the group"
-            0 | 2 => IMUXSource::RMUX((imux_inp_idx - 11) * 6 + 4),
+            0 | 2 => FunctionInputSource::RMUX((imux_inp_idx - 11) * 6 + 4),
             // LUT inputs B/D have access to the second
-            1 | 3 => IMUXSource::RMUX((imux_inp_idx - 11) * 6 + 5),
+            1 | 3 => FunctionInputSource::RMUX((imux_inp_idx - 11) * 6 + 5),
             _ => unreachable!(),
+        },
+        _ => unreachable!(),
+    }
+}
+
+/// Map of CtrlMUX inputs for a logic tile
+pub fn logic_ctrl_preselect_input(ctrlmux_idx: u8, ctrlmux_inp_idx: u8) -> FunctionInputSource {
+    assert!(ctrlmux_idx < 4, "CtrlMux index out of range");
+    assert!(ctrlmux_inp_idx < 32, "CtrlMux input index out of range");
+
+    match ctrlmux_idx % 2 {
+        0 => match ctrlmux_inp_idx {
+            0..=7 => FunctionInputSource::LEOutput(ctrlmux_inp_idx * 2),
+            8..=15 => FunctionInputSource::RightNeighborWire((ctrlmux_inp_idx - 8) * 2),
+            _ => FunctionInputSource::RMUX((ctrlmux_inp_idx - 16) * 6 + 4),
+        },
+        1 => match ctrlmux_inp_idx {
+            0..=7 => FunctionInputSource::LEOutput(ctrlmux_inp_idx * 2 + 1),
+            8..=15 => FunctionInputSource::RightNeighborWire((ctrlmux_inp_idx - 8) * 2 + 1),
+            _ => FunctionInputSource::RMUX((ctrlmux_inp_idx - 16) * 6 + 5),
         },
         _ => unreachable!(),
     }

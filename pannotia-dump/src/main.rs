@@ -10,7 +10,7 @@ use bitvec::prelude::*;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::padring::PadRingExt;
-use pannotia::routedb::{Direction, IMUXSource, RMUXSource, RoutingWire};
+use pannotia::routedb::{Direction, FunctionInputSource, RMUXSource, RoutingWire};
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
 use pannotia::tiles::io::IOTileCommon;
 use pannotia::tiles::local_lines::IMUX;
@@ -295,13 +295,13 @@ fn main() -> Result<ExitCode, Error> {
                                             lut_i, lut_inp_i, imux_idx,
                                         );
                                         match imux_src {
-                                            IMUXSource::RMUX(i) => {
+                                            FunctionInputSource::RMUX(i) => {
                                                 println!("\t// rmux[{i}]")
                                             }
-                                            IMUXSource::LEOutput(i) => {
+                                            FunctionInputSource::LEOutput(i) => {
                                                 println!("\t// this_output[{i}]")
                                             }
-                                            IMUXSource::RightNeighborWire(i) => {
+                                            FunctionInputSource::RightNeighborWire(i) => {
                                                 let tile_right = tile.pos() + Direction::E;
                                                 println!("\t// tile[{}] T4_W[{}]", tile_right, i);
                                             }
@@ -1230,13 +1230,13 @@ fn main() -> Result<ExitCode, Error> {
                     let inp = pannotia::routedb::logic_imux_input(le_i, le_inp_i, mux_inp_i);
                     print!("    .I{mux_inp_i}(");
                     match inp {
-                        IMUXSource::RMUX(i) => {
+                        FunctionInputSource::RMUX(i) => {
                             print!("RMUX{:02}_O", i);
                         }
-                        IMUXSource::RightNeighborWire(i) => {
+                        FunctionInputSource::RightNeighborWire(i) => {
                             print!("T1_W_I0[{i}]");
                         }
-                        IMUXSource::LEOutput(i) => {
+                        FunctionInputSource::LEOutput(i) => {
                             print!("OMUX{:02}_O", i * 3 + 1);
                         }
                         _ => unreachable!(),
@@ -1245,6 +1245,28 @@ fn main() -> Result<ExitCode, Error> {
                 }
                 println!("    .O0(IMUX{imux_i:02}_O));\n");
             }
+        }
+    } else if args[1].eq_ignore_ascii_case("debug_logic_ctrlmux_routing") {
+        for ctrlmux_i in 0..4 {
+            println!("CtrlMUX_32_1 m_CtrlMUX{:02} (", ctrlmux_i);
+            for mux_inp_i in (0..32).rev() {
+                let inp = pannotia::routedb::logic_ctrl_preselect_input(ctrlmux_i, mux_inp_i);
+                print!("    .I{mux_inp_i}(");
+                match inp {
+                    FunctionInputSource::RMUX(i) => {
+                        print!("RMUX{:02}_O", i);
+                    }
+                    FunctionInputSource::RightNeighborWire(i) => {
+                        print!("T1_W_I0[{i}]");
+                    }
+                    FunctionInputSource::LEOutput(i) => {
+                        print!("OMUX{:02}_O", i * 3 + 1);
+                    }
+                    _ => unreachable!(),
+                }
+                println!("),")
+            }
+            println!("    .O0(CtrlMUX{ctrlmux_i:02}_O));\n");
         }
     } else {
         return Err(Error::InvalidMode);
