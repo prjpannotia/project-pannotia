@@ -288,15 +288,6 @@ impl FieldPositionCalculator for LogicOut {
 }
 
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileClk(clk_idx),
-            _d: PhantomData,
-        };
-        Mux3Inv::get(ref_)
-    }
     pub fn clock_en_mux(&self, clk_idx: u8) -> Mux2Inv {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -453,15 +444,6 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn set_clock_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileClk(clk_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
     pub fn set_clock_en_mux(&mut self, clk_idx: u8, val: Mux2Inv) {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
@@ -618,33 +600,22 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRefTrait for LogicTileRef<D, Ref> {
-    fn rmux(&self, rmux_idx: u8) -> RMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: RMUXRef {
-                is_bram: false,
-                i: rmux_idx,
-            },
-            _d: PhantomData,
-        };
-        RMUX::get(ref_)
+magic_tile_impl_gen! {
+    impl LogicTileRef {
+        /// Selects which input (a global line or a preselected control signal) drives this clock line
+        pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
+            TileClk(clk_idx)
+        }
     }
 }
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
-    for LogicTileRef<D, Ref>
-{
-    fn set_rmux(&mut self, rmux_idx: u8, val: RMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: RMUXRef {
+
+magic_tile_impl_gen! {
+    impl on LogicTileRef trait GenericRoutingRefTrait, GenericRoutingRefMutTrait {
+        fn rmux(&self, rmux_idx: u8) -> RMUX {
+            RMUXRef {
                 is_bram: false,
                 i: rmux_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
+            }
+        }
     }
 }

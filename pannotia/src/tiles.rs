@@ -518,8 +518,10 @@ impl BitSource for &[bool] {
 }
 
 macro_rules! _magic_tile_impl_gen_items {
-    (read $($v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
+    (read $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
         $(
+            #[doc = concat!("Read the field `", stringify!($f), "`\n\n")]
+            $(#[$attr])*
             $v fn $f(&$self $($args)* ) -> $r {
                 let field_pos = $body;
                 let ref_ = crate::coordinates::GenericFieldRef {
@@ -532,9 +534,11 @@ macro_rules! _magic_tile_impl_gen_items {
             }
         )*
     };
-    (write $($v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
+    (write $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
         mident::mident!{
             $(
+                #[doc = concat!("Write the field `", stringify!($f), "`\n\n")]
+                $(#[$attr])*
                 $v fn #concat(set_ $f)(&mut $self $($args)*, val: $r ) {
                     let field_pos = $body;
                     let ref_ = crate::coordinates::GenericFieldRef {
