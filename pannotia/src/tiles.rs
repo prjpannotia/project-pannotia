@@ -543,7 +543,7 @@ macro_rules! _magic_tile_impl_gen_one_item {
             field_pos,
             _d: std::marker::PhantomData,
         };
-        <_ as ::bitmux::BitstreamField>::get(ref_)
+        ::bitmux::BitstreamField::get(ref_)
     };
     (write $self:ident $val:ident $r:ty $body:block) => {
         let field_pos = $body;
