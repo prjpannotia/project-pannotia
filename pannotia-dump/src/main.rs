@@ -10,9 +10,10 @@ use bitvec::prelude::*;
 
 use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
 use pannotia::padring::PadRingExt;
-use pannotia::routedb::{RMUXSource, RoutingWire};
+use pannotia::routedb::{Direction, IMUXSource, RMUXSource, RoutingWire};
 use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
 use pannotia::tiles::io::IOTileCommon;
+use pannotia::tiles::local_lines::IMUX;
 use pannotia::tiles::{TileRefTrait, TileType};
 
 #[derive(Debug)]
@@ -281,14 +282,31 @@ fn main() -> Result<ExitCode, Error> {
 
                                 for lut_inp_i in 0..4 {
                                     let lut_inp = tile.lut_input(lut_i, lut_inp_i);
-                                    if lut_inp != Default::default() {
-                                        println!(
+                                    if let IMUX::I(imux_idx) = lut_inp {
+                                        print!(
                                             "tile[{}].lut_{}[{}] = {}",
                                             tile_pos,
                                             ["A", "B", "C", "D"][lut_inp_i as usize],
                                             lut_i,
                                             lut_inp
                                         );
+
+                                        let imux_src = pannotia::routedb::logic_imux_input(
+                                            lut_i, lut_inp_i, imux_idx,
+                                        );
+                                        match imux_src {
+                                            IMUXSource::RMUX(i) => {
+                                                println!("\t// rmux[{i}]")
+                                            }
+                                            IMUXSource::LEOutput(i) => {
+                                                println!("\t// this_output[{i}]")
+                                            }
+                                            IMUXSource::RightNeighborWire(i) => {
+                                                let tile_right = tile.pos() + Direction::E;
+                                                println!("\t// tile[{}] T4_W[{}]", tile_right, i);
+                                            }
+                                            _ => unreachable!(),
+                                        }
                                     }
                                 }
 
@@ -1154,7 +1172,7 @@ fn main() -> Result<ExitCode, Error> {
             }
             println!();
         }
-    } else if args[1].eq_ignore_ascii_case("debug_routing") {
+    } else if args[1].eq_ignore_ascii_case("debug_rmux_routing") {
         for rmux_i in 0..96 {
             println!("RMUX_21_1 m_RMUX{rmux_i:02} (");
             for inp_i in (0..21).rev() {
@@ -1202,6 +1220,31 @@ fn main() -> Result<ExitCode, Error> {
                 println!("),")
             }
             println!("    .O0(RMUX{rmux_i:02}_O));\n");
+        }
+    } else if args[1].eq_ignore_ascii_case("debug_logic_imux_routing") {
+        for le_i in 0..16 {
+            for le_inp_i in 0..4 {
+                let imux_i = le_i * 4 + le_inp_i;
+                println!("IMUX_27_1 m_IMUX{:02} (", imux_i);
+                for mux_inp_i in (0..27).rev() {
+                    let inp = pannotia::routedb::logic_imux_input(le_i, le_inp_i, mux_inp_i);
+                    print!("    .I{mux_inp_i}(");
+                    match inp {
+                        IMUXSource::RMUX(i) => {
+                            print!("RMUX{:02}_O", i);
+                        }
+                        IMUXSource::RightNeighborWire(i) => {
+                            print!("T1_W_I0[{i}]");
+                        }
+                        IMUXSource::LEOutput(i) => {
+                            print!("OMUX{:02}_O", i * 3 + 1);
+                        }
+                        _ => unreachable!(),
+                    }
+                    println!("),")
+                }
+                println!("    .O0(IMUX{imux_i:02}_O));\n");
+            }
         }
     } else {
         return Err(Error::InvalidMode);

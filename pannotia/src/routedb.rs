@@ -217,6 +217,7 @@ impl From<RMUXSourceInternal> for RMUXSource {
     }
 }
 
+/// Map of RMUX inputs
 pub fn rmux_input(rmux_idx: u8, inp_idx: u8, is_bram: bool) -> RMUXSource {
     if inp_idx != 4 {
         let mut ret = rmux::RMUX_MAP[rmux_idx as usize][inp_idx as usize].into();
@@ -276,6 +277,71 @@ pub use rmux::RMUX_PURPOSE;
 pub use rmux::rmux_idx_for_span4;
 
 mod rmux;
+
+/// Possible sources to drive a (LUT/BRAM) IMUX
+#[non_exhaustive]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum IMUXSource {
+    /// The output of an RMUX in this tile
+    ///
+    /// This will be a T0 self-wire
+    RMUX(u8),
+    /// A T1 left-going wire from the right neighbor
+    RightNeighborWire(u8),
+    /// The output of an LE in this tile (only for logic tiles)
+    LEOutput(u8),
+}
+
+/// Map of IMUX inputs for a logic tile
+pub fn logic_imux_input(le_idx: u8, le_inp_idx: u8, imux_inp_idx: u8) -> IMUXSource {
+    assert!(le_idx < 16, "LE index out of range");
+    assert!(le_inp_idx < 4, "LE input index out of range");
+    assert!(imux_inp_idx < 27, "IMUX input index out of range");
+
+    // An IMUX has 27 inputs, which are divided up as follows:
+    // [0-8]    a LE output
+    // [9-10]   a neighbor wire
+    // [11-26]  a RMUX self-wire
+    match imux_inp_idx {
+        0..=8 => match le_inp_idx {
+            0 | 2 => {
+                // LUT inputs A/C have access to even LE outputs, with one extra odd output
+                let xtra_idx = le_idx / 2 + 1;
+                if imux_inp_idx == xtra_idx {
+                    IMUXSource::LEOutput(le_idx / 2 * 2 + 1)
+                } else if imux_inp_idx > xtra_idx {
+                    IMUXSource::LEOutput((imux_inp_idx - 1) * 2)
+                } else {
+                    IMUXSource::LEOutput(imux_inp_idx * 2)
+                }
+            }
+            1 | 3 => {
+                // LUT inputs B/D have access to odd LE outputs, with one extra odd output
+                let xtra_idx = le_idx / 2;
+                if imux_inp_idx == xtra_idx {
+                    IMUXSource::LEOutput(le_idx / 2 * 2)
+                } else if imux_inp_idx > xtra_idx {
+                    IMUXSource::LEOutput((imux_inp_idx - 1) * 2 + 1)
+                } else {
+                    IMUXSource::LEOutput(imux_inp_idx * 2 + 1)
+                }
+            }
+            _ => unreachable!(),
+        },
+        // Input 9 has access to the "top" half of the neighbor wires
+        9 => IMUXSource::RightNeighborWire(le_idx % 2 * 4 + le_inp_idx),
+        // Input 10 has access to the "bottom" half of the neighbor wires
+        10 => IMUXSource::RightNeighborWire(le_idx % 2 * 4 + le_inp_idx + 8),
+        11..=26 => match le_inp_idx {
+            // LUT inputs A/C have access to the "first of the two in the group"
+            0 | 2 => IMUXSource::RMUX((imux_inp_idx - 11) * 6 + 4),
+            // LUT inputs B/D have access to the second
+            1 | 3 => IMUXSource::RMUX((imux_inp_idx - 11) * 6 + 5),
+            _ => unreachable!(),
+        },
+        _ => unreachable!(),
+    }
+}
 
 #[cfg(test)]
 mod tests {
