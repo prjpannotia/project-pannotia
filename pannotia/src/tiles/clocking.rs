@@ -5,8 +5,6 @@ use std::borrow::{Borrow, BorrowMut};
 use super::hard_ip::Mux13Inv;
 use super::*;
 
-use bitmux::{BitGetter, BitSetter, BitstreamField};
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct PLLTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     pub(super) r: Ref,
@@ -67,27 +65,19 @@ impl FieldPositionCalculator for PLLGlobal2Local {
     }
 }
 
+magic_tile_impl_gen! {
+    impl PLLTileRef {
+        pub fn to_pll(&self, idx: u8) -> Mux13Inv {
+            PLLWireTo(idx)
+        }
+
+        pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+            PLLGlobal2Local(idx)
+        }
+    }
+}
+
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
-    pub fn to_pll(&self, idx: u8) -> Mux13Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: PLLWireTo(idx),
-            _d: PhantomData,
-        };
-        Mux13Inv::get(ref_)
-    }
-
-    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: PLLGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
-
     pub fn fb_phase_coarse(&self) -> u8 {
         let bitstream = self.r.borrow();
         bitstream.get_aux_array_bits(1, 1, 23..23 + 8) as u8
@@ -256,26 +246,6 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> PLLTileRef<D, Ref> {
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
-    pub fn set_to_pll(&mut self, idx: u8, val: Mux13Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: PLLWireTo(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: PLLGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
     pub fn set_fb_phase_coarse(&mut self, val: u8) {
         let bitstream = self.r.borrow_mut();
         bitstream.set_aux_array_bits(1, 1, 23..23 + 8, val as u32);
@@ -598,125 +568,30 @@ impl FieldPositionCalculator for GCLKSWMux {
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
-    pub fn fabric_to_clock(&self, idx: u8) -> super::hard_ip::Mux17Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GCLKSWFabricToClock(idx),
-            _d: PhantomData,
-        };
-        super::hard_ip::Mux17Inv::get(ref_)
-    }
+magic_tile_impl_gen! {
+    impl GCLKSWTileRef {
+        pub fn fabric_to_clock(&self, idx: u8) -> super::hard_ip::Mux17Inv {
+            GCLKSWFabricToClock(idx)
+        }
 
-    pub fn clock_enable(&self, idx: u8) -> InvertedMux17Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GCLKSWEnable(idx),
-            _d: PhantomData,
-        };
-        InvertedMux17Inv::get(ref_)
-    }
+        pub fn clock_enable(&self, idx: u8) -> InvertedMux17Inv {
+            GCLKSWEnable(idx)
+        }
 
-    pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GCLKSWGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
+        pub fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+            GCLKSWGlobal2Local(idx)
+        }
 
-    pub fn clock_to_fabric(&self, idx: u8) -> Mux2 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GCLKSWClock2Fabric(idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
+        pub fn clock_to_fabric(&self, idx: u8) -> Mux2 {
+            GCLKSWClock2Fabric(idx)
+        }
 
-    pub fn cen_is_registered(&self, idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GCLKSWClockEnReg(idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
+        pub fn cen_is_registered(&self, idx: u8) -> bool {
+            GCLKSWClockEnReg(idx)
+        }
 
-    pub fn clock_dist_mux(&self, idx: u8) -> GCLKMux4 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GCLKSWMux(idx),
-            _d: PhantomData,
-        };
-        GCLKMux4::get(ref_)
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GCLKSWTileRef<D, Ref> {
-    pub fn set_fabric_to_clock(&mut self, idx: u8, val: super::hard_ip::Mux17Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GCLKSWFabricToClock(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_clock_enable(&mut self, idx: u8, val: InvertedMux17Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GCLKSWEnable(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GCLKSWGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_clock_to_fabric(&mut self, idx: u8, val: Mux2) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GCLKSWClock2Fabric(idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-
-    pub fn set_cen_is_registered(&mut self, idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GCLKSWClockEnReg(idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    pub fn set_clock_dist_mux(&mut self, idx: u8, val: GCLKMux4) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GCLKSWMux(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
+        pub fn clock_dist_mux(&self, idx: u8) -> GCLKMux4 {
+            GCLKSWMux(idx)
+        }
     }
 }
