@@ -593,13 +593,15 @@ macro_rules! _magic_tile_impl_gen_items {
 
 macro_rules! magic_tile_impl_gen {
     // impl a trait
-    (impl on $impl_on:ident trait $trait:ty, $trait_mut:ty { $($inside:tt)* }) => {
+    (impl on $impl_on:ident trait $trait:ty, $trait_mut:ty $(, get { $($get_item:item)* })? $(, set { $($set_item:item)* })? { $($inside:tt)* }) => {
         mident::mident! {
             impl<D: DebugTracer, Ref: std::borrow::Borrow<Bitstream<D>>> $trait for $impl_on<D, Ref> {
                 _magic_tile_impl_gen_items!{ read $($inside)* }
+                $($( $get_item )*)?
             }
             impl<D: DebugTracer, Ref: std::borrow::BorrowMut<Bitstream<D>>> $trait_mut for $impl_on<D, Ref> {
                 _magic_tile_impl_gen_items!{ write $($inside)* }
+                $($( $set_item )*)?
             }
         }
     };

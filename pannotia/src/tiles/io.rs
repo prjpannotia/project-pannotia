@@ -21,12 +21,9 @@
 //!
 //! These tiles contain 4 I/Os. Outputs are driven onto `T4Y` wires (wasting 4 of 12).
 
-use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
 
 use super::*;
-
-use bitmux::{BitGetter, BitSetter, BitstreamField};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum TopBottomIOLocalMux {
@@ -957,9 +954,10 @@ impl FieldPositionCalculator for LeftRightOEPU {
 
 /// The function of the sync/async control signal on the IOB register
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[bitmux::bitenum]
 pub enum RegCtrlMode {
-    Reset,
-    Set,
+    Reset = "0",
+    Set = "1",
 }
 impl Display for RegCtrlMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1323,554 +1321,183 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
-    pub fn local_line(&self, idx: u8) -> TopBottomIOLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOLocalLine {
+magic_tile_impl_gen! {
+    impl TopBottomIOTileRef {
+        pub fn local_line(&self, idx: u8) -> TopBottomIOLocalMux {
+            TopBottomIOLocalLine {
                 is_bottom: self.p.y == 0,
                 i: idx,
-            },
-            _d: PhantomData,
-        };
-        TopBottomIOLocalMux::get(ref_)
+            }
+        }
     }
 }
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTileRef<D, Ref> {
-    fn num_ios(&self) -> u8 {
-        4
-    }
+magic_tile_impl_gen! {
+    impl on TopBottomIOTileRef trait IOTileCommon, IOTileCommonMut, get {
+        fn num_ios(&self) -> u8 {
+            4
+        }
 
-    fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOGlobal2Local {
+        fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([0, 1, 7, 6][io_idx as usize])
+        }
+        fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([2, 3, 5, 4][io_idx as usize])
+        }
+        fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([10, 11, 13, 12][io_idx as usize])
+        }
+        fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([8, 9, 15, 14][io_idx as usize])
+        }
+        fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([16, 17, 23, 22][io_idx as usize])
+        }
+        fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([18, 19, 21, 20][io_idx as usize])
+        }
+    }, set {
+        fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([0, 1, 7, 6][io_idx as usize], val)
+        }
+        fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([2, 3, 5, 4][io_idx as usize], val)
+        }
+        fn set_local_to_out_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([10, 11, 13, 12][io_idx as usize], val)
+        }
+        fn set_local_to_in_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([8, 9, 15, 14][io_idx as usize], val)
+        }
+        fn set_local_to_async_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([16, 17, 23, 22][io_idx as usize], val)
+        }
+        fn set_local_to_sync_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([18, 19, 21, 20][io_idx as usize], val)
+        }
+    } {
+        fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+            TopBottomIOGlobal2Local {
                 is_bottom: self.p.y == 0,
                 i: idx,
-            },
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
+            }
+        }
 
-    fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOLocal2Clk {
+        fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
+            TopBottomIOLocal2Clk {
                 is_bottom: self.p.y == 0,
                 i: idx,
-            },
-            _d: PhantomData,
-        };
-        IOLocalToClockMux::get(ref_)
-    }
+            }
+        }
 
-    fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOLocal2IO {
+        fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
+            TopBottomIOLocal2IO {
                 is_bottom: self.p.y == 0,
                 i: custom_idx,
-            },
-            _d: PhantomData,
-        };
-        LocalToIOMux::get(ref_)
-    }
+            }
+        }
 
-    fn clock_mux(&self, idx: u8) -> IOClockMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOClockMux {
+        fn clock_mux(&self, idx: u8) -> IOClockMux {
+            TopBottomIOClockMux {
                 is_bottom: self.p.y == 0,
                 i: idx,
-            },
-            _d: PhantomData,
-        };
-        IOClockMux::get(ref_)
-    }
+            }
+        }
 
-    fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOOutMux {
+        fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX {
+            TopBottomIOOutMux {
                 is_bottom: self.p.y == 0,
                 i: io_idx * 2 + out_idx,
-            },
-            _d: PhantomData,
-        };
-        <_ as BitstreamField>::get(ref_)
-    }
+            }
+        }
 
-    fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([0, 1, 7, 6][io_idx as usize])
-    }
-    fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([2, 3, 5, 4][io_idx as usize])
-    }
-    fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([10, 11, 13, 12][io_idx as usize])
-    }
-    fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([8, 9, 15, 14][io_idx as usize])
-    }
-    fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([16, 17, 23, 22][io_idx as usize])
-    }
-    fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([18, 19, 21, 20][io_idx as usize])
-    }
+        fn in_data_delay(&self, io_idx: u8) -> 3 bits in u8 {
+            TopBottomIOInDaDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            }
+        }
+        fn in_reg_delay(&self, io_idx: u8) -> 3 bits in u8 {
+            TopBottomIOInRegDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            }
+        }
+        fn out_delay(&self, io_idx: u8) -> bool {
+            TopBottomOutDelay {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            }
+        }
 
-    fn in_data_delay(&self, io_idx: u8) -> u8 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOInDaDelay {
+        fn out_use_reg(&self, io_idx: u8) -> bool {
+            TopBottomOutReg {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bits::<3>() as u8
-    }
-    fn in_reg_delay(&self, io_idx: u8) -> u8 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOInRegDelay {
+            }
+        }
+        fn oe_use_reg(&self, io_idx: u8) -> bool {
+            TopBottomOEReg {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bits::<3>() as u8
-    }
-    fn out_delay(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutDelay {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
+            }
+        }
 
-    fn out_use_reg(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutReg {
+        fn in_powerup_state(&self, io_idx: u8) -> bool {
+            TopBottomInPU {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    fn oe_use_reg(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOEReg {
+            }
+        }
+        fn out_powerup_state(&self, io_idx: u8) -> bool {
+            TopBottomOutPU {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
+            }
+        }
+        fn oe_powerup_state(&self, io_idx: u8) -> bool {
+            TopBottomOEPU {
+                is_bottom: self.p.y == 0,
+                i: io_idx,
+            }
+        }
 
-    fn in_powerup_state(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomInPU {
+        fn in_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+            TopBottomInAMode {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    fn out_powerup_state(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutPU {
+            }
+        }
+        fn out_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+            TopBottomOutAMode {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    fn oe_powerup_state(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOEPU {
+            }
+        }
+        fn oe_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+            TopBottomOEAMode {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
+            }
+        }
 
-    fn in_async_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomInAMode {
+        fn in_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+            TopBottomInSMode {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn out_async_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutAMode {
+            }
+        }
+        fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+            TopBottomOutSMode {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn oe_async_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOEAMode {
+            }
+        }
+        fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+            TopBottomOESMode {
                 is_bottom: self.p.y == 0,
                 i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-
-    fn in_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomInSMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutSMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TopBottomOESMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> TopBottomIOTileRef<D, Ref> {
-    pub fn set_local_line(&mut self, idx: u8, val: TopBottomIOLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOLocalLine {
-                is_bottom: self.p.y == 0,
-                i: idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottomIOTileRef<D, Ref> {
-    fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOGlobal2Local {
-                is_bottom: self.p.y == 0,
-                i: idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOLocal2Clk {
-                is_bottom: self.p.y == 0,
-                i: idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOLocal2IO {
-                is_bottom: self.p.y == 0,
-                i: custom_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_clock_mux(&mut self, idx: u8, val: IOClockMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOClockMux {
-                is_bottom: self.p.y == 0,
-                i: idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOOutMux {
-                is_bottom: self.p.y == 0,
-                i: io_idx * 2 + out_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([0, 1, 7, 6][io_idx as usize], val)
-    }
-    fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([2, 3, 5, 4][io_idx as usize], val)
-    }
-    fn set_local_to_out_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([10, 11, 13, 12][io_idx as usize], val)
-    }
-    fn set_local_to_in_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([8, 9, 15, 14][io_idx as usize], val)
-    }
-    fn set_local_to_async_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([16, 17, 23, 22][io_idx as usize], val)
-    }
-    fn set_local_to_sync_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([18, 19, 21, 20][io_idx as usize], val)
-    }
-
-    fn set_in_data_delay(&mut self, io_idx: u8, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOInDaDelay {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bits::<3>(val as u32);
-    }
-    fn set_in_reg_delay(&mut self, io_idx: u8, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomIOInRegDelay {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bits::<3>(val as u32);
-    }
-    fn set_out_delay(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutDelay {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    fn set_out_use_reg(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutReg {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    fn set_oe_use_reg(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOEReg {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    fn set_in_powerup_state(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomInPU {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    fn set_out_powerup_state(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutPU {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    fn set_oe_powerup_state(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOEPU {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    fn set_in_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomInAMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_out_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutAMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_oe_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOEAMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-
-    fn set_in_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomInSMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_out_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOutSMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_oe_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TopBottomOESMode {
-                is_bottom: self.p.y == 0,
-                i: io_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
+            }
+        }
     }
 }
 
@@ -1899,434 +1526,123 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
-    pub fn local_line(&self, idx: u8) -> LeftRightIOLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOLocalLine(idx),
-            _d: PhantomData,
-        };
-        LeftRightIOLocalMux::get(ref_)
+magic_tile_impl_gen! {
+    impl LeftRightIOTileRef {
+        pub fn local_line(&self, idx: u8) -> LeftRightIOLocalMux {
+            LeftRightIOLocalLine(idx)
+        }
     }
 }
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTileRef<D, Ref> {
-    fn num_ios(&self) -> u8 {
-        6
-    }
+magic_tile_impl_gen! {
+    impl on LeftRightIOTileRef trait IOTileCommon, IOTileCommonMut, get {
+        fn num_ios(&self) -> u8 {
+            6
+        }
 
-    fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
+        fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io(16 + io_idx)
+        }
+        fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize])
+        }
+        fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([4, 5, 6, 7, 28, 29][io_idx as usize])
+        }
+        fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io(30 + io_idx)
+        }
+        fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io(8 + io_idx)
+        }
+        fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux {
+            self.local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize])
+        }
+    }, set {
+        fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io(16 + io_idx, val)
+        }
+        fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize], val)
+        }
+        fn set_local_to_out_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([4, 5, 6, 7, 28, 29][io_idx as usize], val)
+        }
+        fn set_local_to_in_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io(30 + io_idx, val)
+        }
+        fn set_local_to_async_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io(8 + io_idx, val)
+        }
+        fn set_local_to_sync_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
+            self.set_local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize], val)
+        }
+    } {
+        fn global_to_local(&self, idx: u8) -> GlobalToLocalMux {
+            LeftRightIOGlobal2Local(idx)
+        }
 
-    fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOLocal2Clk(idx),
-            _d: PhantomData,
-        };
-        IOLocalToClockMux::get(ref_)
-    }
+        fn local_to_clock(&self, idx: u8) -> IOLocalToClockMux {
+            LeftRightIOLocal2Clk(idx)
+        }
 
-    fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOLocal2IO(custom_idx),
-            _d: PhantomData,
-        };
-        LocalToIOMux::get(ref_)
-    }
+        fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux {
+            LeftRightIOLocal2IO(custom_idx)
+        }
 
-    fn clock_mux(&self, idx: u8) -> IOClockMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOClockMux(idx),
-            _d: PhantomData,
-        };
-        IOClockMux::get(ref_)
-    }
+        fn clock_mux(&self, idx: u8) -> IOClockMux {
+            LeftRightIOClockMux(idx)
+        }
 
-    fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOOutMux(io_idx * 2 + out_idx),
-            _d: PhantomData,
-        };
-        <_ as BitstreamField>::get(ref_)
-    }
+        fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX {
+            LeftRightIOOutMux(io_idx * 2 + out_idx)
+        }
 
-    fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io(16 + io_idx)
-    }
-    fn local_to_io_oe(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize])
-    }
-    fn local_to_out_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([4, 5, 6, 7, 28, 29][io_idx as usize])
-    }
-    fn local_to_in_clk_en(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io(30 + io_idx)
-    }
-    fn local_to_async_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io(8 + io_idx)
-    }
-    fn local_to_sync_ctrl(&self, io_idx: u8) -> LocalToIOMux {
-        self.local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize])
-    }
+        fn in_data_delay(&self, io_idx: u8) -> 3 bits in u8 {
+            LeftRightIOInDaDelay(io_idx)
+        }
+        fn in_reg_delay(&self, io_idx: u8) -> 3 bits in u8 {
+            LeftRightIOInRegDelay(io_idx)
+        }
+        fn out_delay(&self, io_idx: u8) -> bool {
+            LeftRightOutDelay(io_idx)
+        }
 
-    fn in_data_delay(&self, io_idx: u8) -> u8 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOInDaDelay(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bits::<3>() as u8
-    }
-    fn in_reg_delay(&self, io_idx: u8) -> u8 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOInRegDelay(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bits::<3>() as u8
-    }
-    fn out_delay(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutDelay(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
+        fn out_use_reg(&self, io_idx: u8) -> bool {
+            LeftRightOutReg(io_idx)
+        }
+        fn oe_use_reg(&self, io_idx: u8) -> bool {
+            LeftRightOEReg(io_idx)
+        }
 
-    fn out_use_reg(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutReg(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    fn oe_use_reg(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOEReg(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
+        fn in_powerup_state(&self, io_idx: u8) -> bool {
+            LeftRightInPU(io_idx)
+        }
+        fn out_powerup_state(&self, io_idx: u8) -> bool {
+            LeftRightOutPU(io_idx)
+        }
+        fn oe_powerup_state(&self, io_idx: u8) -> bool {
+            LeftRightOEPU(io_idx)
+        }
 
-    fn in_powerup_state(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightInPU(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    fn out_powerup_state(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutPU(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    fn oe_powerup_state(&self, io_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOEPU(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
+        fn in_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+            LeftRightInAMode(io_idx)
+        }
+        fn out_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+            LeftRightOutAMode(io_idx)
+        }
+        fn oe_async_mode(&self, io_idx: u8) -> RegCtrlMode {
+            LeftRightOEAMode(io_idx)
+        }
 
-    fn in_async_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightInAMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn out_async_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutAMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn oe_async_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOEAMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-
-    fn in_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightInSMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutSMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LeftRightOESMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LeftRightIOTileRef<D, Ref> {
-    pub fn set_local_line(&mut self, idx: u8, val: LeftRightIOLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOLocalLine(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRightIOTileRef<D, Ref> {
-    fn set_global_to_local(&mut self, idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOGlobal2Local(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_local_to_clock(&mut self, idx: u8, val: IOLocalToClockMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOLocal2Clk(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOLocal2IO(custom_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_clock_mux(&mut self, idx: u8, val: IOClockMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOClockMux(idx),
-            _d: PhantomData,
-        };
-        val.set(ref_)
-    }
-
-    fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOOutMux(io_idx * 2 + out_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io(16 + io_idx, val)
-    }
-    fn set_local_to_io_oe(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([22, 23, 0, 1, 2, 3][io_idx as usize], val)
-    }
-    fn set_local_to_out_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([4, 5, 6, 7, 28, 29][io_idx as usize], val)
-    }
-    fn set_local_to_in_clk_en(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io(30 + io_idx, val)
-    }
-    fn set_local_to_async_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io(8 + io_idx, val)
-    }
-    fn set_local_to_sync_ctrl(&mut self, io_idx: u8, val: LocalToIOMux) {
-        self.set_local_to_io([14, 15, 24, 25, 26, 27][io_idx as usize], val)
-    }
-
-    fn set_in_data_delay(&mut self, io_idx: u8, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOInDaDelay(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bits::<3>(val as u32);
-    }
-    fn set_in_reg_delay(&mut self, io_idx: u8, val: u8) {
-        assert!(val & !0b111 == 0, "invalid setting");
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightIOInRegDelay(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bits::<3>(val as u32);
-    }
-    fn set_out_delay(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutDelay(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    fn set_out_use_reg(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutReg(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    fn set_oe_use_reg(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOEReg(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    fn set_in_powerup_state(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightInPU(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    fn set_out_powerup_state(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutPU(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    fn set_oe_powerup_state(&mut self, io_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOEPU(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-
-    fn set_in_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightInAMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_out_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutAMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_oe_async_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOEAMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-
-    fn set_in_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightInSMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_out_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOutSMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    fn set_oe_sync_mode(&mut self, io_idx: u8, val: RegCtrlMode) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LeftRightOESMode(io_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
+        fn in_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+            LeftRightInSMode(io_idx)
+        }
+        fn out_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+            LeftRightOutSMode(io_idx)
+        }
+        fn oe_sync_mode(&self, io_idx: u8) -> RegCtrlMode {
+            LeftRightOESMode(io_idx)
+        }
     }
 }
 
