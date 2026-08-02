@@ -517,6 +517,63 @@ impl BitSource for &[bool] {
     }
 }
 
+macro_rules! _magic_tile_impl_gen_items {
+    (read $($v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
+        $(
+            $v fn $f(&$self $($args)* ) -> $r {
+                let field_pos = $body;
+                let ref_ = crate::coordinates::GenericFieldRef {
+                    bitstream: $self.r.borrow(),
+                    tile_pos: $self.p,
+                    field_pos,
+                    _d: std::marker::PhantomData,
+                };
+                <_ as ::bitmux::BitstreamField>::get(ref_)
+            }
+        )*
+    };
+    (write $($v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $r:ty $body:block)* ) => {
+        mident::mident!{
+            $(
+                $v fn #concat(set_ $f)(&mut $self $($args)*, val: $r ) {
+                    let field_pos = $body;
+                    let ref_ = crate::coordinates::GenericFieldRef {
+                        bitstream: $self.r.borrow_mut(),
+                        tile_pos: $self.p,
+                        field_pos,
+                        _d: std::marker::PhantomData,
+                    };
+                    ::bitmux::BitstreamField::set(&val, ref_);
+                }
+            )*
+        }
+    };
+}
+
+macro_rules! magic_tile_impl_gen {
+    // impl a trait
+    (impl on $impl_on:ident trait $trait:ty, $trait_mut:ty { $($inside:tt)* }) => {
+        mident::mident! {
+            impl<D: DebugTracer, Ref: std::borrow::Borrow<Bitstream<D>>> $trait for $impl_on<D, Ref> {
+                _magic_tile_impl_gen_items!{ read $($inside)* }
+            }
+            impl<D: DebugTracer, Ref: std::borrow::BorrowMut<Bitstream<D>>> $trait_mut for $impl_on<D, Ref> {
+                _magic_tile_impl_gen_items!{ write $($inside)* }
+            }
+        }
+    };
+
+    // impl on the struct itself
+    (impl $impl_on:ident { $($inside:tt)* }) => {
+        impl<D: DebugTracer, Ref: std::borrow::Borrow<Bitstream<D>>> $impl_on<D, Ref> {
+            _magic_tile_impl_gen_items!{ read $($inside)* }
+        }
+        impl<D: DebugTracer, Ref: std::borrow::BorrowMut<Bitstream<D>>> $impl_on<D, Ref> {
+            _magic_tile_impl_gen_items!{ write $($inside)* }
+        }
+    };
+}
+
 pub mod bram9k;
 pub mod clocking;
 pub mod generic_routing;

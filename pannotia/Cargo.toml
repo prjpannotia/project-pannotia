@@ -8,3 +8,4 @@ crc = "3.4"
 log = "0.4"
 bitvec = "1"
 bitmux = { path = "../bitmux" }
+mident = { version = "0.0.1", path = "../../mident" }

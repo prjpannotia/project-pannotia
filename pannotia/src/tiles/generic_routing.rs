@@ -57,12 +57,9 @@
 //! but right-going neighbor wires are controlled by tile-specific output muxes.
 //! "Whatever is left" of the `RMUX`es control `T0` wires.
 
-use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
 
 use super::*;
-
-use bitmux::BitstreamField;
 
 /// Access to only the generic routing muxes of a (non-boundary) tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -197,38 +194,15 @@ pub trait GenericRoutingRefMutTrait: GenericRoutingRefTrait {
     fn set_rmux(&mut self, rmux_idx: u8, val: RMUX);
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> GenericRoutingRefTrait
-    for GenericRoutingRef<D, Ref>
-{
-    fn rmux(&self, rmux_idx: u8) -> RMUX {
-        let is_bram = self.tile_type() == TileType::BRAM;
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: RMUXRef {
+magic_tile_impl_gen! {
+    impl on GenericRoutingRef trait GenericRoutingRefTrait, GenericRoutingRefMutTrait {
+        fn rmux(&self, rmux_idx: u8) -> RMUX {
+            let is_bram = self.tile_type() == TileType::BRAM;
+            RMUXRef {
                 is_bram,
                 i: rmux_idx,
-            },
-            _d: PhantomData,
-        };
-        RMUX::get(ref_)
-    }
-}
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> GenericRoutingRefMutTrait
-    for GenericRoutingRef<D, Ref>
-{
-    fn set_rmux(&mut self, rmux_idx: u8, val: RMUX) {
-        let is_bram = self.tile_type() == TileType::BRAM;
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: RMUXRef {
-                is_bram,
-                i: rmux_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
+            }
+        }
     }
 }
 
