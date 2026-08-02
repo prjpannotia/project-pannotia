@@ -204,26 +204,8 @@ impl FieldPositionCalculator for TopIPGlobal2Local {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct TopIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
-    pub(super) r: Ref,
-    pub(super) p: TilePos,
-    pub(super) _d: PhantomData<D>,
-}
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for TopIPTileRef<D, Ref> {
-    fn tile_type(&self) -> TileType {
-        TileType::TopIP
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-    fn as_base_tile(self) -> TileRef<D, Ref> {
-        TileRef {
-            r: self.r,
-            p: self.p,
-            _d: PhantomData,
-        }
-    }
+make_tile_ref! {
+    TopIPTileRef = TileType::TopIP
 }
 
 magic_tile_impl_gen! {
@@ -322,28 +304,8 @@ impl FieldPositionCalculator for LeftRightIPGlobal2Local {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct LeftRightIPTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
-    pub(super) r: Ref,
-    pub(super) p: TilePos,
-    pub(super) _d: PhantomData<D>,
-}
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
-    for LeftRightIPTileRef<D, Ref>
-{
-    fn tile_type(&self) -> TileType {
-        TileType::LeftRightIP
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-    fn as_base_tile(self) -> TileRef<D, Ref> {
-        TileRef {
-            r: self.r,
-            p: self.p,
-            _d: PhantomData,
-        }
-    }
+make_tile_ref! {
+    LeftRightIPTileRef = TileType::LeftRightIP
 }
 
 magic_tile_impl_gen! {

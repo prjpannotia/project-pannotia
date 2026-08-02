@@ -61,27 +61,11 @@ use std::fmt::Display;
 
 use super::*;
 
-/// Access to only the generic routing muxes of a (non-boundary) tile
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct GenericRoutingRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
-    pub(super) r: Ref,
-    pub(super) p: TilePos,
-    pub(super) _d: PhantomData<D>,
-}
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for GenericRoutingRef<D, Ref> {
-    fn tile_type(&self) -> TileType {
+make_tile_ref! {
+    /// Access to only the generic routing muxes of a (non-boundary) tile
+    GenericRoutingRef = self {
         let family = self.r.borrow().family();
         family.get_tile_type(self.p)
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-    fn as_base_tile(self) -> TileRef<D, Ref> {
-        TileRef {
-            r: self.r,
-            p: self.p,
-            _d: PhantomData,
-        }
     }
 }
 

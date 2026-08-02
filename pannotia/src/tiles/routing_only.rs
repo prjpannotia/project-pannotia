@@ -8,29 +8,9 @@ use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, 
 
 use super::*;
 
-/// Access to a routing-only tile
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct RoutingOnlyTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
-    pub(super) r: Ref,
-    pub(super) p: TilePos,
-    pub(super) _d: PhantomData<D>,
-}
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref>
-    for RoutingOnlyTileRef<D, Ref>
-{
-    fn tile_type(&self) -> TileType {
-        TileType::RoutingOnly
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-    fn as_base_tile(self) -> TileRef<D, Ref> {
-        TileRef {
-            r: self.r,
-            p: self.p,
-            _d: PhantomData,
-        }
-    }
+make_tile_ref! {
+    /// Access to a routing-only tile
+    RoutingOnlyTileRef = TileType::RoutingOnly
 }
 
 struct OMUXRef(u8);

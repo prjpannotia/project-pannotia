@@ -617,6 +617,59 @@ macro_rules! magic_tile_impl_gen {
     };
 }
 
+macro_rules! make_tile_ref {
+    // handle the need to refer to self
+    ($(#[$attr:meta])* $name:ident = $self:ident $override_ty:block) => {
+        $(#[$attr])*
+        #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+        pub struct $name<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+            pub(super) r: Ref,
+            pub(super) p: TilePos,
+            pub(super) _d: PhantomData<D>,
+        }
+        impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for $name<D, Ref> {
+            fn tile_type(&$self) -> TileType {
+                $override_ty
+            }
+            fn pos(&self) -> TilePos {
+                self.p
+            }
+            fn as_base_tile(self) -> TileRef<D, Ref> {
+                TileRef {
+                    r: self.r,
+                    p: self.p,
+                    _d: PhantomData,
+                }
+            }
+        }
+    };
+
+    ($(#[$attr:meta])* $name:ident = $override_ty:expr) => {
+        $(#[$attr])*
+        #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+        pub struct $name<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+            pub(super) r: Ref,
+            pub(super) p: TilePos,
+            pub(super) _d: PhantomData<D>,
+        }
+        impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for $name<D, Ref> {
+            fn tile_type(&self) -> TileType {
+                $override_ty
+            }
+            fn pos(&self) -> TilePos {
+                self.p
+            }
+            fn as_base_tile(self) -> TileRef<D, Ref> {
+                TileRef {
+                    r: self.r,
+                    p: self.p,
+                    _d: PhantomData,
+                }
+            }
+        }
+    };
+}
+
 pub mod bram9k;
 pub mod clocking;
 pub mod generic_routing;

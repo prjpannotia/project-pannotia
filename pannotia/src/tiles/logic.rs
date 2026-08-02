@@ -49,27 +49,9 @@ use super::*;
 
 use bitmux::{BitGetter, BitSetter};
 
-/// Access to a logic tile
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct LogicTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
-    pub(super) r: Ref,
-    pub(super) p: TilePos,
-    pub(super) _d: PhantomData<D>,
-}
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for LogicTileRef<D, Ref> {
-    fn tile_type(&self) -> TileType {
-        TileType::Logic
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-    fn as_base_tile(self) -> TileRef<D, Ref> {
-        TileRef {
-            r: self.r,
-            p: self.p,
-            _d: PhantomData,
-        }
-    }
+make_tile_ref! {
+    /// Access to a logic tile
+    LogicTileRef = TileType::Logic
 }
 
 /// (Helper) access to clock mux

@@ -5,26 +5,9 @@ use std::borrow::{Borrow, BorrowMut};
 use super::hard_ip::Mux13Inv;
 use super::*;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct PLLTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
-    pub(super) r: Ref,
-    pub(super) p: TilePos,
-    pub(super) _d: PhantomData<D>,
-}
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for PLLTileRef<D, Ref> {
-    fn tile_type(&self) -> TileType {
-        TileType::PLL
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-    fn as_base_tile(self) -> TileRef<D, Ref> {
-        TileRef {
-            r: self.r,
-            p: self.p,
-            _d: PhantomData,
-        }
-    }
+make_tile_ref! {
+    /// Access to a PLL tile
+    PLLTileRef = TileType::PLL
 }
 
 struct PLLWireTo(u8);
@@ -430,26 +413,9 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> PLLTileRef<D, Ref> {
 /// The clock enable signals in a GCLKSW tile default to an opposite sense invert bit
 pub type InvertedMux17Inv = super::hard_ip::Mux17InvGeneric<true>;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct GCLKSWTileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
-    pub(super) r: Ref,
-    pub(super) p: TilePos,
-    pub(super) _d: PhantomData<D>,
-}
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for GCLKSWTileRef<D, Ref> {
-    fn tile_type(&self) -> TileType {
-        TileType::GCLKSW
-    }
-    fn pos(&self) -> TilePos {
-        self.p
-    }
-    fn as_base_tile(self) -> TileRef<D, Ref> {
-        TileRef {
-            r: self.r,
-            p: self.p,
-            _d: PhantomData,
-        }
-    }
+make_tile_ref! {
+    /// Access to a GCLKSW tile
+    GCLKSWTileRef = TileType::GCLKSW
 }
 
 struct GCLKSWFabricToClock(u8);
