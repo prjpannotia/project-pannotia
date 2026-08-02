@@ -10946,3 +10946,255 @@ pub(super) const RMUX_MAP: [[RMUXSourceInternal; 21]; 96] = [
         },
     ],
 ];
+
+pub const RMUX_PURPOSE: [RMUXPurpose; 96] = [
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 0,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 1,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 2,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 3,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 4,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 5,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 6,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 7,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 8,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 9,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 10,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 11,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 0,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 1,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 2,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 3,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 4,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 5,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 6,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 7,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 8,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 9,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 10,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 11,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 0,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 1,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 2,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 3,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 4,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 5,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 6,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 7,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 8,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 9,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 10,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 11,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 0,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 1,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 2,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 3,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 4,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 5,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 6,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 7,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::S,
+        wire_idx: 8,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::LeftNeighbor,
+    RMUXPurpose::Span4 {
+        going_dir: Direction::E,
+        wire_idx: 9,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::N,
+        wire_idx: 10,
+    },
+    RMUXPurpose::Span4 {
+        going_dir: Direction::W,
+        wire_idx: 11,
+    },
+    RMUXPurpose::SelfWire,
+    RMUXPurpose::SelfWire,
+];
+
+pub const fn rmux_idx_for_span4(dir: Direction, wire_idx: u8) -> usize {
+    match dir {
+        Direction::N => [25, 2, 75, 55, 32, 9, 85, 62, 39, 19, 92, 69][wire_idx as usize],
+        Direction::S => [73, 50, 27, 7, 80, 57, 37, 14, 87, 67, 44, 21][wire_idx as usize],
+        Direction::E => [1, 74, 51, 31, 8, 81, 61, 38, 15, 91, 68, 45][wire_idx as usize],
+        Direction::W => [49, 26, 3, 79, 56, 33, 13, 86, 63, 43, 20, 93][wire_idx as usize],
+    }
+}

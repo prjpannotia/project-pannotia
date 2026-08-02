@@ -171,6 +171,22 @@ fn main() -> Result<ExitCode, Error> {
                                 if let RMUX::I(rmux_inp_i) = rmux {
                                     print!("tile[{}].rmux[{}] = {}", tile_pos, rmux_i, rmux);
 
+                                    let this_rmux =
+                                        pannotia::routedb::RMUX_PURPOSE[rmux_i as usize];
+                                    let this_rmux = match this_rmux {
+                                        pannotia::routedb::RMUXPurpose::SelfWire => format!(
+                                            "rmux_self[{}]",
+                                            rmux_i / 6 * 2 + rmux_i % 6 - 4
+                                        ),
+                                        pannotia::routedb::RMUXPurpose::LeftNeighbor => {
+                                            format!("T1_W[{}]", rmux_i / 6)
+                                        }
+                                        pannotia::routedb::RMUXPurpose::Span4 {
+                                            going_dir,
+                                            wire_idx,
+                                        } => format!("T4_{}[{}]", going_dir, wire_idx),
+                                    };
+
                                     let rmux_src = pannotia::routedb::rmux_input(
                                         rmux_i,
                                         rmux_inp_i,
@@ -178,19 +194,20 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                     match rmux_src {
                                         RMUXSource::GlobalToLocal(i) => {
-                                            println!("\t// glb2loc[{i}]")
+                                            println!("\t// {this_rmux} = glb2loc[{i}]")
                                         }
                                         RMUXSource::RMUX(i) => {
-                                            println!("\t// rmux[{i}]")
+                                            println!("\t// {this_rmux} = rmux[{i}]")
                                         }
                                         RMUXSource::CellOutput(i) => {
-                                            println!("\t// this_output[{i}]")
+                                            println!("\t// {this_rmux} = this_output[{i}]")
                                         }
                                         RMUXSource::RoutingWire(src_wire) => {
                                             let abs_wire =
                                                 src_wire.to_absolute(b.family(), tile.pos());
                                             println!(
-                                                "\t// tile[{}] {} going {} [{}]",
+                                                "\t// {} = tile[{}] {}_{}[{}]",
+                                                this_rmux,
                                                 abs_wire.tile,
                                                 abs_wire.ty,
                                                 abs_wire.going_dir,

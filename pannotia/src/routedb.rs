@@ -251,4 +251,42 @@ pub fn rmux_input(rmux_idx: u8, inp_idx: u8, is_bram: bool) -> RMUXSource {
     }
 }
 
+/// What a given RMUX actually does
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum RMUXPurpose {
+    /// A self-wire into the tile's logic
+    SelfWire,
+    /// A T1 left-going neighbor wire
+    LeftNeighbor,
+    /// A span-4 wire
+    Span4 { going_dir: Direction, wire_idx: u8 },
+}
+
+/// Map of RMUX index to what it actually does
+pub use rmux::RMUX_PURPOSE;
+
+/// Map of span-4 wire to the RMUX index that controls it
+pub use rmux::rmux_idx_for_span4;
+
 mod rmux;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rmux_consistency_check() {
+        for dir in [Direction::N, Direction::S, Direction::E, Direction::W] {
+            for i in 0..12 {
+                let rmux_i = rmux_idx_for_span4(dir, i);
+                assert_eq!(
+                    RMUX_PURPOSE[rmux_i],
+                    RMUXPurpose::Span4 {
+                        going_dir: dir,
+                        wire_idx: i
+                    }
+                )
+            }
+        }
+    }
+}
