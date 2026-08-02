@@ -528,7 +528,6 @@ macro_rules! _magic_replace_set_redirect_fn {
     ($self:ident $val:ident self.$redir_to:ident($($args:tt)*)) => {
         mident::mident! {
             $self.#concat(set_ $redir_to)($($args)*, $val);
-            panic!("test test {:?}", $val);
         }
     };
 }
