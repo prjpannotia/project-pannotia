@@ -318,7 +318,7 @@ fn main() -> Result<ExitCode, Error> {
                                     );
                                 }
                                 let lc_carry_en = tile.lc_carry_en(lut_i);
-                                if !lc_carry_en {
+                                if (!lc_carry_en).0 {
                                     println!("tile[{}].carry_en[{}] = 0", tile_pos, lut_i);
                                 }
 

@@ -1404,7 +1404,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for TopBottomIOTile
             },
             _d: PhantomData,
         };
-        ref_.get_bit(0).into()
+        <_ as BitstreamField>::get(ref_)
     }
 
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
@@ -1667,7 +1667,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
     }
 
     fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX) {
-        let mut ref_ = GenericFieldRef {
+        let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: TopBottomIOOutMux {
@@ -1676,7 +1676,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for TopBottom
             },
             _d: PhantomData,
         };
-        ref_.set_bit(0, val.into())
+        val.set(ref_);
     }
 
     fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {
@@ -1962,7 +1962,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> IOTileCommon for LeftRightIOTile
             field_pos: LeftRightIOOutMux(io_idx * 2 + out_idx),
             _d: PhantomData,
         };
-        ref_.get_bit(0).into()
+        <_ as BitstreamField>::get(ref_)
     }
 
     fn local_to_io_out(&self, io_idx: u8) -> LocalToIOMux {
@@ -2168,13 +2168,13 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> IOTileCommonMut for LeftRight
     }
 
     fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX) {
-        let mut ref_ = GenericFieldRef {
+        let ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
             tile_pos: self.p,
             field_pos: LeftRightIOOutMux(io_idx * 2 + out_idx),
             _d: PhantomData,
         };
-        ref_.set_bit(0, val.into())
+        val.set(ref_);
     }
 
     fn set_local_to_io_out(&mut self, io_idx: u8, val: LocalToIOMux) {

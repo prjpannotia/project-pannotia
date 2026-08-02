@@ -47,7 +47,7 @@ use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, 
 use super::local_lines::{CtrlMux, CtrlMuxRef, IMUX, IMUXRef};
 use super::*;
 
-use bitmux::{BitGetter, BitSetter, BitstreamField};
+use bitmux::{BitGetter, BitSetter};
 
 /// Access to a logic tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -236,9 +236,10 @@ impl FieldPositionCalculator for LogicBypassMode {
 
 /// A choice between an unregistered output and the flip-flop's output
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[bitmux::bitenum]
 pub enum OMUX {
-    Combinatorial,
-    FlipFlop,
+    Combinatorial = "0",
+    FlipFlop = "1",
 }
 impl Display for OMUX {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -251,22 +252,6 @@ impl Display for OMUX {
 impl Default for OMUX {
     fn default() -> Self {
         Self::Combinatorial
-    }
-}
-impl From<bool> for OMUX {
-    fn from(value: bool) -> Self {
-        match value {
-            false => Self::Combinatorial,
-            true => Self::FlipFlop,
-        }
-    }
-}
-impl From<OMUX> for bool {
-    fn from(value: OMUX) -> Self {
-        match value {
-            OMUX::Combinatorial => false,
-            OMUX::FlipFlop => true,
-        }
     }
 }
 
@@ -288,69 +273,6 @@ impl FieldPositionCalculator for LogicOut {
 }
 
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn clock_en_mux(&self, clk_idx: u8) -> Mux2Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileClkEn(clk_idx),
-            _d: PhantomData,
-        };
-        Mux2Inv::get(ref_)
-    }
-    pub fn async_mux(&self, clk_idx: u8) -> Mux3Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileAsync(clk_idx),
-            _d: PhantomData,
-        };
-        Mux3Inv::get(ref_)
-    }
-    pub fn sync_load_mux(&self) -> Mux2Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileSLoad {},
-            _d: PhantomData,
-        };
-        Mux2Inv::get(ref_)
-    }
-    pub fn sync_clr_mux(&self) -> Mux2Inv {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: TileSClr {},
-            _d: PhantomData,
-        };
-        Mux2Inv::get(ref_)
-    }
-
-    pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: GlobalToLocalMuxRef {
-                is_bram: false,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        GlobalToLocalMux::get(ref_)
-    }
-
-    pub fn control_signal_preselect(&self, inp_idx: u8) -> CtrlMux {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: CtrlMuxRef {
-                is_bram: false,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        CtrlMux::get(ref_)
-    }
-
     pub fn lut(&self, lc_idx: u8) -> u16 {
         let ref_ = GenericFieldRef {
             bitstream: self.r.borrow(),
@@ -360,153 +282,8 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
         };
         ref_.get_bits::<16>() as u16
     }
-
-    pub fn lut_input(&self, lc_idx: u8, inp_idx: u8) -> IMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: IMUXRef {
-                is_bram: false,
-                i: lc_idx * 4 + inp_idx,
-            },
-            _d: PhantomData,
-        };
-        IMUX::get(ref_)
-    }
-
-    pub fn lc_output(&self, lc_idx: u8, out_idx: u8) -> OMUX {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicOut {
-                lc: lc_idx,
-                i: out_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-
-    pub fn lc_input_c_mode(&self, lc_idx: u8) -> InputCMode {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicInputC(lc_idx),
-            _d: PhantomData,
-        };
-        InputCMode::get(ref_)
-    }
-    pub fn lc_carry_en(&self, lc_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicCarryEn(lc_idx),
-            _d: PhantomData,
-        };
-        !ref_.get_bit(0)
-    }
-
-    pub fn lc_async_choice(&self, lc_idx: u8) -> Mux2 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicAsyncMux(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    pub fn lc_clk_choice(&self, lc_idx: u8) -> Mux2 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicClkMux(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0).into()
-    }
-    pub fn lc_shift_reg_mode(&self, lc_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicShiftMode(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
-    pub fn lc_input_c_bypass_mode(&self, lc_idx: u8) -> bool {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicBypassMode(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.get_bit(0)
-    }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn set_clock_en_mux(&mut self, clk_idx: u8, val: Mux2Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileClkEn(clk_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_async_mux(&mut self, clk_idx: u8, val: Mux3Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileAsync(clk_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_sync_load_mux(&mut self, val: Mux2Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileSLoad {},
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-    pub fn set_sync_clr_mux(&mut self, val: Mux2Inv) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: TileSClr {},
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_global_to_local(&mut self, inp_idx: u8, val: GlobalToLocalMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: GlobalToLocalMuxRef {
-                is_bram: false,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_control_signal_preselect(&mut self, inp_idx: u8, val: CtrlMux) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: CtrlMuxRef {
-                is_bram: false,
-                i: inp_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
     pub fn set_lut(&mut self, lc_idx: u8, val: u16) {
         let mut ref_ = GenericFieldRef {
             bitstream: self.r.borrow_mut(),
@@ -516,88 +293,6 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
         };
         ref_.set_bits::<16>(val as u32)
     }
-
-    pub fn set_lut_input(&mut self, lc_idx: u8, inp_idx: u8, val: IMUX) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: IMUXRef {
-                is_bram: false,
-                i: lc_idx * 4 + inp_idx,
-            },
-            _d: PhantomData,
-        };
-        val.set(ref_);
-    }
-
-    pub fn set_lc_output(&mut self, lc_idx: u8, out_idx: u8, val: OMUX) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicOut {
-                lc: lc_idx,
-                i: out_idx,
-            },
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-
-    pub fn set_lc_input_c_mode(&mut self, lc_idx: u8, val: InputCMode) {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicInputC(lc_idx),
-            _d: PhantomData,
-        };
-        val.set(ref_)
-    }
-    pub fn set_lc_carry_en(&mut self, lc_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicCarryEn(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, !val);
-    }
-
-    pub fn set_lc_async_choice(&mut self, lc_idx: u8, val: Mux2) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicAsyncMux(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    pub fn set_lc_clk_choice(&mut self, lc_idx: u8, val: Mux2) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicClkMux(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val.into());
-    }
-    pub fn set_lc_shift_reg_mode(&mut self, lc_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicShiftMode(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
-    pub fn set_lc_input_c_bypass_mode(&mut self, lc_idx: u8, val: bool) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicBypassMode(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bit(0, val);
-    }
 }
 
 magic_tile_impl_gen! {
@@ -605,6 +300,66 @@ magic_tile_impl_gen! {
         /// Selects which input (a global line or a preselected control signal) drives this clock line
         pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
             TileClk(clk_idx)
+        }
+        pub fn clock_en_mux(&self, clk_idx: u8) -> Mux2Inv {
+            TileClkEn(clk_idx)
+        }
+        pub fn async_mux(&self, asy_idx: u8) -> Mux3Inv {
+            TileAsync(asy_idx)
+        }
+        pub fn sync_load_mux(&self) -> Mux2Inv {
+            TileSLoad {}
+        }
+        pub fn sync_clr_mux(&self) -> Mux2Inv {
+            TileSClr {}
+        }
+
+        pub fn global_to_local(&self, inp_idx: u8) -> GlobalToLocalMux {
+            GlobalToLocalMuxRef {
+                is_bram: false,
+                i: inp_idx,
+            }
+        }
+
+        pub fn control_signal_preselect(&self, inp_idx: u8) -> CtrlMux {
+            CtrlMuxRef {
+                is_bram: false,
+                i: inp_idx,
+            }
+        }
+
+        pub fn lut_input(&self, lc_idx: u8, inp_idx: u8) -> IMUX {
+            IMUXRef {
+                is_bram: false,
+                i: lc_idx * 4 + inp_idx,
+            }
+        }
+
+        pub fn lc_output(&self, lc_idx: u8, out_idx: u8) -> OMUX {
+            LogicOut {
+                lc: lc_idx,
+                i: out_idx,
+            }
+        }
+
+        pub fn lc_input_c_mode(&self, lc_idx: u8) -> InputCMode {
+            LogicInputC(lc_idx)
+        }
+        pub fn lc_carry_en(&self, lc_idx: u8) -> bitmux::InvertedBool {
+            LogicCarryEn(lc_idx)
+        }
+
+        pub fn lc_async_choice(&self, lc_idx: u8) -> Mux2 {
+            LogicAsyncMux(lc_idx)
+        }
+        pub fn lc_clk_choice(&self, lc_idx: u8) -> Mux2 {
+            LogicClkMux(lc_idx)
+        }
+        pub fn lc_shift_reg_mode(&self, lc_idx: u8) -> bool {
+            LogicShiftMode(lc_idx)
+        }
+        pub fn lc_input_c_bypass_mode(&self, lc_idx: u8) -> bool {
+            LogicBypassMode(lc_idx)
         }
     }
 }

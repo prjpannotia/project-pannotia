@@ -38,6 +38,8 @@
 
 #![no_std]
 
+use core::ops;
+
 use bitvec::prelude::*;
 
 /// Hardcode that each field can be encoded with at most 32 bits
@@ -127,6 +129,44 @@ pub trait BitstreamField {
     fn get(b: impl BitGetter) -> Self;
     /// Write ourself into a [BitSetter] handle
     fn set(&self, b: impl BitSetter);
+}
+
+impl BitstreamField for bool {
+    fn get(b: impl BitGetter) -> Self {
+        b.get_bit(0)
+    }
+    fn set(&self, mut b: impl BitSetter) {
+        b.set_bit(0, *self);
+    }
+}
+
+/// A boolean with inverted sense when reading/writing from the bitstream
+#[repr(transparent)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
+pub struct InvertedBool(pub bool);
+impl From<bool> for InvertedBool {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+impl From<InvertedBool> for bool {
+    fn from(value: InvertedBool) -> Self {
+        value.0
+    }
+}
+impl BitstreamField for InvertedBool {
+    fn get(b: impl BitGetter) -> Self {
+        Self(!b.get_bit(0))
+    }
+    fn set(&self, mut b: impl BitSetter) {
+        b.set_bit(0, !self.0);
+    }
+}
+impl ops::Not for InvertedBool {
+    type Output = Self;
+    fn not(self) -> Self::Output {
+        Self(!self.0)
+    }
 }
 
 /// Macro to generate enum field

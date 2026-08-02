@@ -247,9 +247,10 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRef<D, Ref> {
 
 /// A generic 2-choice mux
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[bitmux::bitenum]
 pub enum Mux2 {
-    _0,
-    _1,
+    _0 = "0",
+    _1 = "1",
 }
 impl Display for Mux2 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
