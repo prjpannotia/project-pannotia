@@ -3,16 +3,64 @@
 //! A block RAM tile is also similar to a logic tile, with the obvious difference
 //! that a block RAM requires many more signals than a single logic cell.
 //!
-//! Because a block RAM has 36 output wires which is approximately equal to 2x16
-//! (looping the output back into the input is also much less useful),
+//! ## Outputs
+//!
+//! Because a block RAM has 36 output wires which is approximately equal to 2×16,
 //! there are no output muxes in a BRAM tile. Instead, all output wiring is fixed.
 //!
+//! The right-going neighbor wires (`T1_E`) get bits [0-7] and [9-16] of port A's
+//! data output. This corresponds to 16 "non-parity" bits.
+//!
+//! The inputs to `RMUX` which in a logic tile _would've_ come from LE outputs
+//! instead get bits [0-7] and [9-16] of port B's data output.
+//!
+//! The remaining 4 output bits (2 from each of port A/B) replace
+//! what in a logic tile are the 4 global-to-local wire inputs into the `RMUX`.
+//! A BRAM tile still _has_ global-to-local wires though, so those then replace
+//! what in a logic tile would be RMUX-to-RMUX self-wires. A BRAM tile doesn't have those.
+//!
+//! ## Inputs
+//!
 //! Address and data inputs can use a similar set of `IMUX` as LE inputs.
-//! However, this does not cover the control signals and also does not
-//! give the ability to invert control signals where desired.
+//! Each port has 18 data lines and 13 address lines for a total of 31 inputs per port.
+//! This equals a grand total of 62 inputs per BRAM which is 2 less than the 64 inputs
+//! in a logic tile. These 2 extra wires can be used as clock enables or async resets.
+//!
+//! Because feeding a block RAM's data output right back into its input is
+//! not nearly as useful as feeding a LE's output back into its input,
+//! and because BRAMs need a much larger set of _unique_ inputs,
+//! BRAM `IMUX`es contain a different mix of input signals from a logic tile
+//! (and do not contain such loopback paths,
+//! instead replacing them with extra `RMUX` choices).
+//!
+//! However, `IMUX`es do not cover the BRAM's actual control signals (e.g. read/write enables)
+//! and also does not give the ability to invert these control signals where desired.
 //! BRAM tiles thus contain an additional layer of [TMUX] followed by [KMUX] for these signals.
 //! A [TMUX] preselects from (mostly) the various `T*` wires found in the tile.
 //! A [KMUX] then selects from amongst the `TMUX` outputs, optionally including an invert bit.
+//!
+//! ## Diagram
+//!
+//! ```text
+//!                                     +------------+                                  +----------+
+//! output wires other than T1_E <------|            |--- TMUX-to-KMUX wires ---------->| 16× KMUX |--> 6× useless wires
+//! general-purpose routing wires ----->| 16× TMUX   |<-+                               +----------+
+//!                                     | 6× 16 RMUX |--+ RMUX-to- *TMUX* wires                 |
+//!                                     | 4× CtrlMUX |--------------------------+               +------ 10× control signals ----+
+//!                                     |            |<-----------------+       | 3× 16 local lines (RMUX-to-IMUX)              |
+//!                                     +------------+                  |       v                                               |
+//!                                         ^ |                         |   +------------+                                      |
+//!                 +--------------------+  | | 4× control signal       |   | 4× 16 IMUX |<-- T1_W wires                        |
+//! global wires -> | 4× global-to-local | -+ |    preselections        |   +------------+                                      |
+//!                 +--------------------+  | | +---------------------- | ----+     |   2× (18× data wires, 13× address wires)  |
+//!                                         v v v    16× wires (port B) | 2× bonus  | =62× total wires                          |
+//!                                        _______   +4× wires (parity) |    wires  v                                           |
+//!                                        \_____/                      |   +---------+                                         |
+//!                                          |                          +---|         |<----------------------------------------+
+//!                tile-wide control signals |                              |   RAM   |----> T1_E wires (port A)
+//!              (clock+enable, async reset) +----------------------------->|         |
+//!                                                                         +---------+
+//! ```
 
 use std::borrow::{Borrow, BorrowMut};
 

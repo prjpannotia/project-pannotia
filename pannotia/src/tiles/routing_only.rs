@@ -2,7 +2,30 @@
 //!
 //! This tile behaves like a logic tile without any logic cells inside.
 //! This means that there are no `IMUX` nor control signals.
-//! Right-going neighbor wires instead select from the `RMUX` self-wires.
+//!
+//! Each right-going neighbor wires (`T1_E`) instead makes a selection
+//! from 1-of-2 of the `RMUX` local lines that _would've_ gone into `IMUX` in a logic tile.
+//! This reduces the 2× 16 local lines into a 1× 16 count of neighbor wires.
+//!
+//! The inputs to `RMUX` which in a logic tile _would've_ come from LE outputs
+//! instead comes directly from neighbor wires (`T1_W`) from the cell on the right.
+//!
+//! Visually, this looks like this:
+//!
+//! ```text
+//!                                     +------------+
+//! output wires other than T1_E <------|            |--+
+//! general-purpose routing wires ----->| 6× 16 RMUX |  | RMUX-to-RMUX self-wires
+//!                                     |            |<-+
+//!                                     | 4× CtrlMUX |----------------------+
+//!                                     |            |<-------------+       | 2× 16 local lines
+//!                                     +------------+              |       v
+//!                                         ^                       |   +----------+
+//!                 +--------------------+  |                       |   | 16× OMUX |----> T1_E wires
+//! global wires -> | 4× global-to-local | -+                       |   +----------+
+//!                 +--------------------+                          |
+//!                                                                 +-- T1_W wires
+//! ```
 
 use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, RMUX, RMUXRef};
 

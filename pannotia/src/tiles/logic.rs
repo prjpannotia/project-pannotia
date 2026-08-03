@@ -29,6 +29,29 @@
 //! 2. LUT inputs within this tile (via `IMUX`)
 //! 3. `RMUX` within this tile
 //!
+//! Visually, the routing _within_ a logic tile looks like this:
+//!
+//! ```text
+//!                                     +------------+
+//! output wires other than T1_E <------|            |--+
+//! general-purpose routing wires ----->| 6× 16 RMUX |  | RMUX-to-RMUX self-wires
+//!                                     |            |<-+
+//!                                     | 4× CtrlMUX |----------------------+
+//!                                     |            |<-------------+       | 2× 16 local lines (RMUX-to-IMUX)
+//!                                     +------------+              |       v
+//!                                         ^ |                     |   +------------+
+//!                 +--------------------+  | | 4× control signal   |   | 4× 16 IMUX |<-- T1_W wires
+//! global wires -> | 4× global-to-local | -+ |    preselections    |   +------------+
+//!                 +--------------------+  | |                     |       | ^
+//!                                         v v            16× OMUX |       | | 16× OMUX
+//!                                        _____                    |       v |
+//!                                        \___/                    |   +---------+
+//!                                          |                      +---|         |
+//!                tile-wide control signals |                          | 16× LEs |----> T1_E wires (via OMUX)
+//!        (clock+enable, async reset, etc.) +------------------------->|         |
+//!                                                                     +---------+
+//! ```
+//!
 //! TODO: This following bit of the documentation should be improved
 //!
 //! A logic tile also has a number of "control signal" wires which are shared by all LEs.
