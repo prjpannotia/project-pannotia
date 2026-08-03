@@ -459,6 +459,27 @@ pub fn bram_ctrl_preselect_input(ctrlmux_idx: u8, ctrlmux_inp_idx: u8) -> Functi
     }
 }
 
+/// Possible sources to drive a TMUX
+#[non_exhaustive]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum TMUXSource {
+    /// One (of 6) global-to-local muxes in this tile
+    GlobalToLocal(u8),
+    /// An unused input
+    ///
+    /// This shows up in place of a global-to-local wire sometimes
+    Unused,
+    /// The output of another RMUX in this tile
+    RMUX(u8),
+    /// A routing wire coming into this tile
+    RoutingWire(RoutingWire),
+}
+
+mod tmux;
+
+// Map of block RAM TMUX inputs
+pub use tmux::TMUX_MAP;
+
 #[cfg(test)]
 mod tests {
     use super::*;
