@@ -16,8 +16,9 @@
 //!
 //! The remaining 4 output bits (2 from each of port A/B) replace
 //! what in a logic tile are the 4 global-to-local wire inputs into the `RMUX`.
-//! A BRAM tile still _has_ global-to-local wires though, so those then replace
-//! what in a logic tile would be RMUX-to-RMUX self-wires. A BRAM tile doesn't have those.
+//! A BRAM tile still _has_ global-to-local wires though (6 rather than 4),
+//! so those then replace what in a logic tile would be RMUX-to-RMUX self-wires.
+//! A BRAM tile doesn't have those.
 //!
 //! ## Inputs
 //!
@@ -52,7 +53,7 @@
 //!                                     +------------+                  |       v                                               |
 //!                                         ^ |                         |   +------------+                                      |
 //!                 +--------------------+  | | 4× control signal       |   | 4× 16 IMUX |<-- T1_W wires                        |
-//! global wires -> | 4× global-to-local | -+ |    preselections        |   +------------+                                      |
+//! global wires -> | 6× global-to-local | -+ |    preselections        |   +------------+                                      |
 //!                 +--------------------+  | | +---------------------- | ----+     |   2× (18× data wires, 13× address wires)  |
 //!                                         v v v    16× wires (port B) | 2× bonus  | =62× total wires                          |
 //!                                        _______   +4× wires (parity) |    wires  v                                           |
