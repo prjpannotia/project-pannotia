@@ -1,4 +1,42 @@
 //! Clocking resources (PLL, clock distribution)
+//!
+//! # PLL
+//!
+//! The PLL's "general-purpose" signals (e.g. for dynamically changing the settings
+//! or adjusting the phase) can come from the `T4X` wires entering the tile.
+//! The corresponding general-purpose outputs also drive `T4X` wires.
+//! This is very similar to a hard IP tile (except with different bit locations).
+//!
+//! A PLL tile may or may not buffer and "turn around" its `T1` neighbor wires.
+//! (TODO needs hardware testing)
+//!
+//! The PLL's clock input must come from either a global clock net or a dedicated clock pin.
+//! Similarly, the PLL's feedback input can only come from dedicated feedback clock paths.
+//!
+//! # GCLKSW
+//!
+//! This tile controls clock distribution. It contains (arguably) a rather ad-hoc collection of paths,
+//! especially on AGRV2K where the microcontroller's clock is also involved.
+//!
+//! In general, each clock network on the chip can have an optional clock enable coming from the fabric.
+//! The source of the clock itself can come from either:
+//! - the fabric
+//! - the PLL outputs (a different mix of 2 PLL outputs per clock net)
+//! - a dedicated clock input pin.
+//!
+//! Note that the dedicated pins available to drive the global clock nets are not exactly the same as
+//! the set which can drive the PLL. For example, pin 16 on the AGRV2KL100 can drive a global net but not the PLL.
+//!
+//! As an exception, on the AGRV2K, global clock net 5 is not programmed by the bitstream.
+//! Instead, its clock source is the one chosen _by software_ running on the MCU.
+//! (However, the clock _enable_ still comes from the fabric. This only affects the FPGA and not the MCU.)
+//!
+//! Fabric inputs can be chosen from any of the `T1` neighbor wires.
+//!
+//! The GCLKSW tile can also drive certain dedicated clock pins into the general-purpose fabric via `T1` wires.
+//!
+//! A GCLKSW tile may or may not buffer and "turn around" its `T4X` neighbor wires.
+//! (TODO needs hardware testing)
 
 use super::hard_ip::Mux13Inv;
 use super::*;
