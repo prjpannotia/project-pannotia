@@ -183,6 +183,25 @@ enum RMUXSourceInternal {
         wire_idx: u8,
     },
 }
+impl RMUXSourceInternal {
+    pub const fn into_rmux_source(self) -> RMUXSource {
+        match self {
+            Self::SpecialCaseInput => unreachable!(),
+            Self::CellOutput(i) => RMUXSource::CellOutput(i),
+            Self::RoutingWire {
+                ty,
+                going_dir,
+                bundle,
+                wire_idx,
+            } => RMUXSource::RoutingWire(RoutingWire {
+                ty,
+                going_dir,
+                bundle,
+                wire_idx,
+            }),
+        }
+    }
+}
 
 /// Possible sources to drive a RMUX
 #[non_exhaustive]
@@ -199,28 +218,14 @@ pub enum RMUXSource {
 }
 impl From<RMUXSourceInternal> for RMUXSource {
     fn from(value: RMUXSourceInternal) -> Self {
-        match value {
-            RMUXSourceInternal::SpecialCaseInput => unreachable!(),
-            RMUXSourceInternal::CellOutput(i) => Self::CellOutput(i),
-            RMUXSourceInternal::RoutingWire {
-                ty,
-                going_dir,
-                bundle,
-                wire_idx,
-            } => Self::RoutingWire(RoutingWire {
-                ty,
-                going_dir,
-                bundle,
-                wire_idx,
-            }),
-        }
+        value.into_rmux_source()
     }
 }
 
 /// Map of RMUX inputs
-pub fn rmux_input(rmux_idx: u8, inp_idx: u8, is_bram: bool) -> RMUXSource {
+pub const fn rmux_input(rmux_idx: u8, inp_idx: u8, is_bram: bool) -> RMUXSource {
     if inp_idx != 4 {
-        let mut ret = rmux::RMUX_MAP[rmux_idx as usize][inp_idx as usize].into();
+        let mut ret = rmux::RMUX_MAP[rmux_idx as usize][inp_idx as usize].into_rmux_source();
 
         // In a BRAM tile, outputs [0-15] go to neighbor wires.
         // RMUXes get outputs [16-31] where the logic tile has LE outputs.
@@ -231,10 +236,12 @@ pub fn rmux_input(rmux_idx: u8, inp_idx: u8, is_bram: bool) -> RMUXSource {
 
         ret
     } else {
-        assert_eq!(
-            rmux::RMUX_MAP[rmux_idx as usize][inp_idx as usize],
-            RMUXSourceInternal::SpecialCaseInput
-        );
+        if let RMUXSourceInternal::SpecialCaseInput =
+            rmux::RMUX_MAP[rmux_idx as usize][inp_idx as usize]
+        {
+        } else {
+            panic!("RMUX table not as expected, should never happen!")
+        }
         // RMUXes have a repeating pattern of 6
         let rmux_within_group = rmux_idx % 6;
 
@@ -297,7 +304,7 @@ pub enum FunctionInputSource {
 }
 
 /// Map of IMUX inputs for a logic tile
-pub fn logic_imux_input(le_idx: u8, le_inp_idx: u8, imux_inp_idx: u8) -> FunctionInputSource {
+pub const fn logic_imux_input(le_idx: u8, le_inp_idx: u8, imux_inp_idx: u8) -> FunctionInputSource {
     assert!(le_idx < 16, "LE index out of range");
     assert!(le_inp_idx < 4, "LE input index out of range");
     assert!(imux_inp_idx < 27, "IMUX input index out of range");
@@ -348,7 +355,10 @@ pub fn logic_imux_input(le_idx: u8, le_inp_idx: u8, imux_inp_idx: u8) -> Functio
 }
 
 /// Map of CtrlMUX inputs for a logic tile
-pub fn logic_ctrl_preselect_input(ctrlmux_idx: u8, ctrlmux_inp_idx: u8) -> FunctionInputSource {
+pub const fn logic_ctrl_preselect_input(
+    ctrlmux_idx: u8,
+    ctrlmux_inp_idx: u8,
+) -> FunctionInputSource {
     assert!(ctrlmux_idx < 4, "CtrlMux index out of range");
     assert!(ctrlmux_inp_idx < 32, "CtrlMux input index out of range");
 
@@ -392,7 +402,7 @@ const BRAM_IMUX_ODD_RMUX: [[u8; 18]; 4] = [
 ];
 
 /// Map of IMUX inputs for a BRAM tile
-pub fn bram_imux_input(imux_idx: u8, imux_inp_idx: u8) -> FunctionInputSource {
+pub const fn bram_imux_input(imux_idx: u8, imux_inp_idx: u8) -> FunctionInputSource {
     assert!(imux_idx < 64, "IMUX index out of range");
     assert!(imux_inp_idx < 27, "IMUX input index out of range");
 
@@ -438,7 +448,10 @@ pub fn bram_imux_input(imux_idx: u8, imux_inp_idx: u8) -> FunctionInputSource {
 }
 
 /// Map of CtrlMUX inputs for a BRAM tile
-pub fn bram_ctrl_preselect_input(ctrlmux_idx: u8, ctrlmux_inp_idx: u8) -> FunctionInputSource {
+pub const fn bram_ctrl_preselect_input(
+    ctrlmux_idx: u8,
+    ctrlmux_inp_idx: u8,
+) -> FunctionInputSource {
     assert!(ctrlmux_idx < 4, "CtrlMux index out of range");
     assert!(ctrlmux_inp_idx < 32, "CtrlMux input index out of range");
 
