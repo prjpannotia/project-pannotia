@@ -6,20 +6,84 @@
 //! go "over"/"through" the tile instead "fold back around"
 //! and exit in the opposite direction from which they came.
 //! (These wires _can_ also be used as inputs into the tile's function.)
+//! No "length" is subtracted from them when this happens.
 //!
-//! All I/O elements contain embedded registers
-//! which can be bypassed on the output path. On the input path,
-//! both the registered and unregistered signals can be used.
+//! All I/O elements contain 3 embedded registers on the output, OE, and input.
+//! On the output and OE, each register can be optionally disabled/bypassed.
+//! On the input path, it is not possible to disable the register,
+//! but both the registered and unregistered signals are available.
+//!
+//! Each I/O element thus contains the following inputs:
+//! - data to be output
+//! - output enable
+//! - clock for the output path registers (on data and OE)
+//! - clock for the input path register
+//! - async reset/set
+//! - sync reset/set
+//!
+//! They _also_ contain the following inputs:
+//! - output clock (shared by the data and OE registers)
+//! - input clock
+//!
+//! Just like in other tiles, these inputs need to be chosen from "local lines".
+//! The clocks vs other signals are controlled by different kinds of muxes,
+//! because clocks have their programmable invert bits specified in a later subsequent mux.
+//! Thus having an invert bit in the mux which selects from local lines is redundant.
+//! However, both of these muxes have the same number of input choices (8).
 //!
 //! ## Left/right IOs
 //!
 //! These tiles contain 6 I/Os. Outputs are driven onto neighbor wires (wasting 4 of 16).
+//! These output wires have a particular interleaving pattern, such that the 6 IOBs drive wires:
+//! 1. `0`, `2`
+//! 2. `1`, `3`
+//! 3. `4`, `6`
+//! 4. `5`, `7`
+//! 5. `8`, `10`
+//! 6. `9`, `11`
 //!
-//! Supposedly, `T4X` wires are driven by a `LoopMUX`, but it is not clear if this actually exists.
+//! Supposedly, `T4X` wires are driven by a `LoopMUX`
+//! which buffers and re-outputs the `T4X` wires terminating in this tile,
+//! but it is not clear if this actually exists
+//! (it doesn't consistently appear in the vendor tool's data model).
 //!
-//! # Top/bottom IOs
+//! ## Top/bottom IOs
 //!
 //! These tiles contain 4 I/Os. Outputs are driven onto `T4Y` wires (wasting 4 of 12).
+//! There is no permuting here, so the 4 IOBs drive wires:
+//! 1. `0`, `1`
+//! 2. `2`, `3`
+//! 3. `4`, `5`
+//! 4. `6`, `7`
+//!
+//! ## Routing
+//!
+//! I/O tiles contain a relatively large number of local lines:
+//! 32 in a top/bottom tile and 48 in a left/right tile.
+//! However, not every control signal has access to every local line.
+//! The exact mix depends on the position within the tile.
+//!
+//! Local lines have 7 options to choose from in top/bottom tiles and 9 in left/right tiles.
+//!
+//! As a diagram:
+//!
+//! ```text
+//!                                         +----------+    +----------------+
+//!                                         |          |--->| 6× #IOBs IOMUX |------+
+//! general-purpose routing wires --------->| 8× #IOBs |    +----------------+      | data and control signals
+//!                                         |   RMUX   |    +------------------+    | (output enable, clock enable, resets)
+//!                                         |          |--->| 2× #IOBs CtrlMUX |    |
+//!                                         +----------+    +------------------+    |
+//!                                                 ^           |                   |   +-------------+
+//!                                                 |           +---|\              +-->|             |     +-----+
+//!                 +--------------------------+    |               | |---- clocks ---->| IO elements |<--->| PAD |
+//! global wires -> | 2× #IOBs global-to-local | ---+---------------|/                  |             |     +-----+
+//!                 +--------------------------+                                        +-------------+
+//!                                                                                             |
+//!                                                                                             v
+//!                                                                                 outputs to routing wires
+//!                                                                             (2× each, registered+unregistered)
+//! ```
 
 use std::fmt::Display;
 
