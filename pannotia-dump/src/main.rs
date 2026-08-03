@@ -1315,6 +1315,15 @@ fn main() -> Result<ExitCode, Error> {
             }
             println!("    .O0(CtrlMUX{ctrlmux_i:02}_O));\n");
         }
+    } else if args[1].eq_ignore_ascii_case("debug_bram_kmux_routing") {
+        for kmux_i in 0..16 {
+            println!("KMUX_15_1 m_KMUX{:02} (", kmux_i);
+            for mux_inp_i in (0..15).rev() {
+                let inp = pannotia::routedb::kmux_input(kmux_i, mux_inp_i);
+                println!("    .I{mux_inp_i}(TMUX{inp:02}_O),");
+            }
+            println!("    .O0(KMUX{kmux_i:02}_O));\n");
+        }
     } else {
         return Err(Error::InvalidMode);
     }

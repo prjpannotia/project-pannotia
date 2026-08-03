@@ -480,6 +480,23 @@ mod tmux;
 // Map of block RAM TMUX inputs
 pub use tmux::TMUX_MAP;
 
+/// Map of KMUX inputs
+///
+/// The input always comes from a TMUX
+pub const fn kmux_input(kmux_idx: u8, mut inp_idx: u8) -> u8 {
+    assert!(kmux_idx < 16, "KMUX index out of range");
+
+    if kmux_idx != 0 {
+        // for everything except the first one,
+        // scoot over the output indices for inputs past a certain point
+        if inp_idx >= kmux_idx - 1 {
+            inp_idx += 1;
+        }
+    }
+
+    inp_idx
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
