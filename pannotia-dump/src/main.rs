@@ -65,7 +65,7 @@ fn main() -> Result<ExitCode, Error> {
     let f = BufReader::new(File::open(&args[2])?);
     struct BitstreamDebugTracer {
         bit_w: usize,
-        accesses: RefCell<Vec<Option<(TilePos, TileRelativeBitPos)>>>,
+        accesses: RefCell<Vec<Option<(TilePos, TileRelativeBitPos, String)>>>,
     }
     impl pannotia::container::DebugTracer for BitstreamDebugTracer {
         fn log_coordinate_access(
@@ -73,18 +73,19 @@ fn main() -> Result<ExitCode, Error> {
             global_bit_pos: GlobalBitPos,
             tile_pos: TilePos,
             tile_relative_pos: TileRelativeBitPos,
-            _field: &dyn std::fmt::Debug,
+            field: &dyn std::fmt::Debug,
         ) {
             let mut accesses = self.accesses.borrow_mut();
 
-            if let Some((orig_tile_pos, orig_rel_pos)) =
-                accesses[global_bit_pos.y as usize * self.bit_w + global_bit_pos.x as usize]
+            if let Some((orig_tile_pos, orig_rel_pos, orig_field)) =
+                &accesses[global_bit_pos.y as usize * self.bit_w + global_bit_pos.x as usize]
             {
-                assert!(orig_tile_pos == tile_pos);
-                assert!(orig_rel_pos == tile_relative_pos)
+                assert_eq!(*orig_tile_pos, tile_pos);
+                assert_eq!(*orig_rel_pos, tile_relative_pos);
+                assert_eq!(orig_field.as_str(), format!("{:?}", field));
             }
             accesses[global_bit_pos.y as usize * self.bit_w + global_bit_pos.x as usize] =
-                Some((tile_pos, tile_relative_pos));
+                Some((tile_pos, tile_relative_pos, format!("{:?}", field)));
         }
     }
     impl BitstreamDebugTracer {
