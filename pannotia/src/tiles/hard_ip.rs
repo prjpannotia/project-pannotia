@@ -1,4 +1,39 @@
 //! Interface to external hard IP blocks
+//!
+//! Hard IP tiles exist at the edges of the array, similar to I/O tiles.
+//! However, IP tiles do not need two stages of "global" → "local" → IP
+//! and instead directly picks wires from the interconnect to send to the IP.
+//!
+//! Each wire can come from either general-purpose interconnect or global interconnect,
+//! and they all have a programmable invert bit.
+//!
+//! ## Top hard IP cells
+//!
+//! Top-edge hard IP interfaces have up to 12 wires to the IP and 12 wires from the IP.
+//!
+//! Each wire going _to_ the IP can chose from _any_ of the `T4Y` wires entering the tile
+//! (or from one of the global clock lines).
+//!
+//! Each wire coming _from_ the IP can drive up 2 possible outputs, the "corresponding" one
+//! or the "neighboring" one. For example, wire `0` from the IP can drive either `T4Y` wire `0` or `1`.
+//! Likewise, wire `1` from the IP can also drive either `T4Y` wire `0` or `1`.
+//! IP wires `2` and `3` can drive `T4Y` wires `2` or `3`, and so on.
+//! Because you usually want to be able to use _all_ the wires, this effectively gives
+//! two _useful_ choices of "go straight" or "swap pair" for each group of 2 wires.
+//!
+//! ## Left/right hard IP cells
+//!
+//! Top-edge hard IP interfaces have up to 20 wires to the IP and 20 wires from the IP.
+//!
+//! For the first 12 of these wires, each of them can chose from _any_ of the
+//! `T4X` wires entering the tile (or from one of the global clock lines).
+//! For the remaining 8 wires, each of them can chose from _any_ of the
+//! `T1` neighbor wires entering the tile (or from one of the global clock lines).
+//!
+//! The first 12 output wires drive onto `T4X` outputs, either "straight" or "swapped"
+//! (just like in top hard IP cells). The remaining 8 output wires drive onto `T1` neighbor wires.
+//! Because 8 is half of 16, each of these wires drives _2_ `T1` wires
+//! (in order, so output `12` drives `T1` wires `0` and `1`, `13` drives `2` and `3`, etc).
 
 use std::fmt::Display;
 
