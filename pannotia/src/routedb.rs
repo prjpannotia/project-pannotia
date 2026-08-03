@@ -510,6 +510,53 @@ pub const fn kmux_input(kmux_idx: u8, mut inp_idx: u8) -> u8 {
     inp_idx
 }
 
+/// Possible sources to drive an IO tile local line
+#[non_exhaustive]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum IOLocalLineSource {
+    /// A routing wire coming into this tile
+    ///
+    /// The direction of this wire need not be specified
+    /// because IO tiles only have routing wires entering from one side.
+    RoutingWire {
+        ty: WireType,
+        bundle: u8,
+        wire_idx: u8,
+    },
+    /// One (of 2× number-of-IOs) global-to-local muxes in this tile
+    GlobalToLocal(u8),
+}
+
+mod io_rmux;
+
+/// Map of top/bottom IO inputs to local lines
+pub const fn top_bottom_io_local_line_input(rmux_idx: u8, inp_idx: u8) -> IOLocalLineSource {
+    assert!(rmux_idx < 32, "RMUX index out of range");
+    assert!(inp_idx < 7, "RMUX input index out of range");
+
+    // These occur in groups of 4, where each item in the group of 4 is the same
+    io_rmux::TOP_BOTTOM_IO_RMUX_LOOKUP[rmux_idx as usize / 4][inp_idx as usize]
+}
+
+/// Map of top/bottom IO inputs to clocks (from local lines)
+pub const TOP_BOTTOM_IO_CLK_INPUTS: [u8; 8] = [3, 7, 11, 15, 19, 23, 27, 31];
+
+/// Map of top/bottom IO inputs to non-clocks (from local lines)
+pub const fn top_bottom_io_signal_input(iomux_idx: u8, inp_idx: u8) -> u8 {
+    assert!(iomux_idx < 24, "IOMUX index out of range");
+    assert!(inp_idx < 8, "IOMUX input index out of range");
+
+    // These occur in groups of 8, where each item in the group of 8 is the same
+    [
+        // IOMUX 0
+        [0, 4, 8, 12, 16, 20, 24, 28],
+        // IOMUX 8
+        [1, 5, 9, 13, 17, 21, 25, 29],
+        // IOMUX 16
+        [2, 6, 10, 14, 18, 22, 26, 30],
+    ][iomux_idx as usize / 8][inp_idx as usize]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
