@@ -274,3 +274,350 @@ pub(super) const TOP_BOTTOM_IO_RMUX_LOOKUP: [[IOLocalLineSource; 7]; 8] = [
         IOLocalLineSource::GlobalToLocal(7),
     ],
 ];
+
+pub(super) const LEFT_RIGHT_IO_RMUX_LOOKUP: [[IOLocalLineSource; 8]; 8] = [
+    // RMUX 0
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 0,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 0,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 0,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 0,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 1,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 1,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 1,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 1,
+        },
+    ],
+    // RMUX 6
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 2,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 2,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 2,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 2,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 3,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 3,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 3,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 3,
+        },
+    ],
+    // RMUX 12
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 4,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 4,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 4,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 4,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 5,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 5,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 5,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 5,
+        },
+    ],
+    // RMUX 18
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 6,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 6,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 6,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 6,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 7,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 7,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 7,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 7,
+        },
+    ],
+    // RMUX 24
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 8,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 8,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 8,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 8,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 9,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 9,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 9,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 9,
+        },
+    ],
+    // RMUX 30
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 10,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 10,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 10,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 10,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 0,
+            wire_idx: 11,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 1,
+            wire_idx: 11,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 2,
+            wire_idx: 11,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T4,
+            bundle: 3,
+            wire_idx: 11,
+        },
+    ],
+    // RMUX 36
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 0,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 1,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 2,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 3,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 4,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 5,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 6,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 7,
+        },
+    ],
+    // RMUX 42
+    [
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 8,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 9,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 10,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 11,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 12,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 13,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 14,
+        },
+        IOLocalLineSource::RoutingWire {
+            ty: WireType::T1,
+            bundle: 0,
+            wire_idx: 15,
+        },
+    ],
+];

@@ -539,7 +539,12 @@ pub const fn top_bottom_io_local_line_input(rmux_idx: u8, inp_idx: u8) -> IOLoca
 }
 
 /// Map of top/bottom IO inputs to clocks (from local lines)
-pub const TOP_BOTTOM_IO_CLK_INPUTS: [u8; 8] = [3, 7, 11, 15, 19, 23, 27, 31];
+pub const fn top_bottom_io_clock_input(clkmux_idx: u8, inp_idx: u8) -> u8 {
+    assert!(clkmux_idx < 8, "CtrlMUX index out of range");
+    assert!(inp_idx < 8, "CtrlMUX input index out of range");
+
+    [3, 7, 11, 15, 19, 23, 27, 31][inp_idx as usize]
+}
 
 /// Map of top/bottom IO inputs to non-clocks (from local lines)
 pub const fn top_bottom_io_signal_input(iomux_idx: u8, inp_idx: u8) -> u8 {
@@ -554,6 +559,47 @@ pub const fn top_bottom_io_signal_input(iomux_idx: u8, inp_idx: u8) -> u8 {
         [1, 5, 9, 13, 17, 21, 25, 29],
         // IOMUX 16
         [2, 6, 10, 14, 18, 22, 26, 30],
+    ][iomux_idx as usize / 8][inp_idx as usize]
+}
+
+/// Map of left/right IO inputs to local lines
+pub const fn left_right_io_local_line_input(rmux_idx: u8, inp_idx: u8) -> IOLocalLineSource {
+    assert!(rmux_idx < 48, "RMUX index out of range");
+    assert!(inp_idx < 9, "RMUX input index out of range");
+
+    if inp_idx == 8 {
+        // This last input is special, and is always a global2local in groups of _4_
+        IOLocalLineSource::GlobalToLocal(rmux_idx / 4)
+    } else {
+        // These occur in groups of _6_, where each item in the group of _6_ is the same
+        io_rmux::LEFT_RIGHT_IO_RMUX_LOOKUP[rmux_idx as usize / 6][inp_idx as usize]
+    }
+}
+
+/// Map of left/right IO inputs to clocks (from local lines)
+pub const fn left_right_io_clock_input(clkmux_idx: u8, inp_idx: u8) -> u8 {
+    assert!(clkmux_idx < 12, "CtrlMUX index out of range");
+    assert!(inp_idx < 8, "CtrlMUX input index out of range");
+
+    if clkmux_idx < 4 {
+        [4, 10, 16, 22, 28, 34, 40, 46][inp_idx as usize]
+    } else {
+        [5, 11, 17, 23, 29, 35, 41, 47][inp_idx as usize]
+    }
+}
+
+/// Map of left/right IO inputs to non-clocks (from local lines)
+pub const fn left_right_io_signal_input(iomux_idx: u8, inp_idx: u8) -> u8 {
+    assert!(iomux_idx < 36, "IOMUX index out of range");
+    assert!(inp_idx < 8, "IOMUX input index out of range");
+
+    // These occur in groups of 8, where each item in the group of 8 is the same
+    [
+        [0, 6, 12, 18, 24, 30, 36, 42],
+        [1, 7, 13, 19, 25, 31, 37, 43],
+        [2, 8, 14, 20, 26, 32, 38, 44],
+        [3, 9, 15, 21, 27, 33, 39, 45],
+        [4, 10, 16, 22, 28, 34, 40, 46],
     ][iomux_idx as usize / 8][inp_idx as usize]
 }
 
