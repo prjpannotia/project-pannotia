@@ -7,8 +7,9 @@ use std::marker::PhantomData;
 use bitmux::BitstreamField;
 
 use crate::container::{Bitstream, DebugTracer};
+use crate::coordinates::TilePos;
 
-fn pad_i_to_bit_i(pad_i: u8) -> usize {
+const fn pad_i_to_bit_i(pad_i: u8) -> usize {
     let mut base_offset = pad_i as usize * 10;
 
     if pad_i >= 22 {
@@ -32,6 +33,93 @@ fn pad_i_to_bit_i(pad_i: u8) -> usize {
 
     833 - base_offset
 }
+
+/// Map from pad ring control bit internal index to IO tile coordinate and site
+pub const PADRING_TO_TILE: [(TilePos, u8); 79] = [
+    // top edge
+    (TilePos { x: 14, y: 13 }, 0),
+    (TilePos { x: 14, y: 13 }, 2),
+    (TilePos { x: 15, y: 13 }, 0),
+    (TilePos { x: 15, y: 13 }, 2),
+    (TilePos { x: 15, y: 13 }, 3),
+    (TilePos { x: 16, y: 13 }, 0),
+    (TilePos { x: 16, y: 13 }, 1),
+    (TilePos { x: 16, y: 13 }, 2),
+    (TilePos { x: 16, y: 13 }, 3),
+    (TilePos { x: 17, y: 13 }, 0),
+    (TilePos { x: 17, y: 13 }, 1),
+    (TilePos { x: 17, y: 13 }, 2),
+    (TilePos { x: 17, y: 13 }, 3),
+    (TilePos { x: 18, y: 13 }, 0),
+    (TilePos { x: 18, y: 13 }, 1),
+    (TilePos { x: 18, y: 13 }, 2),
+    (TilePos { x: 18, y: 13 }, 3),
+    (TilePos { x: 19, y: 13 }, 0),
+    (TilePos { x: 19, y: 13 }, 1),
+    (TilePos { x: 19, y: 13 }, 2),
+    (TilePos { x: 19, y: 13 }, 3),
+    (TilePos { x: 20, y: 13 }, 1),
+    (TilePos { x: 20, y: 13 }, 2),
+    (TilePos { x: 20, y: 13 }, 3),
+    // right edge
+    (TilePos { x: 22, y: 3 }, 0),
+    (TilePos { x: 22, y: 3 }, 1),
+    (TilePos { x: 22, y: 3 }, 2),
+    (TilePos { x: 22, y: 3 }, 3),
+    (TilePos { x: 22, y: 2 }, 3),
+    (TilePos { x: 22, y: 2 }, 5),
+    (TilePos { x: 22, y: 1 }, 0),
+    (TilePos { x: 22, y: 1 }, 2),
+    (TilePos { x: 22, y: 1 }, 3),
+    (TilePos { x: 22, y: 1 }, 4),
+    // bottom edge
+    (TilePos { x: 20, y: 0 }, 2),
+    (TilePos { x: 20, y: 0 }, 0),
+    (TilePos { x: 19, y: 0 }, 3),
+    (TilePos { x: 19, y: 0 }, 1),
+    (TilePos { x: 18, y: 0 }, 1),
+    (TilePos { x: 18, y: 0 }, 0),
+    (TilePos { x: 17, y: 0 }, 2),
+    (TilePos { x: 17, y: 0 }, 1),
+    (TilePos { x: 17, y: 0 }, 0),
+    (TilePos { x: 8, y: 0 }, 3),
+    (TilePos { x: 8, y: 0 }, 2),
+    (TilePos { x: 8, y: 0 }, 1),
+    (TilePos { x: 8, y: 0 }, 0),
+    (TilePos { x: 7, y: 0 }, 3),
+    (TilePos { x: 7, y: 0 }, 1),
+    (TilePos { x: 7, y: 0 }, 0),
+    (TilePos { x: 6, y: 0 }, 3),
+    (TilePos { x: 6, y: 0 }, 0),
+    (TilePos { x: 1, y: 0 }, 3),
+    (TilePos { x: 1, y: 0 }, 2),
+    (TilePos { x: 1, y: 0 }, 1),
+    (TilePos { x: 1, y: 0 }, 0),
+    // left edge
+    (TilePos { x: 0, y: 1 }, 5),
+    (TilePos { x: 0, y: 1 }, 4),
+    (TilePos { x: 0, y: 1 }, 3),
+    (TilePos { x: 0, y: 1 }, 2),
+    (TilePos { x: 0, y: 1 }, 0),
+    (TilePos { x: 0, y: 2 }, 5),
+    (TilePos { x: 0, y: 2 }, 4),
+    (TilePos { x: 0, y: 2 }, 3),
+    (TilePos { x: 0, y: 2 }, 2),
+    (TilePos { x: 0, y: 2 }, 1),
+    (TilePos { x: 0, y: 2 }, 0),
+    (TilePos { x: 0, y: 3 }, 5),
+    (TilePos { x: 0, y: 3 }, 4),
+    (TilePos { x: 0, y: 3 }, 3),
+    (TilePos { x: 0, y: 3 }, 2),
+    (TilePos { x: 0, y: 3 }, 1),
+    (TilePos { x: 0, y: 3 }, 0),
+    (TilePos { x: 0, y: 4 }, 5),
+    (TilePos { x: 0, y: 4 }, 4),
+    (TilePos { x: 0, y: 4 }, 3),
+    (TilePos { x: 0, y: 4 }, 2),
+    (TilePos { x: 0, y: 4 }, 1),
+    (TilePos { x: 0, y: 4 }, 0),
+];
 
 struct DriveStrengthBits<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     r: Ref,

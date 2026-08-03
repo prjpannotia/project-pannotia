@@ -3,6 +3,7 @@
 pub mod chips;
 pub mod container;
 pub mod coordinates;
+pub mod packages;
 pub mod padring;
 pub mod routedb;
 pub mod tiles;
