@@ -70,6 +70,7 @@ make_tile_ref! {
 }
 
 /// (Helper) access to RMUX
+#[derive(Debug)]
 pub(crate) struct RMUXRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,

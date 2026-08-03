@@ -472,9 +472,10 @@ impl<D: DebugTracer> Bitstream<D> {
         global_bit_pos: GlobalBitPos,
         tile_pos: TilePos,
         tile_relative_pos: TileRelativeBitPos,
+        field: &dyn std::fmt::Debug,
     ) {
         self.debug_tracer
-            .log_coordinate_access(global_bit_pos, tile_pos, tile_relative_pos);
+            .log_coordinate_access(global_bit_pos, tile_pos, tile_relative_pos, field);
     }
     #[inline]
     pub fn set_logic_array_bit(&mut self, bit: GlobalBitPos, val: bool) {
@@ -513,6 +514,7 @@ pub trait DebugTracer {
         global_bit_pos: GlobalBitPos,
         tile_pos: TilePos,
         tile_relative_pos: TileRelativeBitPos,
+        field: &dyn std::fmt::Debug,
     );
 }
 
@@ -520,5 +522,12 @@ pub trait DebugTracer {
 pub struct DummyDebugTracer {}
 impl DebugTracer for DummyDebugTracer {
     #[inline(always)]
-    fn log_coordinate_access(&self, _: GlobalBitPos, _: TilePos, _: TileRelativeBitPos) {}
+    fn log_coordinate_access(
+        &self,
+        _: GlobalBitPos,
+        _: TilePos,
+        _: TileRelativeBitPos,
+        _: &dyn std::fmt::Debug,
+    ) {
+    }
 }

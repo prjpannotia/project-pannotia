@@ -154,6 +154,7 @@ impl<const IS_INVERTED: bool> bitmux::BitstreamField for Mux17InvGeneric<IS_INVE
 /// A mux with 17 choices and an optional invert
 pub type Mux17Inv = Mux17InvGeneric<false>;
 
+#[derive(Debug)]
 struct TopIPToExtMux(u8);
 impl FieldPositionCalculator for TopIPToExtMux {
     #[inline]
@@ -184,6 +185,7 @@ impl FieldPositionCalculator for TopIPToExtMux {
     }
 }
 
+#[derive(Debug)]
 struct TopIPFromExtMux(u8);
 impl FieldPositionCalculator for TopIPFromExtMux {
     #[inline]
@@ -209,6 +211,7 @@ impl FieldPositionCalculator for TopIPFromExtMux {
     }
 }
 
+#[derive(Debug)]
 struct TopIPGlobal2Local(u8);
 impl FieldPositionCalculator for TopIPGlobal2Local {
     #[inline]
@@ -259,6 +262,7 @@ magic_tile_impl_gen! {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIPToExtMux13(u8);
 impl FieldPositionCalculator for LeftRightIPToExtMux13 {
     #[inline]
@@ -281,6 +285,7 @@ impl FieldPositionCalculator for LeftRightIPToExtMux13 {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIPToExtMux17(u8);
 impl FieldPositionCalculator for LeftRightIPToExtMux17 {
     #[inline]
@@ -306,6 +311,7 @@ impl FieldPositionCalculator for LeftRightIPToExtMux17 {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIPFromExtMux(u8);
 impl FieldPositionCalculator for LeftRightIPFromExtMux {
     #[inline]
@@ -318,6 +324,7 @@ impl FieldPositionCalculator for LeftRightIPFromExtMux {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIPGlobal2Local(u8);
 impl FieldPositionCalculator for LeftRightIPGlobal2Local {
     #[inline]

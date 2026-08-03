@@ -110,8 +110,11 @@ pub(crate) struct GenericFieldRef<
     pub(crate) field_pos: F,
     pub(crate) _d: PhantomData<D>,
 }
-impl<D: DebugTracer, Ref: Borrow<crate::container::Bitstream<D>>, F: FieldPositionCalculator>
-    bitmux::BitGetter for GenericFieldRef<D, Ref, F>
+impl<
+    D: DebugTracer,
+    Ref: Borrow<crate::container::Bitstream<D>>,
+    F: FieldPositionCalculator + std::fmt::Debug,
+> bitmux::BitGetter for GenericFieldRef<D, Ref, F>
 {
     #[inline]
     fn get_bit(&self, biti: usize) -> bool {
@@ -119,7 +122,12 @@ impl<D: DebugTracer, Ref: Borrow<crate::container::Bitstream<D>>, F: FieldPositi
         let bitstream = self.bitstream.borrow();
         let family = bitstream.family();
         let global_bit_pos: GlobalBitPos = (family, self.tile_pos, tile_relative_pos).into();
-        bitstream.debug_log_access(global_bit_pos, self.tile_pos, tile_relative_pos);
+        bitstream.debug_log_access(
+            global_bit_pos,
+            self.tile_pos,
+            tile_relative_pos,
+            &self.field_pos,
+        );
         bitstream.get_logic_array_bit(global_bit_pos)
     }
 }

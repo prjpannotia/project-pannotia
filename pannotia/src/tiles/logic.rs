@@ -78,6 +78,7 @@ make_tile_ref! {
 }
 
 /// (Helper) access to clock mux
+#[derive(Debug)]
 struct TileClk(u8);
 impl FieldPositionCalculator for TileClk {
     #[inline]
@@ -89,6 +90,7 @@ impl FieldPositionCalculator for TileClk {
     }
 }
 /// (Helper) access to clock enable mux
+#[derive(Debug)]
 struct TileClkEn(u8);
 impl FieldPositionCalculator for TileClkEn {
     #[inline]
@@ -100,6 +102,7 @@ impl FieldPositionCalculator for TileClkEn {
     }
 }
 /// (Helper) access to async control signal mux
+#[derive(Debug)]
 struct TileAsync(u8);
 impl FieldPositionCalculator for TileAsync {
     #[inline]
@@ -111,6 +114,7 @@ impl FieldPositionCalculator for TileAsync {
     }
 }
 /// (Helper) access to sync load mux
+#[derive(Debug)]
 struct TileSLoad {}
 impl FieldPositionCalculator for TileSLoad {
     #[inline]
@@ -121,6 +125,7 @@ impl FieldPositionCalculator for TileSLoad {
     }
 }
 /// (Helper) access to sync clear mux
+#[derive(Debug)]
 struct TileSClr {}
 impl FieldPositionCalculator for TileSClr {
     #[inline]
@@ -132,6 +137,7 @@ impl FieldPositionCalculator for TileSClr {
 }
 
 /// (Helper) access to LUT bits
+#[derive(Debug)]
 struct LogicLUT(u8);
 impl FieldPositionCalculator for LogicLUT {
     #[inline]
@@ -166,6 +172,7 @@ impl Default for InputCMode {
 }
 
 /// (Helper) access to LE input-C setting
+#[derive(Debug)]
 struct LogicInputC(u8);
 impl FieldPositionCalculator for LogicInputC {
     #[inline]
@@ -178,6 +185,7 @@ impl FieldPositionCalculator for LogicInputC {
     }
 }
 /// (Helper) access to LE carry setting
+#[derive(Debug)]
 struct LogicCarryEn(u8);
 impl FieldPositionCalculator for LogicCarryEn {
     #[inline]
@@ -191,6 +199,7 @@ impl FieldPositionCalculator for LogicCarryEn {
 }
 
 /// (Helper) access to LE async control mux
+#[derive(Debug)]
 struct LogicAsyncMux(u8);
 impl FieldPositionCalculator for LogicAsyncMux {
     #[inline]
@@ -203,6 +212,7 @@ impl FieldPositionCalculator for LogicAsyncMux {
     }
 }
 /// (Helper) access to LE clock+enable mux
+#[derive(Debug)]
 struct LogicClkMux(u8);
 impl FieldPositionCalculator for LogicClkMux {
     #[inline]
@@ -215,6 +225,7 @@ impl FieldPositionCalculator for LogicClkMux {
     }
 }
 /// (Helper) access to LE shift-register setting
+#[derive(Debug)]
 struct LogicShiftMode(u8);
 impl FieldPositionCalculator for LogicShiftMode {
     #[inline]
@@ -227,6 +238,7 @@ impl FieldPositionCalculator for LogicShiftMode {
     }
 }
 /// (Helper) access to LE LUT-bypass setting
+#[derive(Debug)]
 struct LogicBypassMode(u8);
 impl FieldPositionCalculator for LogicBypassMode {
     #[inline]
@@ -261,6 +273,7 @@ impl Default for OMUX {
 }
 
 /// (Helper) access to LE OMUX setting
+#[derive(Debug)]
 struct LogicOut {
     lc: u8,
     i: u8,

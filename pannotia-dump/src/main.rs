@@ -73,6 +73,7 @@ fn main() -> Result<ExitCode, Error> {
             global_bit_pos: GlobalBitPos,
             tile_pos: TilePos,
             tile_relative_pos: TileRelativeBitPos,
+            _field: &dyn std::fmt::Debug,
         ) {
             let mut accesses = self.accesses.borrow_mut();
 

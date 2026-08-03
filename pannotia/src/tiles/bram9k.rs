@@ -79,6 +79,7 @@ make_tile_ref! {
 }
 
 /// (Helper) access to BRAM preloaded data
+#[derive(Debug)]
 struct InitVal {}
 impl FieldPositionCalculator for InitVal {
     #[inline]
@@ -104,6 +105,7 @@ impl FieldPositionCalculator for InitVal {
 }
 
 /// (Helper) access to TMUX
+#[derive(Debug)]
 struct TMUXRef(u8);
 impl FieldPositionCalculator for TMUXRef {
     #[inline]
@@ -167,6 +169,7 @@ impl bitmux::BitstreamField for TMUX {
 }
 
 /// (Helper) access to KMUX
+#[derive(Debug)]
 struct KMUXRef(u8);
 impl FieldPositionCalculator for KMUXRef {
     #[inline]
@@ -252,6 +255,7 @@ impl bitmux::BitstreamField for KMUX {
 }
 
 /// (Helper) access to clock mux
+#[derive(Debug)]
 struct TileClk(u8);
 impl FieldPositionCalculator for TileClk {
     #[inline]
@@ -268,6 +272,7 @@ impl FieldPositionCalculator for TileClk {
     }
 }
 /// (Helper) access to clock enable mux
+#[derive(Debug)]
 struct TileClkEn(u8);
 impl FieldPositionCalculator for TileClkEn {
     #[inline]
@@ -287,6 +292,7 @@ impl FieldPositionCalculator for TileClkEn {
     }
 }
 /// (Helper) access to async control signal mux
+#[derive(Debug)]
 struct TileAsync(u8);
 impl FieldPositionCalculator for TileAsync {
     #[inline]
@@ -335,6 +341,7 @@ impl Display for PortWidth {
     }
 }
 /// (Helper) access to BRAM port A width
+#[derive(Debug)]
 struct PortAWidth {}
 impl FieldPositionCalculator for PortAWidth {
     #[inline]
@@ -413,6 +420,7 @@ impl FieldPositionCalculator for PortAWidth {
     }
 }
 /// (Helper) access to BRAM port B width
+#[derive(Debug)]
 struct PortBWidth {}
 impl FieldPositionCalculator for PortBWidth {
     #[inline]
@@ -492,6 +500,7 @@ impl FieldPositionCalculator for PortBWidth {
 }
 
 /// (Helper) access to BRAM port A output reg enable
+#[derive(Debug)]
 struct OutRegA {}
 impl FieldPositionCalculator for OutRegA {
     #[inline]
@@ -500,6 +509,7 @@ impl FieldPositionCalculator for OutRegA {
     }
 }
 /// (Helper) access to BRAM port B output reg enable
+#[derive(Debug)]
 struct OutRegB {}
 impl FieldPositionCalculator for OutRegB {
     #[inline]
@@ -508,6 +518,7 @@ impl FieldPositionCalculator for OutRegB {
     }
 }
 /// (Helper) access to BRAM port A write thru mode
+#[derive(Debug)]
 struct WriteThruA {}
 impl FieldPositionCalculator for WriteThruA {
     #[inline]
@@ -516,6 +527,7 @@ impl FieldPositionCalculator for WriteThruA {
     }
 }
 /// (Helper) access to BRAM port B write thru mode
+#[derive(Debug)]
 struct WriteThruB {}
 impl FieldPositionCalculator for WriteThruB {
     #[inline]
@@ -524,6 +536,7 @@ impl FieldPositionCalculator for WriteThruB {
     }
 }
 /// (Helper) access to BRAM port A in reg reset enable
+#[derive(Debug)]
 struct UseRstInA {}
 impl FieldPositionCalculator for UseRstInA {
     #[inline]
@@ -532,6 +545,7 @@ impl FieldPositionCalculator for UseRstInA {
     }
 }
 /// (Helper) access to BRAM port B in reg reset enable
+#[derive(Debug)]
 struct UseRstInB {}
 impl FieldPositionCalculator for UseRstInB {
     #[inline]
@@ -540,6 +554,7 @@ impl FieldPositionCalculator for UseRstInB {
     }
 }
 /// (Helper) access to BRAM port A out reg reset enable
+#[derive(Debug)]
 struct UseRstOutA {}
 impl FieldPositionCalculator for UseRstOutA {
     #[inline]
@@ -548,6 +563,7 @@ impl FieldPositionCalculator for UseRstOutA {
     }
 }
 /// (Helper) access to BRAM port B out reg reset enable
+#[derive(Debug)]
 struct UseRstOutB {}
 impl FieldPositionCalculator for UseRstOutB {
     #[inline]
@@ -556,6 +572,7 @@ impl FieldPositionCalculator for UseRstOutB {
     }
 }
 /// (Helper) access to BRAM port A in reg clock enable
+#[derive(Debug)]
 struct UseClkEnInA {}
 impl FieldPositionCalculator for UseClkEnInA {
     #[inline]
@@ -564,6 +581,7 @@ impl FieldPositionCalculator for UseClkEnInA {
     }
 }
 /// (Helper) access to BRAM port B in reg clock enable
+#[derive(Debug)]
 struct UseClkEnInB {}
 impl FieldPositionCalculator for UseClkEnInB {
     #[inline]
@@ -572,6 +590,7 @@ impl FieldPositionCalculator for UseClkEnInB {
     }
 }
 /// (Helper) access to BRAM port A out reg clock enable
+#[derive(Debug)]
 struct UseClkEnOutA {}
 impl FieldPositionCalculator for UseClkEnOutA {
     #[inline]
@@ -580,6 +599,7 @@ impl FieldPositionCalculator for UseClkEnOutA {
     }
 }
 /// (Helper) access to BRAM port B out reg clock enable
+#[derive(Debug)]
 struct UseClkEnOutB {}
 impl FieldPositionCalculator for UseClkEnOutB {
     #[inline]
@@ -588,6 +608,7 @@ impl FieldPositionCalculator for UseClkEnOutB {
     }
 }
 
+#[derive(Debug)]
 struct RsenDly {}
 impl FieldPositionCalculator for RsenDly {
     #[inline]
@@ -598,6 +619,7 @@ impl FieldPositionCalculator for RsenDly {
         ][biti]
     }
 }
+#[derive(Debug)]
 struct DlyTime {}
 impl FieldPositionCalculator for DlyTime {
     #[inline]
@@ -639,6 +661,7 @@ impl Display for ClockMode {
     }
 }
 /// (Helper) access to BRAM clocking mode
+#[derive(Debug)]
 struct ClkModeRef {}
 impl FieldPositionCalculator for ClkModeRef {
     #[inline]
@@ -651,6 +674,7 @@ impl FieldPositionCalculator for ClkModeRef {
 }
 
 /// (Helper) access to BRAM "packed" mode
+#[derive(Debug)]
 struct PackedModeAddressOverride {}
 impl FieldPositionCalculator for PackedModeAddressOverride {
     #[inline]

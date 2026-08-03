@@ -167,6 +167,7 @@ impl bitmux::BitstreamField for LeftRightIOLocalMux {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOLocalLine {
     is_bottom: bool,
     i: u8,
@@ -216,6 +217,7 @@ impl FieldPositionCalculator for TopBottomIOLocalLine {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOLocalLine(u8);
 impl FieldPositionCalculator for LeftRightIOLocalLine {
     #[inline]
@@ -254,6 +256,7 @@ impl FieldPositionCalculator for LeftRightIOLocalLine {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOGlobal2Local {
     is_bottom: bool,
     i: u8,
@@ -287,6 +290,7 @@ impl FieldPositionCalculator for TopBottomIOGlobal2Local {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOGlobal2Local(u8);
 impl FieldPositionCalculator for LeftRightIOGlobal2Local {
     #[inline]
@@ -348,6 +352,7 @@ impl bitmux::BitstreamField for IOLocalToClockMux {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOLocal2Clk {
     is_bottom: bool,
     i: u8,
@@ -393,6 +398,7 @@ impl FieldPositionCalculator for TopBottomIOLocal2Clk {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOLocal2Clk(u8);
 impl FieldPositionCalculator for LeftRightIOLocal2Clk {
     #[inline]
@@ -474,6 +480,7 @@ impl bitmux::BitstreamField for LocalToIOMux {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOLocal2IO {
     is_bottom: bool,
     i: u8,
@@ -516,6 +523,7 @@ impl FieldPositionCalculator for TopBottomIOLocal2IO {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOLocal2IO(u8);
 impl FieldPositionCalculator for LeftRightIOLocal2IO {
     #[inline]
@@ -607,6 +615,7 @@ impl bitmux::BitstreamField for IOClockMux {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOClockMux {
     is_bottom: bool,
     i: u8,
@@ -652,6 +661,7 @@ impl FieldPositionCalculator for TopBottomIOClockMux {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOClockMux(u8);
 impl FieldPositionCalculator for LeftRightIOClockMux {
     #[inline]
@@ -685,6 +695,7 @@ impl FieldPositionCalculator for LeftRightIOClockMux {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOOutMux {
     is_bottom: bool,
     i: u8,
@@ -714,6 +725,7 @@ impl FieldPositionCalculator for TopBottomIOOutMux {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOOutMux(u8);
 impl FieldPositionCalculator for LeftRightIOOutMux {
     #[inline]
@@ -726,6 +738,7 @@ impl FieldPositionCalculator for LeftRightIOOutMux {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOInDaDelay {
     is_bottom: bool,
     i: u8,
@@ -748,6 +761,7 @@ impl FieldPositionCalculator for TopBottomIOInDaDelay {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOInDaDelay(u8);
 impl FieldPositionCalculator for LeftRightIOInDaDelay {
     #[inline]
@@ -770,6 +784,7 @@ impl FieldPositionCalculator for LeftRightIOInDaDelay {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomIOInRegDelay {
     is_bottom: bool,
     i: u8,
@@ -796,6 +811,7 @@ impl FieldPositionCalculator for TopBottomIOInRegDelay {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightIOInRegDelay(u8);
 impl FieldPositionCalculator for LeftRightIOInRegDelay {
     #[inline]
@@ -818,6 +834,7 @@ impl FieldPositionCalculator for LeftRightIOInRegDelay {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOutDelay {
     is_bottom: bool,
     i: u8,
@@ -838,6 +855,7 @@ impl FieldPositionCalculator for TopBottomOutDelay {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOutDelay(u8);
 impl FieldPositionCalculator for LeftRightOutDelay {
     #[inline]
@@ -851,6 +869,7 @@ impl FieldPositionCalculator for LeftRightOutDelay {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOutReg {
     is_bottom: bool,
     i: u8,
@@ -871,6 +890,7 @@ impl FieldPositionCalculator for TopBottomOutReg {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOutReg(u8);
 impl FieldPositionCalculator for LeftRightOutReg {
     #[inline]
@@ -884,6 +904,7 @@ impl FieldPositionCalculator for LeftRightOutReg {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOEReg {
     is_bottom: bool,
     i: u8,
@@ -904,6 +925,7 @@ impl FieldPositionCalculator for TopBottomOEReg {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOEReg(u8);
 impl FieldPositionCalculator for LeftRightOEReg {
     #[inline]
@@ -917,6 +939,7 @@ impl FieldPositionCalculator for LeftRightOEReg {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomInPU {
     is_bottom: bool,
     i: u8,
@@ -937,6 +960,7 @@ impl FieldPositionCalculator for TopBottomInPU {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOutPU {
     is_bottom: bool,
     i: u8,
@@ -957,6 +981,7 @@ impl FieldPositionCalculator for TopBottomOutPU {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOEPU {
     is_bottom: bool,
     i: u8,
@@ -977,6 +1002,7 @@ impl FieldPositionCalculator for TopBottomOEPU {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightInPU(u8);
 impl FieldPositionCalculator for LeftRightInPU {
     #[inline]
@@ -990,6 +1016,7 @@ impl FieldPositionCalculator for LeftRightInPU {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOutPU(u8);
 impl FieldPositionCalculator for LeftRightOutPU {
     #[inline]
@@ -1003,6 +1030,7 @@ impl FieldPositionCalculator for LeftRightOutPU {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOEPU(u8);
 impl FieldPositionCalculator for LeftRightOEPU {
     #[inline]
@@ -1053,6 +1081,7 @@ impl From<RegCtrlMode> for bool {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomInSMode {
     is_bottom: bool,
     i: u8,
@@ -1073,6 +1102,7 @@ impl FieldPositionCalculator for TopBottomInSMode {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomInAMode {
     is_bottom: bool,
     i: u8,
@@ -1093,6 +1123,7 @@ impl FieldPositionCalculator for TopBottomInAMode {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOutSMode {
     is_bottom: bool,
     i: u8,
@@ -1113,6 +1144,7 @@ impl FieldPositionCalculator for TopBottomOutSMode {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOutAMode {
     is_bottom: bool,
     i: u8,
@@ -1133,6 +1165,7 @@ impl FieldPositionCalculator for TopBottomOutAMode {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOESMode {
     is_bottom: bool,
     i: u8,
@@ -1153,6 +1186,7 @@ impl FieldPositionCalculator for TopBottomOESMode {
     }
 }
 
+#[derive(Debug)]
 struct TopBottomOEAMode {
     is_bottom: bool,
     i: u8,
@@ -1173,6 +1207,7 @@ impl FieldPositionCalculator for TopBottomOEAMode {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightInSMode(u8);
 impl FieldPositionCalculator for LeftRightInSMode {
     #[inline]
@@ -1186,6 +1221,7 @@ impl FieldPositionCalculator for LeftRightInSMode {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightInAMode(u8);
 impl FieldPositionCalculator for LeftRightInAMode {
     #[inline]
@@ -1199,6 +1235,7 @@ impl FieldPositionCalculator for LeftRightInAMode {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOutSMode(u8);
 impl FieldPositionCalculator for LeftRightOutSMode {
     #[inline]
@@ -1212,6 +1249,7 @@ impl FieldPositionCalculator for LeftRightOutSMode {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOutAMode(u8);
 impl FieldPositionCalculator for LeftRightOutAMode {
     #[inline]
@@ -1225,6 +1263,7 @@ impl FieldPositionCalculator for LeftRightOutAMode {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOESMode(u8);
 impl FieldPositionCalculator for LeftRightOESMode {
     #[inline]
@@ -1238,6 +1277,7 @@ impl FieldPositionCalculator for LeftRightOESMode {
     }
 }
 
+#[derive(Debug)]
 struct LeftRightOEAMode(u8);
 impl FieldPositionCalculator for LeftRightOEAMode {
     #[inline]

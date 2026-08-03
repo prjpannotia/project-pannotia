@@ -283,6 +283,7 @@ impl From<Mux2> for bool {
 }
 
 /// (Helper) access to global2local, only in the core
+#[derive(Debug)]
 pub(crate) struct GlobalToLocalMuxRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,

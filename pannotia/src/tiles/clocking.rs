@@ -46,6 +46,7 @@ make_tile_ref! {
     PLLTileRef = TileType::PLL
 }
 
+#[derive(Debug)]
 struct PLLWireTo(u8);
 impl FieldPositionCalculator for PLLWireTo {
     #[inline]
@@ -66,6 +67,7 @@ impl FieldPositionCalculator for PLLWireTo {
     }
 }
 
+#[derive(Debug)]
 struct PLLGlobal2Local(u8);
 impl FieldPositionCalculator for PLLGlobal2Local {
     #[inline]
@@ -320,6 +322,7 @@ make_tile_ref! {
     GCLKSWTileRef = TileType::GCLKSW
 }
 
+#[derive(Debug)]
 struct GCLKSWFabricToClock(u8);
 impl FieldPositionCalculator for GCLKSWFabricToClock {
     #[inline]
@@ -342,6 +345,7 @@ impl FieldPositionCalculator for GCLKSWFabricToClock {
     }
 }
 
+#[derive(Debug)]
 struct GCLKSWEnable(u8);
 impl FieldPositionCalculator for GCLKSWEnable {
     #[inline]
@@ -364,6 +368,7 @@ impl FieldPositionCalculator for GCLKSWEnable {
     }
 }
 
+#[derive(Debug)]
 struct GCLKSWGlobal2Local(u8);
 impl FieldPositionCalculator for GCLKSWGlobal2Local {
     #[inline]
@@ -378,6 +383,7 @@ impl FieldPositionCalculator for GCLKSWGlobal2Local {
     }
 }
 
+#[derive(Debug)]
 struct GCLKSWClock2Fabric(u8);
 impl FieldPositionCalculator for GCLKSWClock2Fabric {
     #[inline]
@@ -390,6 +396,7 @@ impl FieldPositionCalculator for GCLKSWClock2Fabric {
     }
 }
 
+#[derive(Debug)]
 struct GCLKSWClockEnReg(u8);
 impl FieldPositionCalculator for GCLKSWClockEnReg {
     #[inline]
@@ -424,6 +431,7 @@ impl bitmux::BitstreamField for GCLKMux4 {
     }
 }
 
+#[derive(Debug)]
 struct GCLKSWMux(u8);
 impl FieldPositionCalculator for GCLKSWMux {
     #[inline]

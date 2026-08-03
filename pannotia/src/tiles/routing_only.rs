@@ -36,6 +36,7 @@ make_tile_ref! {
     RoutingOnlyTileRef = TileType::RoutingOnly
 }
 
+#[derive(Debug)]
 struct OMUXRef(u8);
 impl FieldPositionCalculator for OMUXRef {
     #[inline]

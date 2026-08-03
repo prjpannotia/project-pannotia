@@ -9,6 +9,7 @@ use std::fmt::Display;
 use super::*;
 
 /// (Helper) access to IMUX
+#[derive(Debug)]
 pub(crate) struct IMUXRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,
@@ -94,6 +95,7 @@ impl bitmux::BitstreamField for IMUX {
 }
 
 /// (Helper) access to CtrlMux
+#[derive(Debug)]
 pub(crate) struct CtrlMuxRef {
     pub(crate) is_bram: bool,
     pub(crate) i: u8,
