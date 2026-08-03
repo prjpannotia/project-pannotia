@@ -1268,6 +1268,53 @@ fn main() -> Result<ExitCode, Error> {
             }
             println!("    .O0(CtrlMUX{ctrlmux_i:02}_O));\n");
         }
+    } else if args[1].eq_ignore_ascii_case("debug_bram_imux_routing") {
+        for imux_i in 0..64 {
+            println!("IMUX_27_1 m_IMUX{:02} (", imux_i);
+            for mux_inp_i in (0..27).rev() {
+                let inp = pannotia::routedb::bram_imux_input(imux_i, mux_inp_i);
+                print!("    .I{mux_inp_i}(");
+                match inp {
+                    FunctionInputSource::RMUX(i) => {
+                        print!("RMUX{:02}_O", i);
+                    }
+                    FunctionInputSource::RightNeighborWire(i) => {
+                        print!("T1_W_I0[{i}]");
+                    }
+                    FunctionInputSource::LeftNeighborWire(i) => {
+                        print!("T1_E_I0[{i}]");
+                    }
+                    FunctionInputSource::Unused => {
+                        print!("vcc");
+                    }
+                    _ => unreachable!(),
+                }
+                println!("),")
+            }
+            println!("    .O0(IMUX{imux_i:02}_O));\n");
+        }
+    } else if args[1].eq_ignore_ascii_case("debug_bram_ctrlmux_routing") {
+        for ctrlmux_i in 0..4 {
+            println!("CtrlMUX_32_1 m_CtrlMUX{:02} (", ctrlmux_i);
+            for mux_inp_i in (0..32).rev() {
+                let inp = pannotia::routedb::bram_ctrl_preselect_input(ctrlmux_i, mux_inp_i);
+                print!("    .I{mux_inp_i}(");
+                match inp {
+                    FunctionInputSource::RMUX(i) => {
+                        print!("RMUX{:02}_O", i);
+                    }
+                    FunctionInputSource::RightNeighborWire(i) => {
+                        print!("T1_W_I0[{i}]");
+                    }
+                    FunctionInputSource::LeftNeighborWire(i) => {
+                        print!("T1_E_I0[{i}]");
+                    }
+                    _ => unreachable!(),
+                }
+                println!("),")
+            }
+            println!("    .O0(CtrlMUX{ctrlmux_i:02}_O));\n");
+        }
     } else {
         return Err(Error::InvalidMode);
     }

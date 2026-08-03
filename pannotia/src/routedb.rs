@@ -288,8 +288,12 @@ pub enum FunctionInputSource {
     RMUX(u8),
     /// A T1 left-going wire from the right neighbor
     RightNeighborWire(u8),
+    /// A T1 right-going wire from the left neighbor (only for BRAM tiles)
+    LeftNeighborWire(u8),
     /// The output of an LE in this tile (only for logic tiles)
     LEOutput(u8),
+    /// Dummy VCC input (only for BRAM tiles)
+    Unused,
 }
 
 /// Map of IMUX inputs for a logic tile
@@ -348,18 +352,110 @@ pub fn logic_ctrl_preselect_input(ctrlmux_idx: u8, ctrlmux_inp_idx: u8) -> Funct
     assert!(ctrlmux_idx < 4, "CtrlMux index out of range");
     assert!(ctrlmux_inp_idx < 32, "CtrlMux input index out of range");
 
-    match ctrlmux_idx % 2 {
-        0 => match ctrlmux_inp_idx {
-            0..=7 => FunctionInputSource::LEOutput(ctrlmux_inp_idx * 2),
-            8..=15 => FunctionInputSource::RightNeighborWire((ctrlmux_inp_idx - 8) * 2),
-            _ => FunctionInputSource::RMUX((ctrlmux_inp_idx - 16) * 6 + 4),
-        },
-        1 => match ctrlmux_inp_idx {
-            0..=7 => FunctionInputSource::LEOutput(ctrlmux_inp_idx * 2 + 1),
-            8..=15 => FunctionInputSource::RightNeighborWire((ctrlmux_inp_idx - 8) * 2 + 1),
-            _ => FunctionInputSource::RMUX((ctrlmux_inp_idx - 16) * 6 + 5),
-        },
+    match ctrlmux_inp_idx {
+        0..=7 => FunctionInputSource::LEOutput(ctrlmux_inp_idx * 2 + ctrlmux_idx % 2),
+        8..=15 => {
+            FunctionInputSource::RightNeighborWire((ctrlmux_inp_idx - 8) * 2 + ctrlmux_idx % 2)
+        }
+        _ => FunctionInputSource::RMUX((ctrlmux_inp_idx - 16) * 6 + 4 + ctrlmux_idx % 2),
+    }
+}
+
+const BRAM_IMUX_EVEN_RMUX: [[u8; 18]; 4] = [
+    [
+        0, 4, 6, 10, 16, 22, 28, 34, 40, 46, 52, 58, 64, 70, 76, 82, 88, 94,
+    ],
+    [
+        4, 10, 16, 22, 24, 28, 30, 34, 40, 46, 52, 58, 64, 70, 76, 82, 88, 94,
+    ],
+    [
+        4, 10, 16, 22, 28, 34, 40, 46, 48, 52, 54, 58, 64, 70, 76, 82, 88, 94,
+    ],
+    [
+        4, 10, 16, 22, 28, 34, 40, 46, 52, 58, 64, 70, 72, 76, 78, 82, 88, 94,
+    ],
+];
+
+const BRAM_IMUX_ODD_RMUX: [[u8; 18]; 4] = [
+    [
+        5, 11, 12, 17, 18, 23, 29, 35, 41, 47, 53, 59, 65, 71, 77, 83, 89, 95,
+    ],
+    [
+        5, 11, 17, 23, 29, 35, 36, 41, 42, 47, 53, 59, 65, 71, 77, 83, 89, 95,
+    ],
+    [
+        5, 11, 17, 23, 29, 35, 41, 47, 53, 59, 60, 65, 66, 71, 77, 83, 89, 95,
+    ],
+    [
+        5, 11, 17, 23, 29, 35, 41, 47, 53, 59, 65, 71, 77, 83, 84, 89, 90, 95,
+    ],
+];
+
+/// Map of IMUX inputs for a BRAM tile
+pub fn bram_imux_input(imux_idx: u8, imux_inp_idx: u8) -> FunctionInputSource {
+    assert!(imux_idx < 64, "IMUX index out of range");
+    assert!(imux_inp_idx < 27, "IMUX input index out of range");
+
+    // An IMUX has 27 inputs, which are divided up as follows:
+    // [0-3]    a neighbor wire from the left (T1_E)
+    // [4-7]    a neighbor wire from the right (T1_W)
+    // [8-25]   a RMUX self-wire
+    // 26       not used
+    match imux_inp_idx {
+        // for the T1 wires, there is a difference between the "bottom half" [0-31] IMUXes vs the "top half" [32-63]
+        // in the bottom half, even IMUXes have wires 0/4/8/12 and odd IMUXes have wires 1/5/9/13
+        // in the top half, even IMUXes have wires 2/6/10/14 and odd IMUXes have 3/7/11/15
+        0..=3 => {
+            if imux_idx < 32 {
+                FunctionInputSource::LeftNeighborWire((imux_inp_idx % 4) * 4 + (imux_idx % 2))
+            } else {
+                FunctionInputSource::LeftNeighborWire((imux_inp_idx % 4) * 4 + 2 + (imux_idx % 2))
+            }
+        }
+        4..=7 => {
+            if imux_idx < 32 {
+                FunctionInputSource::RightNeighborWire((imux_inp_idx % 4) * 4 + (imux_idx % 2))
+            } else {
+                FunctionInputSource::RightNeighborWire((imux_inp_idx % 4) * 4 + 2 + (imux_idx % 2))
+            }
+        }
+        8..=25 => {
+            // for the RMUXes, each group of 16 has access to the same mix of inputs
+            let group_of_16 = imux_idx / 16;
+            // and within this group of 16, the evens/odds have access to the same mix of inputs
+            let rmux_even_odd = if imux_idx % 2 == 0 {
+                BRAM_IMUX_EVEN_RMUX
+            } else {
+                BRAM_IMUX_ODD_RMUX
+            };
+            let rmux_inp_set = rmux_even_odd[group_of_16 as usize];
+            // and after this we finally have a few small tables of entries
+            FunctionInputSource::RMUX(rmux_inp_set[imux_inp_idx as usize - 8])
+        }
+        26 => FunctionInputSource::Unused,
         _ => unreachable!(),
+    }
+}
+
+/// Map of CtrlMUX inputs for a BRAM tile
+pub fn bram_ctrl_preselect_input(ctrlmux_idx: u8, ctrlmux_inp_idx: u8) -> FunctionInputSource {
+    assert!(ctrlmux_idx < 4, "CtrlMux index out of range");
+    assert!(ctrlmux_inp_idx < 32, "CtrlMux input index out of range");
+
+    match ctrlmux_inp_idx {
+        0..=3 => FunctionInputSource::LeftNeighborWire(
+            [0, 4, 10, 14][ctrlmux_inp_idx as usize] + ctrlmux_idx % 2,
+        ),
+        4..=7 => FunctionInputSource::RightNeighborWire(
+            [0, 4, 10, 14][ctrlmux_inp_idx as usize - 4] + ctrlmux_idx % 2,
+        ),
+        8..=11 => FunctionInputSource::LeftNeighborWire(
+            [2, 6, 8, 12][ctrlmux_inp_idx as usize - 8] + ctrlmux_idx % 2,
+        ),
+        12..=15 => FunctionInputSource::RightNeighborWire(
+            [2, 6, 8, 12][ctrlmux_inp_idx as usize - 12] + ctrlmux_idx % 2,
+        ),
+        _ => FunctionInputSource::RMUX((ctrlmux_inp_idx - 16) * 6 + 4 + ctrlmux_idx % 2),
     }
 }
 

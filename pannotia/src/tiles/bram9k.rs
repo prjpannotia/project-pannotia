@@ -30,8 +30,9 @@
 //! not nearly as useful as feeding a LE's output back into its input,
 //! and because BRAMs need a much larger set of _unique_ inputs,
 //! BRAM `IMUX`es contain a different mix of input signals from a logic tile
-//! (and do not contain such loopback paths,
-//! instead replacing them with extra `RMUX` choices).
+//! (and do not contain such loopback paths, instead replacing them with extra `RMUX` choices).
+//! BRAM `CtrlMUX`es likewise also do not contain these wires,
+//! instead replacing them with additional neighbor wires from the left neighbor.
 //!
 //! However, `IMUX`es do not cover the BRAM's actual control signals (e.g. read/write enables)
 //! and also does not give the ability to invert these control signals where desired.
