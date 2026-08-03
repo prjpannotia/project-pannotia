@@ -281,7 +281,14 @@ pub enum RMUXPurpose {
 pub use rmux::RMUX_PURPOSE;
 
 /// Map of span-4 wire to the RMUX index that controls it
-pub use rmux::rmux_idx_for_span4;
+pub const fn rmux_idx_for_span4(dir: Direction, wire_idx: u8) -> usize {
+    match dir {
+        Direction::N => [25, 2, 75, 55, 32, 9, 85, 62, 39, 19, 92, 69][wire_idx as usize],
+        Direction::S => [73, 50, 27, 7, 80, 57, 37, 14, 87, 67, 44, 21][wire_idx as usize],
+        Direction::E => [1, 74, 51, 31, 8, 81, 61, 38, 15, 91, 68, 45][wire_idx as usize],
+        Direction::W => [49, 26, 3, 79, 56, 33, 13, 86, 63, 43, 20, 93][wire_idx as usize],
+    }
+}
 
 mod rmux;
 
