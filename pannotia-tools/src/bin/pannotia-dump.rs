@@ -1,5 +1,6 @@
 //! Tool for unpacking bitstreams
 
+use std::collections::HashMap;
 use std::io::{self, BufWriter, Write};
 use std::process::ExitCode;
 
@@ -103,7 +104,57 @@ fn dump_png<W: Write>(b: &Bitstream, wr: W) -> io::Result<()> {
     Ok(())
 }
 
+fn dump_explain_padring<W: Write>(
+    b: &Bitstream,
+    mut wr: W,
+    tile_pos: TilePos,
+    io_i: u8,
+    pad_i: u8,
+) -> io::Result<()> {
+    let setting = b.pad_input_en(pad_i);
+    if setting {
+        writeln!(wr, "pad[{}, {}].input_en = 1", tile_pos, io_i)?;
+    }
+
+    let setting = b.pad_open_drain(pad_i);
+    if setting {
+        writeln!(wr, "pad[{}, {}].open_drain = 1", tile_pos, io_i)?;
+    }
+
+    let setting = b.pad_reduced_slew(pad_i);
+    if setting {
+        writeln!(wr, "pad[{}, {}].reduced_slew = 1", tile_pos, io_i)?;
+    }
+
+    let setting = b.pad_pullup_to_fabric(pad_i);
+    if setting {
+        writeln!(wr, "pad[{}, {}].pullup_to_fabric = 1", tile_pos, io_i)?;
+    }
+
+    let setting = b.pad_drive_strength(pad_i);
+    if setting != Default::default() {
+        writeln!(
+            wr,
+            "pad[{}, {}].drive_strength = {}",
+            tile_pos, io_i, setting
+        )?;
+    }
+
+    let setting = b.pad_termination(pad_i);
+    if setting != Default::default() {
+        writeln!(wr, "pad[{}, {}].term = {}", tile_pos, io_i, setting)?;
+    }
+
+    Ok(())
+}
+
 fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
+    let tile_to_padring_map = padring::PADRING_TO_TILE
+        .iter()
+        .enumerate()
+        .map(|(pad_i, tile_pos)| (*tile_pos, pad_i as u8))
+        .collect::<HashMap<_, _>>();
+
     let (tile_w, tile_h) = b.family().tile_dims();
     for tile_y in 0..tile_h {
         for tile_x in 0..tile_w {
@@ -162,12 +213,24 @@ fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
                         let mut tile_str = String::new();
                         tile.dump(&mut tile_str).unwrap();
                         write!(wr, "{}", tile_str)?;
+
+                        for io_i in 0..tile.num_ios() {
+                            if let Some(pad_i) = tile_to_padring_map.get(&(tile.pos(), io_i)) {
+                                dump_explain_padring(b, &mut wr, tile.pos(), io_i, *pad_i)?;
+                            }
+                        }
                     }
                     TileType::LeftRightIO => {
                         let tile = tile.as_leftright_io_tile();
                         let mut tile_str = String::new();
                         tile.dump(&mut tile_str).unwrap();
                         write!(wr, "{}", tile_str)?;
+
+                        for io_i in 0..tile.num_ios() {
+                            if let Some(pad_i) = tile_to_padring_map.get(&(tile.pos(), io_i)) {
+                                dump_explain_padring(b, &mut wr, tile.pos(), io_i, *pad_i)?;
+                            }
+                        }
                     }
                     TileType::PLL => {
                         let tile = tile.as_pll_tile();
