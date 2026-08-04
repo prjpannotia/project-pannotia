@@ -5,5 +5,5 @@ members = [
     "bitmux_macros",
     "bitmux_macros_impl",
     "pannotia",
-    "pannotia-dump",
+    "pannotia-dump", "pannotia-tools",
 ]
