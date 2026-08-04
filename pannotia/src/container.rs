@@ -328,6 +328,39 @@ impl<D: DebugTracer> Bitstream<D> {
                 let tile = ret.tile_mut(TilePos { y: 0, x: 18 }).unwrap();
                 let mut tile = tile.as_topbottom_io_tile();
                 wipe_io_tile(&mut tile, 3);
+
+                // Clear out bits to the MCU interface
+                for x in 1..13 {
+                    let tile = ret.tile_mut(TilePos { y: 5, x }).unwrap();
+                    let mut tile = tile.as_top_ip_tile();
+
+                    let num_pins_actually_used = if x == 4 { 9 } else { 8 };
+                    for i in 0..num_pins_actually_used {
+                        tile.set_to_ip(i, crate::tiles::hard_ip::Mux13Inv::GND);
+                    }
+                }
+                for y in 5..13 {
+                    let tile = ret.tile_mut(TilePos { y, x: 13 }).unwrap();
+                    let mut tile = tile.as_leftright_ip_tile();
+                    for i in 0..12 {
+                        tile.set_to_ip_13(i, crate::tiles::hard_ip::Mux13Inv::GND);
+                    }
+
+                    let num_pins_actually_used = match y {
+                        12 => 3,
+                        11 => 7,
+                        10 => 3,
+                        9 => 3,
+                        8 => 3,
+                        7 => 2,
+                        6 => 4,
+                        5 => 4,
+                        _ => unreachable!(),
+                    };
+                    for i in 0..num_pins_actually_used {
+                        tile.set_to_ip_17(i, crate::tiles::hard_ip::Mux17Inv::GND);
+                    }
+                }
             }
         }
 
