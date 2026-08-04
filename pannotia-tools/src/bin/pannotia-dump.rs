@@ -3,6 +3,7 @@
 use std::io::{self, BufWriter, Write};
 use std::process::ExitCode;
 
+use base64::prelude::*;
 use bitvec::prelude::*;
 use clap::{Parser, ValueEnum};
 
@@ -120,8 +121,30 @@ fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
                         tile.dump(&mut tile_str).unwrap();
                         write!(wr, "{}", tile_str)?;
                     }
-                    // TileType::RoutingOnly => {}
-                    // TileType::BRAM => {}
+                    TileType::RoutingOnly => {
+                        let tile = tile.as_routing_only_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+                    }
+                    TileType::BRAM => {
+                        let tile = tile.as_bram9k_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+
+                        // Special logic for init data
+                        let mut init_val: BitArr!(for 9216, in u8, Lsb0) = BitArray::ZERO;
+                        tile.init_data(&mut init_val.as_mut_bitslice());
+                        if init_val.any() {
+                            writeln!(
+                                wr,
+                                "tile[{}].init_data = {}",
+                                tile_pos,
+                                BASE64_URL_SAFE.encode(init_val.as_raw_slice())
+                            )?;
+                        }
+                    }
                     // TileType::TopBottomIO => {}
                     // TileType::LeftRightIO => {}
                     // TileType::TopIP => {}

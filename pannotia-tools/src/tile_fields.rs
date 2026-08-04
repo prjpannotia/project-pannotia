@@ -125,6 +125,7 @@ make_tile_fields! {
         sync_clr_mux "sync_clr";
         global_to_local "glb2loc" = 4;
         control_signal_preselect "ctrl" = 4;
+
         lut "lut" = 16;
         lut_inp_a "lut_A" = 16;
         lut_inp_b "lut_B" = 16;
@@ -139,5 +140,59 @@ make_tile_fields! {
         lc_output_neigh "omux_neigh" = 16;
         lc_output_imux "omux_imux" = 16;
         lc_output_rmux "omux_rmux" = 16;
+    }
+}
+
+make_tile_fields! {
+    self: tile::RoutingOnlyTileRef {
+        rmux "rmux" = 96;
+        global_to_local "glb2loc" = 4;
+        right_neighbor_output "omux" = 16;
+    }
+}
+
+make_tile_fields! {
+    self: tile::BRAMTileRef {
+        rmux "rmux" = 96;
+        clock_mux "clk" = 2;
+        clock_en_mux "ce" = 2;
+        async_mux "async" = 2;
+        global_to_local "glb2loc" = 6;
+        control_signal_preselect "ctrl" = 4;
+
+        addr_a "addr_a" = 13;
+        addr_b "addr_b" = 13;
+        data_in_a "data_in_a" = 18;
+        data_in_b "data_in_b" = 18;
+        imux_xtra "imux_xtra" = 2;
+        tmux "tmux" = 16;
+        read_en_a "read_en_a";
+        read_en_b "read_en_b";
+        write_en_a "write_en_a";
+        write_en_b "write_en_b";
+        addr_stall_a "addr_stall_a";
+        addr_stall_b "addr_stall_b";
+        byte_en_a "byte_en_a" = 2;
+        byte_en_b "byte_en_b" = 2;
+        kmux_unused "kmux_unused" = 6;
+
+        @bool use_packed_mode_address_override "use_packed_mode_address_override";
+        clock_choices_mode "clock_choices_mode";
+        width_a "width_a";
+        width_b "width_b";
+        @bool use_output_register_a "use_output_register_a";
+        @bool use_output_register_b "use_output_register_b";
+        @bool use_rst_in_a "use_rst_in_a";
+        @bool use_rst_in_b "use_rst_in_b";
+        @bool use_rst_out_a "use_rst_out_a";
+        @bool use_rst_out_b "use_rst_out_b";
+        @bool use_clk_en_in_a "use_clk_en_in_a";
+        @bool use_clk_en_in_b "use_clk_en_in_b";
+        @bool use_clk_en_out_a "use_clk_en_out_a";
+        @bool use_clk_en_out_b "use_clk_en_out_b";
+        @bool write_thru_a "write_thru_a";
+        @bool write_thru_b "write_thru_b";
+        rsen_delay "rsen_delay";
+        delay_time "delay_time";
     }
 }
