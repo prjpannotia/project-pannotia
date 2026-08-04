@@ -170,6 +170,11 @@ impl Default for InputCMode {
         Self::_00
     }
 }
+impl Display for InputCMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 /// (Helper) access to LE input-C setting
 #[derive(Debug)]
@@ -352,12 +357,33 @@ magic_tile_impl_gen! {
                 i: lc_idx * 4 + inp_idx,
             }
         }
+        pub fn lut_inp_a(&self, lc_idx: u8) -> IMUX = {
+            self.lut_input(lc_idx, 0)
+        }
+        pub fn lut_inp_b(&self, lc_idx: u8) -> IMUX = {
+            self.lut_input(lc_idx, 1)
+        }
+        pub fn lut_inp_c(&self, lc_idx: u8) -> IMUX = {
+            self.lut_input(lc_idx, 2)
+        }
+        pub fn lut_inp_d(&self, lc_idx: u8) -> IMUX = {
+            self.lut_input(lc_idx, 3)
+        }
 
         pub fn lc_output(&self, lc_idx: u8, out_idx: u8) -> OMUX {
             LogicOut {
                 lc: lc_idx,
                 i: out_idx,
             }
+        }
+        pub fn lc_output_neigh(&self, lc_idx: u8) -> OMUX = {
+            self.lc_output(lc_idx, 0)
+        }
+        pub fn lc_output_imux(&self, lc_idx: u8) -> OMUX = {
+            self.lc_output(lc_idx, 1)
+        }
+        pub fn lc_output_rmux(&self, lc_idx: u8) -> OMUX = {
+            self.lc_output(lc_idx, 2)
         }
 
         pub fn lc_input_c_mode(&self, lc_idx: u8) -> InputCMode {

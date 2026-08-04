@@ -38,6 +38,7 @@
 
 #![no_std]
 
+use core::fmt::Display;
 use core::ops;
 
 use bitvec::prelude::*;
@@ -166,6 +167,11 @@ impl ops::Not for InvertedBool {
     type Output = Self;
     fn not(self) -> Self::Output {
         Self(!self.0)
+    }
+}
+impl Display for InvertedBool {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        self.0.fmt(f)
     }
 }
 
