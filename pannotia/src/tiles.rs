@@ -675,7 +675,7 @@ macro_rules! _magic_tile_impl_gen_one_item {
 /// rather than a raw `IOMUX` index.
 ///
 /// The syntax for this situation is:
-/// ```
+/// ```ignore
 /// pub fn specific_thingy(&self, arg: u8) -> FieldType = /* note the equal sign */ {
 ///     self.generic_thingy(arg * 2)
 /// }
