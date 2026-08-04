@@ -101,12 +101,24 @@ impl Family {
         }
     }
 }
+
 /// Try converting a device ID to a chip family
 impl TryFrom<u32> for Family {
     type Error = ();
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             0x40200001 => Ok(Self::AGRV2K),
+            _ => Err(()),
+        }
+    }
+}
+
+/// Try parsing a part name as a chip family
+impl TryFrom<&str> for Family {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value.to_ascii_lowercase().as_str() {
+            "agrv2k" => Ok(Self::AGRV2K),
             _ => Err(()),
         }
     }

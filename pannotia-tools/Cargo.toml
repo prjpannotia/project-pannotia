@@ -4,4 +4,7 @@ version = "0.0.0"
 edition = "2024"
 
 [dependencies]
+clap = { version = "4.6", features = ["derive"] }
+clio = { version = "0.3", features = ["clap-parse"] }
+env_logger = "0.11"
 pannotia = { path = "../pannotia" }

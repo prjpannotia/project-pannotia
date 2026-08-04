@@ -14,7 +14,36 @@ fn main() -> ExitCode {
         println!("Usage: {} what_to_debug", args[0].to_string_lossy());
         return ExitCode::FAILURE;
     }
-    if args[1].eq_ignore_ascii_case("debug_rmux_routing") {
+    if args[1].eq_ignore_ascii_case("debug_tile_grid") {
+        if args.len() < 3 {
+            println!(
+                "Usage: {} debug_tile_grid family",
+                args[0].to_string_lossy()
+            );
+            return ExitCode::FAILURE;
+        }
+
+        let family = args[2].to_string_lossy();
+        let family = if let Ok(family) = Family::try_from(family.as_ref()) {
+            family
+        } else {
+            eprintln!("invalid family");
+            return ExitCode::FAILURE;
+        };
+
+        let (tile_w, tile_h) = family.tile_dims();
+        for tile_y in (0..tile_h).rev() {
+            for tile_x in 0..tile_w {
+                let tile_pos = TilePos {
+                    x: tile_x,
+                    y: tile_y,
+                };
+                let tile_type = family.get_tile_type(tile_pos);
+                print!("{:?}\t", tile_type);
+            }
+            println!()
+        }
+    } else if args[1].eq_ignore_ascii_case("debug_rmux_routing") {
         for rmux_i in 0..96 {
             println!("RMUX_21_1 m_RMUX{rmux_i:02} (");
             for inp_i in (0..21).rev() {
