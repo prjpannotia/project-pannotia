@@ -145,10 +145,20 @@ fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
                             )?;
                         }
                     }
+                    TileType::TopIP => {
+                        let tile = tile.as_top_ip_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+                    }
+                    TileType::LeftRightIP => {
+                        let tile = tile.as_leftright_ip_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+                    }
                     // TileType::TopBottomIO => {}
                     // TileType::LeftRightIO => {}
-                    // TileType::TopIP => {}
-                    // TileType::LeftRightIP => {}
                     // TileType::PLL => {}
                     // TileType::GCLKSW => {}
                     TileType::None => {}

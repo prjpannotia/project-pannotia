@@ -196,3 +196,19 @@ make_tile_fields! {
         delay_time "delay_time";
     }
 }
+
+make_tile_fields! {
+    self: tile::TopIPTileRef {
+        global_to_local "glb2loc" = 12;
+        to_ip "to_ip" = 12;
+        from_ip "from_ip" = 12;
+    }
+}
+make_tile_fields! {
+    self: tile::LeftRightIPTileRef {
+        global_to_local "glb2loc" = 20;
+        to_ip_13 "to_ip_13" = 12;
+        to_ip_17 "to_ip_18" = 8;
+        from_ip "from_ip" = 12;
+    }
+}
