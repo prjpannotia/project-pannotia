@@ -41,4 +41,5 @@ pub mod tile {
     pub use crate::tiles::hard_ip::{LeftRightIPTileRef, TopIPTileRef};
     pub use crate::tiles::io::{LeftRightIOTileRef, TopBottomIOTileRef};
     pub use crate::tiles::logic::LogicTileRef;
+    pub use crate::tiles::routing_only::RoutingOnlyTileRef;
 }
