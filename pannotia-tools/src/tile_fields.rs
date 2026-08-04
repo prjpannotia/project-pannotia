@@ -363,3 +363,14 @@ make_tile_fields! {
         analog_ivco "analog_ivco";
     }
 }
+
+make_tile_fields! {
+    self: tile::GCLKSWTileRef {
+        fabric_to_clock "fab2clk" = 6;
+        clock_enable "ce" = 6;
+        global_to_local "glb2loc" = 12;
+        clock_to_fabric "clk2fab" = 4;
+        @bool cen_is_registered "cen_registered" = 6;
+        clock_dist_mux "clock_dist_mux" = 5;
+    }
+}
