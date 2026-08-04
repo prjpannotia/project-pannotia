@@ -143,7 +143,7 @@ impl BitstreamField for bool {
 
 /// A boolean with inverted sense when reading/writing from the bitstream
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
 pub struct InvertedBool(pub bool);
 impl From<bool> for InvertedBool {
     fn from(value: bool) -> Self {
@@ -167,6 +167,11 @@ impl ops::Not for InvertedBool {
     type Output = Self;
     fn not(self) -> Self::Output {
         Self(!self.0)
+    }
+}
+impl Default for InvertedBool {
+    fn default() -> Self {
+        Self(true)
     }
 }
 impl Display for InvertedBool {
