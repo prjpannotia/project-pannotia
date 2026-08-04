@@ -169,7 +169,12 @@ fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
                         tile.dump(&mut tile_str).unwrap();
                         write!(wr, "{}", tile_str)?;
                     }
-                    // TileType::PLL => {}
+                    TileType::PLL => {
+                        let tile = tile.as_pll_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+                    }
                     // TileType::GCLKSW => {}
                     TileType::None => {}
                     _ => writeln!(wr, "// WARN: Unimplemented tile type {:?}", tile_type)?,

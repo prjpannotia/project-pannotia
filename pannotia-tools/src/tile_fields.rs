@@ -25,6 +25,22 @@ macro_rules! _replace_self {
 }
 
 macro_rules! _dump_one_tile_field {
+    ($self:ident $w:ident $fn_name:ident $fn_str:literal = $start:literal .. $end:literal) => {
+        for i in $start..$end {
+            let setting = $self.$fn_name(i);
+            if setting != Default::default() {
+                write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+                (&&PrettyPrintWrap(setting)).pretty_print(
+                    &mut $w,
+                    $self.family(),
+                    $self.pos(),
+                    $self.tile_type(),
+                    i,
+                )?;
+                writeln!($w)?;
+            }
+        }
+    };
     ($self:ident $w:ident $fn_name:ident $fn_str:literal = $count:expr) => {
         let count = $count;
         for i in 0..count {
@@ -58,6 +74,22 @@ macro_rules! _dump_one_tile_field {
     };
 
     // Copypasta for bool, since there's issues with Default
+    ($self:ident $w:ident @bool $fn_name:ident $fn_str:literal = $start:literal .. $end:literal) => {
+        for i in $start..$end {
+            let setting = $self.$fn_name(i);
+            if setting {
+                write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+                (&&PrettyPrintWrap(setting)).pretty_print(
+                    &mut $w,
+                    $self.family(),
+                    $self.pos(),
+                    $self.tile_type(),
+                    i,
+                )?;
+                writeln!($w)?;
+            }
+        }
+    };
     ($self:ident $w:ident @bool $fn_name:ident $fn_str:literal = $count:expr) => {
         let count = $count;
         for i in 0..count {
@@ -92,7 +124,7 @@ macro_rules! _dump_one_tile_field {
 }
 
 macro_rules! make_tile_fields {
-    ($self:ident: $($tile_ref:ident)::+ { $($(@$maybe_bool:ident)? $func:ident $human_name:literal $eq_or_semi:tt $($count:literal)? $({ $($count_complex:tt)* })? $(;)?)* }) => {
+    ($self:ident: $($tile_ref:ident)::+ { $($(@$maybe_bool:ident)? $func:ident $human_name:literal $eq_or_semi:tt $($count:literal $(.. $count_range:literal)? )? $({ $($count_complex:tt)* })? $(;)?)* }) => {
         impl<
             D: debug::DebugTracer,
             Ref: std::borrow::Borrow<Bitstream<D>>,
@@ -100,7 +132,7 @@ macro_rules! make_tile_fields {
         {
             fn dump<W: std::fmt::Write>(&$self, mut w: W) -> std::fmt::Result {
                 $({
-                    _dump_one_tile_field!{ $self w $(@$maybe_bool)? $func $human_name $eq_or_semi $($count)? $(_replace_self!{ $self { $($count_complex)* } })? }
+                    _dump_one_tile_field!{ $self w $(@$maybe_bool)? $func $human_name $eq_or_semi $($count $(.. $count_range)? )? $(_replace_self!{ $self { $($count_complex)* } })? }
                 })*
 
                 Ok(())
@@ -174,7 +206,7 @@ make_tile_fields! {
         addr_stall_b "addr_stall_b";
         byte_en_a "byte_en_a" = 2;
         byte_en_b "byte_en_b" = 2;
-        kmux_unused "kmux_unused" = 6;
+        kmux "kmux_unused" = 10..16;
 
         @bool use_packed_mode_address_override "use_packed_mode_address_override";
         clock_choices_mode "clock_choices_mode";
@@ -283,5 +315,51 @@ make_tile_fields! {
         in_data_delay "in_data_delay" = 6;
         in_reg_delay "in_reg_delay" = 6;
         @bool out_delay "out_delay" = 6;
+    }
+}
+
+make_tile_fields! {
+    self: tile::PLLTileRef {
+        to_pll "to_pll" = 11;
+        global_to_local "glb2loc" = 11;
+
+        gclk_mux "gclk_mux";
+        clock_mux_0 "clock_mux_0";
+        in_div_lo_time "in_div_lo_time";
+        in_div_hi_time "in_div_hi_time";
+        @bool in_div_duty_cycle_adjust "in_div_duty_cycle_adjust";
+        @bool in_div_bypass "in_div_bypass";
+
+        clock_feedback_mux "clock_feedback_mux";
+        @bool use_internal_fb "use_internal_fb";
+        feedback_delay "feedback_delay";
+        fb_div_lo_time "fb_div_lo_time";
+        fb_div_hi_time "fb_div_hi_time";
+        @bool fb_div_duty_cycle_adjust "fb_div_duty_cycle_adjust";
+        @bool fb_div_bypass "fb_div_bypass";
+        fb_phase_coarse "fb_phase_coarse";
+        fb_phase_fine "fb_phase_fine";
+
+        @bool out_enable "out_enable" = 5;
+        @bool out_cascade "out_cascade" = 1..5;
+        out_div_lo_time "out_div_lo_time" = 5;
+        out_div_hi_time "out_div_hi_time" = 5;
+        @bool out_div_duty_cycle_adjust "out_div_duty_cycle_adjust" = 5;
+        @bool out_div_bypass "out_div_bypass" = 5;
+        out_phase_coarse "out_phase_coarse" = 5;
+        out_phase_fine "out_phase_fine" = 5;
+
+        @bool vco_div2 "vco_div2";
+
+        reg_ctrl "reg_ctrl";
+        @bool enabled "enabled";
+        @bool enable_dedicated_out_n "enable_dedicated_out_n";
+        @bool enable_dedicated_out_p "enable_dedicated_out_p";
+
+        analog_icp "analog_icp";
+        analog_rlpf "analog_rlpf";
+        analog_rref "analog_rref";
+        analog_rvi "analog_rvi";
+        analog_ivco "analog_ivco";
     }
 }

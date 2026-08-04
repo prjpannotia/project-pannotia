@@ -782,10 +782,6 @@ magic_tile_impl_gen! {
             assert!(bit < 2, "invalid byte enable bit index");
             self.kmux(8 + bit)
         }
-        pub fn kmux_unused(&self, idx: u8) -> KMUX = {
-            assert!(idx < 6, "invalid KMUX");
-            self.kmux(10 + idx)
-        }
 
         pub fn clock_mux(&self, clk_idx: u8) -> Mux3Inv {
             TileClk(clk_idx)
