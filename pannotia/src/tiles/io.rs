@@ -1300,6 +1300,12 @@ pub trait IOTileCommon {
     fn local_to_io(&self, custom_idx: u8) -> LocalToIOMux;
     fn clock_mux(&self, idx: u8) -> IOClockMux;
     fn out_mux(&self, io_idx: u8, out_idx: u8) -> super::logic::OMUX;
+    fn out_mux_0(&self, io_idx: u8) -> super::logic::OMUX {
+        self.out_mux(io_idx, 0)
+    }
+    fn out_mux_1(&self, io_idx: u8) -> super::logic::OMUX {
+        self.out_mux(io_idx, 1)
+    }
 
     fn out_clock_global_to_local(&self, io_idx: u8) -> GlobalToLocalMux {
         self.global_to_local(io_idx * 2 + 0)
@@ -1353,6 +1359,12 @@ pub trait IOTileCommonMut: IOTileCommon {
     fn set_local_to_io(&mut self, custom_idx: u8, val: LocalToIOMux);
     fn set_clock_mux(&mut self, idx: u8, val: IOClockMux);
     fn set_out_mux(&mut self, io_idx: u8, out_idx: u8, val: super::logic::OMUX);
+    fn set_out_mux_0(&mut self, io_idx: u8, val: super::logic::OMUX) {
+        self.set_out_mux(io_idx, 0, val);
+    }
+    fn set_out_mux_1(&mut self, io_idx: u8, val: super::logic::OMUX) {
+        self.set_out_mux(io_idx, 1, val);
+    }
 
     fn set_out_clock_global_to_local(&mut self, io_idx: u8, val: GlobalToLocalMux) {
         self.set_global_to_local(io_idx * 2 + 0, val);

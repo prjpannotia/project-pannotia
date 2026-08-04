@@ -157,8 +157,18 @@ fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
                         tile.dump(&mut tile_str).unwrap();
                         write!(wr, "{}", tile_str)?;
                     }
-                    // TileType::TopBottomIO => {}
-                    // TileType::LeftRightIO => {}
+                    TileType::TopBottomIO => {
+                        let tile = tile.as_topbottom_io_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+                    }
+                    TileType::LeftRightIO => {
+                        let tile = tile.as_leftright_io_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+                    }
                     // TileType::PLL => {}
                     // TileType::GCLKSW => {}
                     TileType::None => {}

@@ -212,3 +212,76 @@ make_tile_fields! {
         from_ip "from_ip" = 12;
     }
 }
+
+make_tile_fields! {
+    self: tile::TopBottomIOTileRef {
+        local_line "local_line" = 32;
+
+        out_clock_global_to_local "out_glb2loc" = 4;
+        out_clock_local_to_clock "out_loc2clk" = 4;
+        out_clock_choice "out_clk" = 4;
+        @bool out_use_reg "out_use_reg" = 4;
+        out_async_mode "out_async_mode" = 4;
+        out_sync_mode "out_sync_mode" = 4;
+        @bool out_powerup_state "out_powerup_state" = 4;
+        @bool oe_use_reg "oe_use_reg" = 4;
+        oe_async_mode "oe_async_mode" = 4;
+        oe_sync_mode "oe_sync_mode" = 4;
+        @bool oe_powerup_state "oe_powerup_state" = 4;
+        in_clock_global_to_local "in_glb2loc" = 4;
+        in_clock_local_to_clock "in_loc2clk" = 4;
+        in_clock_choice "in_clk" = 4;
+        in_async_mode "in_async_mode" = 4;
+        in_sync_mode "in_sync_mode" = 4;
+        @bool in_powerup_state "in_powerup_state" = 4;
+        local_to_io_out "loc_to_io_out" = 4;
+        local_to_io_oe "loc_to_io_oe" = 4;
+        local_to_out_clk_en "loc_to_out_cen" = 4;
+        local_to_in_clk_en "loc_to_in_cen" = 4;
+        local_to_async_ctrl "loc_to_async" = 4;
+        local_to_sync_ctrl "loc_to_sync" = 4;
+
+        out_mux_0 "omux0" = 4;
+        out_mux_1 "omux1" = 4;
+
+        in_data_delay "in_data_delay" = 4;
+        in_reg_delay "in_reg_delay" = 4;
+        @bool out_delay "out_delay" = 4;
+    }
+}
+make_tile_fields! {
+    self: tile::LeftRightIOTileRef {
+        local_line "local_line" = 48;
+
+        out_clock_global_to_local "out_glb2loc" = 6;
+        out_clock_local_to_clock "out_loc2clk" = 6;
+        out_clock_choice "out_clk" = 6;
+        @bool out_use_reg "out_use_reg" = 6;
+        out_async_mode "out_async_mode" = 6;
+        out_sync_mode "out_sync_mode" = 6;
+        @bool out_powerup_state "out_powerup_state" = 6;
+        @bool oe_use_reg "oe_use_reg" = 6;
+        oe_async_mode "oe_async_mode" = 6;
+        oe_sync_mode "oe_sync_mode" = 6;
+        @bool oe_powerup_state "oe_powerup_state" = 6;
+        in_clock_global_to_local "in_glb2loc" = 6;
+        in_clock_local_to_clock "in_loc2clk" = 6;
+        in_clock_choice "in_clk" = 6;
+        in_async_mode "in_async_mode" = 6;
+        in_sync_mode "in_sync_mode" = 6;
+        @bool in_powerup_state "in_powerup_state" = 6;
+        local_to_io_out "loc_to_io_out" = 6;
+        local_to_io_oe "loc_to_io_oe" = 6;
+        local_to_out_clk_en "loc_to_out_cen" = 6;
+        local_to_in_clk_en "loc_to_in_cen" = 6;
+        local_to_async_ctrl "loc_to_async" = 6;
+        local_to_sync_ctrl "loc_to_sync" = 6;
+
+        out_mux_0 "omux0" = 6;
+        out_mux_1 "omux1" = 6;
+
+        in_data_delay "in_data_delay" = 6;
+        in_reg_delay "in_reg_delay" = 6;
+        @bool out_delay "out_delay" = 6;
+    }
+}
