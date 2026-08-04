@@ -519,6 +519,37 @@ impl BitSource for &[bool] {
     }
 }
 
+/// Helper macro to rewrite a get function into. a `set_` function
+///
+/// This is intended for the situation where a getter struct has a
+/// ```ignore
+/// pub fn thingy(&self, idx_a: u8, idx_b: u8) -> SomeType {
+///     let some_final_index = idx_a * 123 + idx_b;
+///     self.low_level_thingy(some_final_idx)
+/// }
+/// ```
+///
+/// We would really like to be able to generate a `set_thingy` function
+/// _without_ duplicating the code which computes `some_final_index`.
+/// This macro helps allow that to happen.
+///
+/// This macro is intended to match
+/// ```ignore
+/// let a = long;
+/// let list = of;
+/// statements;
+/// // ...
+/// self.funcion_call(args...)
+/// ```
+///
+/// It will replace that with
+/// ```ignore
+/// let a = long;
+/// let list = of;
+/// statements;
+/// // ...
+/// self.set_funcion_call(args... /* new --> */ , val);
+/// ```
 macro_rules! _magic_replace_set_redirect_fn {
     // shift one statement at a time
     ($self:ident $val:ident $s0:stmt; $($rest:tt)*) => {
@@ -533,6 +564,9 @@ macro_rules! _magic_replace_set_redirect_fn {
     };
 }
 
+/// Helper macro to rewrite _one_ function in a magic deduplicated `impl`
+///
+/// See [_magic_tile_impl_gen_items](macro._magic_tile_impl_gen_items.html) for details
 macro_rules! _magic_tile_impl_gen_one_item {
     // as a BitstreamField
     (read $self:ident $r:ty $body:block) => {
@@ -591,6 +625,67 @@ macro_rules! _magic_tile_impl_gen_one_item {
     };
 }
 
+/// Helper macro to deduplicate getter and setter functions
+///
+/// This macro attempts to simplify writing FPGA tile field accessor functions by both
+/// - automatically generating both getter and setter functions
+/// - avoiding writing boilerplate related to accessing [Bitstream] or translating coordinates
+///
+/// It handles two fundamentally different classes of functions:
+/// 1. access a field, via an implementation of [FieldPositionCalculator]
+/// 2. redirect to an existing, lower-level function
+///
+/// ## Accessing fields
+///
+/// When accessing a field, the field can be represented by either:
+/// 1. a type which implements [::bitmux::BitstreamField]
+/// 2. an integer primitive type
+///
+/// The syntax for the first case is:
+/// ```ignore
+/// pub fn thingy_field(&self, arg0: u8, arg1: u8 /* ... */) -> FieldType {
+///     // body
+/// }
+/// ```
+///
+/// The syntax for the second case is:
+/// ```ignore
+/// pub fn thingy_field(&self, arg0: u8, arg1: u8 /* ... */) -> 5 bits in u8 {
+///     // body
+/// }
+/// ```
+///
+/// In both of these cases, the body should evaluate to a type which implements [FieldPositionCalculator]
+/// and _not_ to (what would appear to be) the declared return type.
+/// When generating getters and setters, the macro automagically borrows `self.r`
+/// (which is assumed to be a `Borrow<Bitstream>`), constructs a [GenericFieldRef]
+/// (which also accesses `self.p` and assumes it's a [TilePos]), and gets or sets the field.
+/// This is intended to pair with [make_tile_ref](macro.make_tile_ref.html).
+///
+/// In the second case, the generated setter checks to make sure that the value being set
+/// actually fits into the specified number of bits (or else it panics).
+///
+/// ## Redirecting to another function
+///
+/// In some cases, it is useful to redirect calls to a "lower-level" function.
+/// An example case where this comes up is in I/O tiles, where `IOMUX`es route signals
+/// from local lines to IO elements. These muxes can be accessed with a numeric index.
+/// However, each mux does have a specific associated logical function (e.g. output data, output enable),
+/// and it would be nice to expose them with functions that take an _IO element_ index
+/// rather than a raw `IOMUX` index.
+///
+/// The syntax for this situation is:
+/// ```
+/// pub fn specific_thingy(&self, arg: u8) -> FieldType = /* note the equal sign */ {
+///     self.generic_thingy(arg * 2)
+/// }
+/// ```
+///
+/// Additional expressions in the body are also allowed.
+/// See [_magic_replace_set_redirect_fn](macro._magic_replace_set_redirect_fn.html) for details.
+///
+/// This specific syntax was chosen as a reasonably-ergonomic compromise that
+/// fits within Rust macro's follow-set restrictions.
 macro_rules! _magic_tile_impl_gen_items {
     (read $($(#[$attr:meta])* $v:vis fn $f:ident(&$self:ident $($args:tt)* ) -> $($nbits:literal bits in)? $r:ty $(= { $($redir_tt:tt)* })? $($body:block)?)* ) => {
         $(
@@ -614,6 +709,25 @@ macro_rules! _magic_tile_impl_gen_items {
     };
 }
 
+/// Macro which automagically generates getters and setters for bitstream tiles
+///
+/// This is the entry point for automagically deduplicating getter and setter functions.
+/// See [_magic_tile_impl_gen_items](macro._magic_tile_impl_gen_items.html)
+/// for details on the syntax of each item.
+///
+/// This macro accepts the following syntax:
+/// ```ignore
+/// // either this
+/// impl SomeTileTypeRef {
+///     // items...
+/// }
+/// impl on SomeTileTypeRef trait GenericTileTrait, GenericTileTraitMut {
+///     // items...
+/// }
+/// ```
+///
+/// The `SomeTileTypeRef` is expected to be generated by [make_tile_ref](macro.make_tile_ref.html)
+/// (or at least to have equivalent generic arguments and fields `r` and `p`).
 macro_rules! magic_tile_impl_gen {
     // impl a trait
     (impl on $impl_on:ident trait $trait:ty, $trait_mut:ty $(, get { $($get_item:item)* })? $(, set { $($set_item:item)* })? { $($inside:tt)* }) => {
@@ -638,6 +752,9 @@ macro_rules! magic_tile_impl_gen {
     };
 }
 
+/// Macro to help generate a struct which accesses a particular tile type
+///
+/// This automagically generates a struct and impls [TileRefTrait] on it.
 macro_rules! make_tile_ref {
     // handle the need to refer to self
     ($(#[$attr:meta])* $name:ident = $self:ident $override_ty:block) => {
