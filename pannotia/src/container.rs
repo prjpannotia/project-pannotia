@@ -361,6 +361,19 @@ impl<D: DebugTracer> Bitstream<D> {
                         tile.set_to_ip_17(i, crate::tiles::hard_ip::Mux17Inv::GND);
                     }
                 }
+
+                // Clear out bits to PLL
+                let tile = ret.tile_mut(TilePos { y: 5, x: 22 }).unwrap();
+                let mut tile = tile.as_pll_tile();
+                for i in 0..11 {
+                    tile.set_to_pll(i, crate::tiles::hard_ip::Mux13Inv::GND);
+                }
+                // PLL analog settings
+                tile.set_analog_icp(4);
+                tile.set_analog_rlpf(1);
+                tile.set_analog_rref(1);
+                tile.set_analog_rvi(1);
+                tile.set_analog_ivco(2);
             }
         }
 
