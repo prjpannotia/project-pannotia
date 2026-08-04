@@ -8,6 +8,8 @@ use clap::{Parser, ValueEnum};
 
 use pannotia::prelude::*;
 
+use pannotia_tools::DumpTile;
+
 #[derive(Parser, Debug)]
 #[command(version, about)]
 struct Cli {
@@ -100,6 +102,42 @@ fn dump_png<W: Write>(b: &Bitstream, wr: W) -> io::Result<()> {
     Ok(())
 }
 
+fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
+    let (tile_w, tile_h) = b.family().tile_dims();
+    for tile_y in 0..tile_h {
+        for tile_x in 0..tile_w {
+            let tile_pos = TilePos {
+                x: tile_x,
+                y: tile_y,
+            };
+            if let Some(tile) = b.tile(tile_pos) {
+                let tile_type = tile.tile_type();
+
+                match tile_type {
+                    TileType::Logic => {
+                        let tile = tile.as_logic_tile();
+                        let mut tile_str = String::new();
+                        tile.dump(&mut tile_str).unwrap();
+                        write!(wr, "{}", tile_str)?;
+                    }
+                    // TileType::RoutingOnly => {}
+                    // TileType::BRAM => {}
+                    // TileType::TopBottomIO => {}
+                    // TileType::LeftRightIO => {}
+                    // TileType::TopIP => {}
+                    // TileType::LeftRightIP => {}
+                    // TileType::PLL => {}
+                    // TileType::GCLKSW => {}
+                    TileType::None => {}
+                    _ => writeln!(wr, "// WARN: Unimplemented tile type {:?}", tile_type)?,
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
 fn main() -> ExitCode {
     env_logger::init();
 
@@ -117,7 +155,7 @@ fn main() -> ExitCode {
     let e = match cli.mode {
         Mode::Raw => dump_raw_bits(&b, out),
         Mode::RawPng => dump_png(&b, out),
-        Mode::Explain => todo!(),
+        Mode::Explain => dump_explain(&b, out),
     };
     match e {
         Ok(_) => {}
