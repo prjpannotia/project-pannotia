@@ -229,20 +229,54 @@ impl<D: DebugTracer> Bitstream<D> {
                 chains
                     .iter()
                     .map(|&nbits| {
-                        let mut bits = BitVec::new();
-                        bits.resize(nbits, false);
-                        bits
+                        let len_in_bytes = crate::divroundup(nbits as u32, 32) as usize * 4;
+                        let mut vec = Vec::new();
+                        vec.resize(len_in_bytes, 0);
+                        BitVec::from_vec(vec)
                     })
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
 
-        Self {
+        let mut ret = Self {
             family,
             user_id: 0xffff,
             config_arrays,
             debug_tracer,
+        };
+
+        match family {
+            crate::chips::Family::AGRV2K => {
+                // Fill a bunch of known all-1 bits
+
+                // Big top-left MCU hole
+                for y in 0..(22 + 7 * 68) {
+                    for x in 0..(20 + 12 * 36) {
+                        ret.set_logic_array_bit(GlobalBitPos { y, x }, true);
+                    }
+                }
+                // Empty IOs above wide BRAM column
+                for y in 0..22 {
+                    for x in (20 + 12 * 36)..(20 + 12 * 36 + 180) {
+                        ret.set_logic_array_bit(GlobalBitPos { y, x }, true);
+                    }
+                }
+                // Top-right
+                for y in 0..22 {
+                    for x in (20 + 12 * 36 + 180 + 7 * 36)..(20 + 12 * 36 + 180 + 7 * 36 + 36) {
+                        ret.set_logic_array_bit(GlobalBitPos { y, x }, true);
+                    }
+                }
+                // Bottom-right
+                for y in (22 + 12 * 68)..(22 + 12 * 68 + 22) {
+                    for x in (20 + 12 * 36 + 180 + 7 * 36)..(20 + 12 * 36 + 180 + 7 * 36 + 36) {
+                        ret.set_logic_array_bit(GlobalBitPos { y, x }, true);
+                    }
+                }
+            }
         }
+
+        ret
     }
 
     pub fn read_with_debug<R: io::Read>(
@@ -422,10 +456,15 @@ impl<D: DebugTracer> Bitstream<D> {
             log::debug!("writing config group {group} chain {chain}");
             let hdr = HeaderWord::make_config_hdr(false, group, chain);
             w.put_u32(hdr.0)?;
-            let cfgw =
-                ConfigWord::make_config_word(array_sizes[group as usize][chain as usize] as u32);
+
+            let len_in_bits = array_sizes[group as usize][chain as usize] as u32;
+            let cfgw = ConfigWord::make_config_word(len_in_bits);
             w.put_u32(cfgw.0)?;
-            w.put_data(self.config_arrays[group as usize][chain as usize].as_raw_slice())?;
+
+            let len_in_bytes = crate::divroundup(len_in_bits, 32) as usize * 4;
+            w.put_data(
+                &self.config_arrays[group as usize][chain as usize].as_raw_slice()[..len_in_bytes],
+            )?;
             Ok(())
         };
         match self.family {
