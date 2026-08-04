@@ -25,16 +25,33 @@ macro_rules! _replace_self {
 }
 
 macro_rules! _dump_one_tile_field {
-    ($self:ident, $w:ident, $fn_str:literal, $fn_name:ident, $i:expr) => {
-        let setting = $self.$fn_name($i);
+    ($self:ident $w:ident $fn_name:ident $fn_str:literal = $count:expr) => {
+        let count = $count;
+        for i in 0..count {
+            let setting = $self.$fn_name(i);
+            if setting != Default::default() {
+                write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+                (&&PrettyPrintWrap(setting)).pretty_print(
+                    &mut $w,
+                    $self.family(),
+                    $self.pos(),
+                    $self.tile_type(),
+                    i,
+                )?;
+                writeln!($w)?;
+            }
+        }
+    };
+    ($self:ident $w:ident $fn_name:ident $fn_str:literal ; ) => {
+        let setting = $self.$fn_name();
         if setting != Default::default() {
-            write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, $i)?;
+            write!($w, "tile[{}].{} = ", $self.pos(), $fn_str)?;
             (&&PrettyPrintWrap(setting)).pretty_print(
                 &mut $w,
                 $self.family(),
                 $self.pos(),
                 $self.tile_type(),
-                $i,
+                0,
             )?;
             writeln!($w)?;
         }
@@ -42,7 +59,7 @@ macro_rules! _dump_one_tile_field {
 }
 
 macro_rules! make_tile_fields {
-    ($self:ident: $($tile_ref:ident)::+ { $($func:ident $human_name:literal = $($count:literal)? $({ $($count_complex:tt)* })? ;)* }) => {
+    ($self:ident: $($tile_ref:ident)::+ { $($func:ident $human_name:literal $eq_or_semi:tt $($count:literal)? $({ $($count_complex:tt)* })? $(;)?)* }) => {
         impl<
             D: debug::DebugTracer,
             Ref: std::borrow::Borrow<Bitstream<D>>,
@@ -50,10 +67,7 @@ macro_rules! make_tile_fields {
         {
             fn dump<W: std::fmt::Write>(&$self, mut w: W) -> std::fmt::Result {
                 $({
-                    let count = $($count)? $(_replace_self!{ $self { $($count_complex)* } })?;
-                    for i in 0..count {
-                        _dump_one_tile_field!($self, w, $human_name, $func, i);
-                    }
+                    _dump_one_tile_field!{ $self w $func $human_name $eq_or_semi $($count)? $(_replace_self!{ $self { $($count_complex)* } })? }
                 })*
 
                 Ok(())
@@ -71,5 +85,10 @@ make_tile_fields! {
 make_tile_fields! {
     self: tile::LogicTileRef {
         rmux "rmux" = 96;
+        clock_mux "clk" = 2;
+        clock_en_mux "ce" = 2;
+        async_mux "async" = 2;
+        sync_load_mux "sync_load";
+        sync_clr_mux "sync_clr";
     }
 }
