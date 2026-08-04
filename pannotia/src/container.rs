@@ -49,7 +49,9 @@ use std::fmt::Display;
 use std::io;
 
 use crate::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
-use crate::tiles::{TileRef, TileType};
+use crate::padring::PadRingExt;
+use crate::tiles::io::IOTileCommonMut;
+use crate::tiles::{TileRef, TileRefTrait, TileType};
 
 use bitvec::prelude::*;
 
@@ -220,6 +222,17 @@ impl Bitstream {
     }
 }
 
+fn wipe_io_tile(tile: &mut dyn IOTileCommonMut, io_i: u8) {
+    tile.set_out_clock_choice(io_i, crate::tiles::io::IOClockMux::GND);
+    tile.set_in_clock_choice(io_i, crate::tiles::io::IOClockMux::GND);
+    tile.set_local_to_io_out(io_i, crate::tiles::io::LocalToIOMux::GND);
+    tile.set_local_to_io_oe(io_i, crate::tiles::io::LocalToIOMux::GND);
+    tile.set_local_to_out_clk_en(io_i, crate::tiles::io::LocalToIOMux::GND);
+    tile.set_local_to_in_clk_en(io_i, crate::tiles::io::LocalToIOMux::GND);
+    tile.set_local_to_async_ctrl(io_i, crate::tiles::io::LocalToIOMux::GND);
+    tile.set_local_to_sync_ctrl(io_i, crate::tiles::io::LocalToIOMux::GND);
+}
+
 impl<D: DebugTracer> Bitstream<D> {
     pub fn new_with_debug(family: crate::chips::Family, debug_tracer: D) -> Self {
         let array_sizes = family.config_bits();
@@ -273,6 +286,48 @@ impl<D: DebugTracer> Bitstream<D> {
                         ret.set_logic_array_bit(GlobalBitPos { y, x }, true);
                     }
                 }
+
+                // By default, apparently all IOs which _exist_ are driven with 0s on their signals
+                for (pad_i, (io_tile_pos, io_i)) in
+                    crate::padring::PADRING_TO_TILE.iter().enumerate()
+                {
+                    let tile = ret.tile_mut(*io_tile_pos).unwrap();
+                    let mut tb_io;
+                    let mut lr_io;
+                    let io_tile: &mut dyn IOTileCommonMut = match tile.tile_type() {
+                        TileType::TopBottomIO => {
+                            tb_io = tile.as_topbottom_io_tile();
+                            &mut tb_io
+                        }
+                        TileType::LeftRightIO => {
+                            lr_io = tile.as_leftright_io_tile();
+                            &mut lr_io
+                        }
+                        _ => unreachable!(),
+                    };
+
+                    wipe_io_tile(io_tile, *io_i);
+
+                    // They apparently also default to a particular drive strength
+                    ret.set_pad_drive_strength(
+                        pad_i as u8,
+                        crate::padring::DriveStrength::default(),
+                    );
+                }
+
+                // These maybe-MIPI IOs are also driven low
+                let tile = ret.tile_mut(TilePos { y: 0, x: 2 }).unwrap();
+                let mut tile = tile.as_topbottom_io_tile();
+                wipe_io_tile(&mut tile, 0);
+
+                let tile = ret.tile_mut(TilePos { y: 0, x: 9 }).unwrap();
+                let mut tile = tile.as_topbottom_io_tile();
+                wipe_io_tile(&mut tile, 0);
+
+                // The vendor tool clears these bits corresponding to BOOT0
+                let tile = ret.tile_mut(TilePos { y: 0, x: 18 }).unwrap();
+                let mut tile = tile.as_topbottom_io_tile();
+                wipe_io_tile(&mut tile, 3);
             }
         }
 
