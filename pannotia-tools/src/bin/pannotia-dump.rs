@@ -155,6 +155,9 @@ fn dump_explain<W: Write>(b: &Bitstream, mut wr: W) -> io::Result<()> {
         .map(|(pad_i, tile_pos)| (*tile_pos, pad_i as u8))
         .collect::<HashMap<_, _>>();
 
+    writeln!(wr, "// Family: {}", b.family())?;
+    writeln!(wr, "USERID 0x{:08x}", b.user_id)?;
+
     let (tile_w, tile_h) = b.family().tile_dims();
     for tile_y in 0..tile_h {
         for tile_x in 0..tile_w {

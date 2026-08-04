@@ -211,12 +211,40 @@ pub struct Bitstream<D: DebugTracer = DummyDebugTracer> {
     pub debug_tracer: D,
 }
 impl Bitstream {
+    pub fn new(family: crate::chips::Family) -> Self {
+        Self::new_with_debug(family, DummyDebugTracer {})
+    }
+
     pub fn read<R: io::Read>(r: R) -> Result<Self, BitstreamContainerError> {
         Self::read_with_debug(r, DummyDebugTracer {})
     }
 }
 
 impl<D: DebugTracer> Bitstream<D> {
+    pub fn new_with_debug(family: crate::chips::Family, debug_tracer: D) -> Self {
+        let array_sizes = family.config_bits();
+        let config_arrays = array_sizes
+            .iter()
+            .map(|chains| {
+                chains
+                    .iter()
+                    .map(|&nbits| {
+                        let mut bits = BitVec::new();
+                        bits.resize(nbits, false);
+                        bits
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        Self {
+            family,
+            user_id: 0xffff,
+            config_arrays,
+            debug_tracer,
+        }
+    }
+
     pub fn read_with_debug<R: io::Read>(
         r: R,
         debug_tracer: D,
