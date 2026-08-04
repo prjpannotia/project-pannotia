@@ -816,3 +816,12 @@ pub mod io;
 pub mod local_lines;
 pub mod logic;
 pub mod routing_only;
+
+#[cfg(test)]
+mod tests {
+    use crate::container::DummyDebugTracer;
+
+    use super::*;
+
+    const _ENSURE_DYN_SAFE: Option<&dyn TileRefTrait<DummyDebugTracer, &Bitstream>> = None;
+}
