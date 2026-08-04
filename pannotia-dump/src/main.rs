@@ -8,20 +8,16 @@ use std::process::ExitCode;
 use base64::prelude::*;
 use bitvec::prelude::*;
 
-use pannotia::coordinates::{GlobalBitPos, TilePos, TileRelativeBitPos};
-use pannotia::padring::PadRingExt;
-use pannotia::routedb::{Direction, FunctionInputSource, RMUXSource, RoutingWire};
-use pannotia::tiles::generic_routing::{GenericRoutingRefTrait, RMUX};
-use pannotia::tiles::io::IOTileCommon;
-use pannotia::tiles::local_lines::IMUX;
-use pannotia::tiles::{TileRefTrait, TileType};
+use pannotia::prelude::debug::*;
+use pannotia::prelude::*;
+use routedb::{FunctionInputSource, RMUXSource};
 
 #[derive(Debug)]
 pub enum Error {
     WrongArgs,
     InvalidMode,
     IoError(io::Error),
-    BitstreamContainerError(pannotia::container::BitstreamContainerError),
+    BitstreamContainerError(BitstreamContainerError),
 }
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -47,8 +43,8 @@ impl From<io::Error> for Error {
         Self::IoError(value)
     }
 }
-impl From<pannotia::container::BitstreamContainerError> for Error {
-    fn from(value: pannotia::container::BitstreamContainerError) -> Self {
+impl From<BitstreamContainerError> for Error {
+    fn from(value: BitstreamContainerError) -> Self {
         Self::BitstreamContainerError(value)
     }
 }
@@ -56,36 +52,31 @@ impl From<pannotia::container::BitstreamContainerError> for Error {
 struct PrettyPrintWrap<T>(T);
 
 trait PrettyPrintRMUX {
-    fn pretty_print(
-        &self,
-        family: pannotia::chips::Family,
-        tile_pos: TilePos,
-        tile_type: TileType,
-        i: u8,
-    ) -> String;
+    fn pretty_print(&self, family: Family, tile_pos: TilePos, tile_type: TileType, i: u8)
+    -> String;
 }
-impl PrettyPrintRMUX for &PrettyPrintWrap<RMUX> {
+impl PrettyPrintRMUX for &PrettyPrintWrap<mux::RMUX> {
     fn pretty_print(
         &self,
-        family: pannotia::chips::Family,
+        family: Family,
         tile_pos: TilePos,
         tile_type: TileType,
         i: u8,
     ) -> String {
         let mut ret = String::new();
 
-        if let RMUX::I(rmux_inp_i) = self.0 {
+        if let mux::RMUX::I(rmux_inp_i) = self.0 {
             write!(ret, "{}\t// ", self.0).unwrap();
 
-            let this_rmux = pannotia::routedb::RMUX_PURPOSE[i as usize];
+            let this_rmux = routedb::RMUX_PURPOSE[i as usize];
             match this_rmux {
-                pannotia::routedb::RMUXPurpose::SelfWire => {
+                routedb::RMUXPurpose::SelfWire => {
                     write!(ret, "rmux_self[{}]", i / 6 * 2 + i % 6 - 4)
                 }
-                pannotia::routedb::RMUXPurpose::LeftNeighbor => {
+                routedb::RMUXPurpose::LeftNeighbor => {
                     write!(ret, "T1_W[{}]", i / 6)
                 }
-                pannotia::routedb::RMUXPurpose::Span4 {
+                routedb::RMUXPurpose::Span4 {
                     going_dir,
                     wire_idx,
                 } => write!(ret, "T4_{}[{}]", going_dir, wire_idx),
@@ -94,8 +85,7 @@ impl PrettyPrintRMUX for &PrettyPrintWrap<RMUX> {
 
             write!(ret, " = ").unwrap();
 
-            let rmux_src =
-                pannotia::routedb::rmux_input(i, rmux_inp_i, tile_type == TileType::BRAM);
+            let rmux_src = routedb::rmux_input(i, rmux_inp_i, tile_type == TileType::BRAM);
             match rmux_src {
                 RMUXSource::GlobalToLocal(i) => {
                     write!(ret, "glb2loc[{i}]")
@@ -126,7 +116,7 @@ struct BitstreamDebugTracer {
     bit_w: usize,
     accesses: RefCell<Vec<Option<(TilePos, TileRelativeBitPos, String)>>>,
 }
-impl pannotia::container::DebugTracer for BitstreamDebugTracer {
+impl DebugTracer for BitstreamDebugTracer {
     fn log_coordinate_access(
         &self,
         global_bit_pos: GlobalBitPos,
@@ -193,8 +183,8 @@ macro_rules! replace_self {
 macro_rules! make_dump_test {
     ($self:ident: $($tile_ref:ident)::+ { $($func:ident $human:literal = $($count:literal)? $({ $($count_complex:tt)* })? ;)* }) => {
         impl<
-            D: pannotia::container::DebugTracer,
-            Ref: std::borrow::Borrow<pannotia::container::Bitstream<D>>,
+            D: DebugTracer,
+            Ref: std::borrow::Borrow<Bitstream<D>>,
         > DumpTile for $($tile_ref)::+<D, Ref>
         {
             fn dump(&$self) {
@@ -209,7 +199,7 @@ macro_rules! make_dump_test {
     };
 }
 make_dump_test! {
-    self: pannotia::tiles::generic_routing::GenericRoutingRef {
+    self: tile::GenericRoutingRef {
         rmux "rmux" = {
             let _test = self.family();
             96
@@ -219,18 +209,13 @@ make_dump_test! {
 }
 
 trait PrettyPrintGeneric {
-    fn pretty_print(
-        &self,
-        family: pannotia::chips::Family,
-        tile_pos: TilePos,
-        tile_type: TileType,
-        i: u8,
-    ) -> String;
+    fn pretty_print(&self, family: Family, tile_pos: TilePos, tile_type: TileType, i: u8)
+    -> String;
 }
 impl<T: Display> PrettyPrintGeneric for PrettyPrintWrap<T> {
     fn pretty_print(
         &self,
-        _family: pannotia::chips::Family,
+        _family: Family,
         _tile_pos: TilePos,
         _tile_type: TileType,
         _i: u8,
@@ -249,7 +234,7 @@ fn main() -> Result<ExitCode, Error> {
     }
 
     let f = BufReader::new(File::open(&args[2])?);
-    let mut b = pannotia::container::Bitstream::read_with_debug(f, BitstreamDebugTracer::new())?;
+    let mut b = Bitstream::read_with_debug(f, BitstreamDebugTracer::new())?;
     let (bit_w, bit_h) = b.family().main_logic_bits();
     b.debug_tracer.bit_w = bit_w as usize;
     b.debug_tracer
@@ -279,7 +264,7 @@ fn main() -> Result<ExitCode, Error> {
                     let (w, h) = b.family().main_logic_bits();
                     for y in 0..h {
                         for x in 0..w {
-                            let coord = pannotia::coordinates::GlobalBitPos { x, y };
+                            let coord = GlobalBitPos { x, y };
                             print!(
                                 "{}",
                                 if b.get_logic_array_bit(coord) {
@@ -392,7 +377,7 @@ fn main() -> Result<ExitCode, Error> {
 
                                 for lut_inp_i in 0..4 {
                                     let lut_inp = tile.lut_input(lut_i, lut_inp_i);
-                                    if let IMUX::I(imux_idx) = lut_inp {
+                                    if let mux::IMUX::I(imux_idx) = lut_inp {
                                         print!(
                                             "tile[{}].lut_{}[{}] = {}",
                                             tile_pos,
@@ -401,9 +386,8 @@ fn main() -> Result<ExitCode, Error> {
                                             lut_inp
                                         );
 
-                                        let imux_src = pannotia::routedb::logic_imux_input(
-                                            lut_i, lut_inp_i, imux_idx,
-                                        );
+                                        let imux_src =
+                                            routedb::logic_imux_input(lut_i, lut_inp_i, imux_idx);
                                         match imux_src {
                                             FunctionInputSource::RMUX(i) => {
                                                 println!("\t// rmux[{i}]")
@@ -1286,7 +1270,7 @@ fn main() -> Result<ExitCode, Error> {
         for rmux_i in 0..96 {
             println!("RMUX_21_1 m_RMUX{rmux_i:02} (");
             for inp_i in (0..21).rev() {
-                let inp = pannotia::routedb::rmux_input(rmux_i, inp_i, true);
+                let inp = routedb::rmux_input(rmux_i, inp_i, true);
                 print!("    .I{inp_i}(");
                 match inp {
                     RMUXSource::GlobalToLocal(i) => {
@@ -1305,21 +1289,14 @@ fn main() -> Result<ExitCode, Error> {
                         bundle,
                         wire_idx,
                     }) => {
-                        let xy =
-                            match going_dir {
-                                pannotia::routedb::Direction::N
-                                | pannotia::routedb::Direction::S => "Y",
-                                pannotia::routedb::Direction::E
-                                | pannotia::routedb::Direction::W => "X",
-                            };
+                        let xy = match going_dir {
+                            Direction::N | Direction::S => "Y",
+                            Direction::E | Direction::W => "X",
+                        };
                         print!(
                             "{}{}_{}_I{}[{}]",
                             ty,
-                            if ty != pannotia::routedb::WireType::T1 {
-                                xy
-                            } else {
-                                ""
-                            },
+                            if ty != WireType::T1 { xy } else { "" },
                             going_dir,
                             bundle,
                             wire_idx,
@@ -1337,7 +1314,7 @@ fn main() -> Result<ExitCode, Error> {
                 let imux_i = le_i * 4 + le_inp_i;
                 println!("IMUX_27_1 m_IMUX{:02} (", imux_i);
                 for mux_inp_i in (0..27).rev() {
-                    let inp = pannotia::routedb::logic_imux_input(le_i, le_inp_i, mux_inp_i);
+                    let inp = routedb::logic_imux_input(le_i, le_inp_i, mux_inp_i);
                     print!("    .I{mux_inp_i}(");
                     match inp {
                         FunctionInputSource::RMUX(i) => {
@@ -1360,7 +1337,7 @@ fn main() -> Result<ExitCode, Error> {
         for ctrlmux_i in 0..4 {
             println!("CtrlMUX_32_1 m_CtrlMUX{:02} (", ctrlmux_i);
             for mux_inp_i in (0..32).rev() {
-                let inp = pannotia::routedb::logic_ctrl_preselect_input(ctrlmux_i, mux_inp_i);
+                let inp = routedb::logic_ctrl_preselect_input(ctrlmux_i, mux_inp_i);
                 print!("    .I{mux_inp_i}(");
                 match inp {
                     FunctionInputSource::RMUX(i) => {
@@ -1382,7 +1359,7 @@ fn main() -> Result<ExitCode, Error> {
         for imux_i in 0..64 {
             println!("IMUX_27_1 m_IMUX{:02} (", imux_i);
             for mux_inp_i in (0..27).rev() {
-                let inp = pannotia::routedb::bram_imux_input(imux_i, mux_inp_i);
+                let inp = routedb::bram_imux_input(imux_i, mux_inp_i);
                 print!("    .I{mux_inp_i}(");
                 match inp {
                     FunctionInputSource::RMUX(i) => {
@@ -1407,7 +1384,7 @@ fn main() -> Result<ExitCode, Error> {
         for ctrlmux_i in 0..4 {
             println!("CtrlMUX_32_1 m_CtrlMUX{:02} (", ctrlmux_i);
             for mux_inp_i in (0..32).rev() {
-                let inp = pannotia::routedb::bram_ctrl_preselect_input(ctrlmux_i, mux_inp_i);
+                let inp = routedb::bram_ctrl_preselect_input(ctrlmux_i, mux_inp_i);
                 print!("    .I{mux_inp_i}(");
                 match inp {
                     FunctionInputSource::RMUX(i) => {
@@ -1429,7 +1406,7 @@ fn main() -> Result<ExitCode, Error> {
         for kmux_i in 0..16 {
             println!("KMUX_15_1 m_KMUX{:02} (", kmux_i);
             for mux_inp_i in (0..15).rev() {
-                let inp = pannotia::routedb::kmux_input(kmux_i, mux_inp_i);
+                let inp = routedb::kmux_input(kmux_i, mux_inp_i);
                 println!("    .I{mux_inp_i}(TMUX{inp:02}_O),");
             }
             println!("    .O0(KMUX{kmux_i:02}_O));\n");
