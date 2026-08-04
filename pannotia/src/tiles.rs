@@ -22,6 +22,7 @@ use std::borrow::Borrow;
 use std::fmt::Display;
 use std::marker::PhantomData;
 
+use crate::chips::Family;
 use crate::container::{Bitstream, DebugTracer};
 use crate::coordinates::*;
 
@@ -89,6 +90,8 @@ pub enum TileType {
 
 /// Functions common to all tile references
 pub trait TileRefTrait<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
+    /// Get the current device family
+    fn family(&self) -> Family;
     /// Get the type of the current tile
     fn tile_type(&self) -> TileType;
     /// Get the position of the current tile
@@ -110,13 +113,19 @@ pub struct TileRef<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     _d: PhantomData<D>,
 }
 impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for TileRef<D, Ref> {
-    fn tile_type(&self) -> TileType {
-        let family = self.r.borrow().family();
-        family.get_tile_type(self.p)
+    #[inline]
+    fn family(&self) -> Family {
+        self.r.borrow().family()
     }
+    #[inline]
+    fn tile_type(&self) -> TileType {
+        self.family().get_tile_type(self.p)
+    }
+    #[inline]
     fn pos(&self) -> TilePos {
         self.p
     }
+    #[inline]
     fn as_base_tile(self) -> TileRef<D, Ref> {
         self
     }
@@ -756,8 +765,8 @@ macro_rules! magic_tile_impl_gen {
 ///
 /// This automagically generates a struct and impls [TileRefTrait] on it.
 macro_rules! make_tile_ref {
-    // handle the need to refer to self
-    ($(#[$attr:meta])* $name:ident = $self:ident $override_ty:block) => {
+    // do *not* override tile_type
+    ($(#[$attr:meta])* $name:ident) => {
         $(#[$attr])*
         #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
         pub struct $name<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
@@ -766,12 +775,19 @@ macro_rules! make_tile_ref {
             pub(super) _d: PhantomData<D>,
         }
         impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for $name<D, Ref> {
-            fn tile_type(&$self) -> TileType {
-                $override_ty
+            #[inline]
+            fn family(&self) -> Family {
+                self.r.borrow().family()
             }
+            #[inline]
+            fn tile_type(&self) -> TileType {
+                self.family().get_tile_type(self.p)
+            }
+            #[inline]
             fn pos(&self) -> TilePos {
                 self.p
             }
+            #[inline]
             fn as_base_tile(self) -> TileRef<D, Ref> {
                 TileRef {
                     r: self.r,
@@ -782,6 +798,7 @@ macro_rules! make_tile_ref {
         }
     };
 
+    // *do* override tile_type
     ($(#[$attr:meta])* $name:ident = $override_ty:expr) => {
         $(#[$attr])*
         #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -791,12 +808,19 @@ macro_rules! make_tile_ref {
             pub(super) _d: PhantomData<D>,
         }
         impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> TileRefTrait<D, Ref> for $name<D, Ref> {
+            #[inline]
+            fn family(&self) -> Family {
+                self.r.borrow().family()
+            }
+            #[inline]
             fn tile_type(&self) -> TileType {
                 $override_ty
             }
+            #[inline]
             fn pos(&self) -> TilePos {
                 self.p
             }
+            #[inline]
             fn as_base_tile(self) -> TileRef<D, Ref> {
                 TileRef {
                     r: self.r,

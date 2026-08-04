@@ -63,10 +63,7 @@ use super::*;
 
 make_tile_ref! {
     /// Access to only the generic routing muxes of a (non-boundary) tile
-    GenericRoutingRef = self {
-        let family = self.r.borrow().family();
-        family.get_tile_type(self.p)
-    }
+    GenericRoutingRef
 }
 
 /// (Helper) access to RMUX
