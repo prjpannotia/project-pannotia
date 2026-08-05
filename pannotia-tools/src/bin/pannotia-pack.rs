@@ -20,6 +20,7 @@ fn try_parse_field(f: &str) -> Result<(&str, u8), ()> {
     if let Some(bracket_idx) = f.find("[") {
         let (field, mut rest) = f.split_at(bracket_idx);
 
+        rest = &rest[1..];
         if let Some(rest_) = rest.strip_suffix("]") {
             rest = rest_;
         }
@@ -55,8 +56,21 @@ fn try_parse_line(
             val = val[..comment_idx].trim_ascii();
         }
 
-        if thing.starts_with("tile[") {
-            //
+        if let Some(rest) = thing.strip_prefix("tile[") {
+            let (coord, field) = rest.split_once("].").ok_or(())?;
+            let coord = coord.split(",").collect::<Vec<_>>();
+            if coord.len() != 2 {
+                return Err(());
+            }
+            let x = u32::from_str_radix(coord[0].trim_ascii(), 10).map_err(|_| {})?;
+            let y = u32::from_str_radix(coord[1].trim_ascii(), 10).map_err(|_| {})?;
+
+            if let Some(tile) = b.tile_mut(TilePos { y, x }) {
+                let (field, field_idx) = try_parse_field(field.trim_ascii())?;
+                dbg!(x, y, field, field_idx, val);
+            } else {
+                return Err(());
+            }
         } else if let Some(rest) = thing.strip_prefix("pad[") {
             let (coord, field) = rest.split_once("].").ok_or(())?;
             let coord = coord.split(",").collect::<Vec<_>>();

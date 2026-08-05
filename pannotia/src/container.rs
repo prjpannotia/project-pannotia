@@ -686,6 +686,7 @@ pub trait DebugTracer {
     );
 }
 
+#[derive(Clone, Copy, Debug)]
 /// Default debug tracer which doesn't do anything
 pub struct DummyDebugTracer {}
 impl DebugTracer for DummyDebugTracer {
