@@ -107,6 +107,15 @@ impl Display for TopBottomIOLocalMux {
         }
     }
 }
+impl FromStr for TopBottomIOLocalMux {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 7).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
+    }
+}
 impl bitmux::BitstreamField for TopBottomIOLocalMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
         let bits = b.get_bits::<6>();
@@ -144,6 +153,15 @@ impl Display for LeftRightIOLocalMux {
             Self::None => write!(f, "<unset>"),
             Self::I(i) => write!(f, "#{i}"),
         }
+    }
+}
+impl FromStr for LeftRightIOLocalMux {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 9).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
     }
 }
 impl bitmux::BitstreamField for LeftRightIOLocalMux {
@@ -333,6 +351,15 @@ impl Display for IOLocalToClockMux {
         }
     }
 }
+impl FromStr for IOLocalToClockMux {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 8).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
+    }
+}
 impl bitmux::BitstreamField for IOLocalToClockMux {
     fn get(b: impl bitmux::BitGetter) -> Self {
         let bits = b.get_bits::<6>();
@@ -452,6 +479,18 @@ impl Display for LocalToIOMux {
                 }
                 write!(f, "#{i}")
             }
+        }
+    }
+}
+impl FromStr for LocalToIOMux {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("vcc") {
+            Ok(Self::VCC)
+        } else if s.eq_ignore_ascii_case("gnd") {
+            Ok(Self::GND)
+        } else {
+            parse_inv_helper(s, 8).map(|(invert, i)| Self::I { invert, i })
         }
     }
 }
@@ -588,6 +627,31 @@ impl Display for IOClockMux {
                     write!(f, "!")?;
                 }
                 write!(f, "loc2clk")
+            }
+        }
+    }
+}
+impl FromStr for IOClockMux {
+    type Err = ();
+    fn from_str(mut s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("vcc") {
+            Ok(Self::VCC)
+        } else if s.eq_ignore_ascii_case("gnd") {
+            Ok(Self::GND)
+        } else {
+            let invert = if let Some(s_) = s.strip_prefix("!") {
+                s = s_.trim();
+                true
+            } else {
+                false
+            };
+
+            if s.eq_ignore_ascii_case("glb2loc") {
+                Ok(Self::ViaGlobalToLocal { invert })
+            } else if s.eq_ignore_ascii_case("loc2clk") {
+                Ok(Self::ViaLocalToClock { invert })
+            } else {
+                Err(())
             }
         }
     }

@@ -65,6 +65,18 @@ impl Display for Mux13Inv {
         }
     }
 }
+impl FromStr for Mux13Inv {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("vcc") {
+            Ok(Self::VCC)
+        } else if s.eq_ignore_ascii_case("gnd") {
+            Ok(Self::GND)
+        } else {
+            parse_inv_helper(s, 13).map(|(invert, i)| Self::I { invert, i })
+        }
+    }
+}
 impl bitmux::BitstreamField for Mux13Inv {
     fn get(b: impl bitmux::BitGetter) -> Self {
         let bits = b.get_bits::<9>();
@@ -118,6 +130,18 @@ impl<const IS_INVERTED: bool> Display for Mux17InvGeneric<IS_INVERTED> {
                 }
                 write!(f, "#{i}")
             }
+        }
+    }
+}
+impl<const IS_INVERTED: bool> FromStr for Mux17InvGeneric<IS_INVERTED> {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("vcc") {
+            Ok(Self::VCC)
+        } else if s.eq_ignore_ascii_case("gnd") {
+            Ok(Self::GND)
+        } else {
+            parse_inv_helper(s, 17).map(|(invert, i)| Self::I { invert, i })
         }
     }
 }

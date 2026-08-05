@@ -21,6 +21,7 @@
 use std::borrow::Borrow;
 use std::fmt::Display;
 use std::marker::PhantomData;
+use std::str::FromStr;
 
 use crate::chips::Family;
 use crate::container::{Bitstream, DebugTracer};
@@ -274,19 +275,13 @@ impl Default for Mux2 {
         Self::_0
     }
 }
-impl From<bool> for Mux2 {
-    fn from(value: bool) -> Self {
-        match value {
-            false => Self::_0,
-            true => Self::_1,
-        }
-    }
-}
-impl From<Mux2> for bool {
-    fn from(value: Mux2) -> Self {
-        match value {
-            Mux2::_0 => false,
-            Mux2::_1 => true,
+impl FromStr for Mux2 {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "0" => Ok(Self::_0),
+            "1" => Ok(Self::_1),
+            _ => Err(()),
         }
     }
 }
@@ -344,6 +339,35 @@ impl FieldPositionCalculator for GlobalToLocalMuxRef {
     }
 }
 
+/// Parse a mux without invert
+pub(crate) fn parse_noinv_helper(s: &str, max: u8) -> Result<Option<u8>, ()> {
+    if s == "<unset>" {
+        Ok(None)
+    } else if let Some(num) = s.strip_prefix("#") {
+        let i = u8::from_str_radix(num.trim(), 10).map_err(|_| {})?;
+        if i >= max { Err(()) } else { Ok(Some(i)) }
+    } else {
+        Err(())
+    }
+}
+
+/// Parse a mux with invert (if not vcc/gnd)
+pub(crate) fn parse_inv_helper(mut s: &str, max: u8) -> Result<(bool, u8), ()> {
+    let invert = if let Some(s_) = s.strip_prefix("!") {
+        s = s_.trim();
+        true
+    } else {
+        false
+    };
+
+    if let Some(num) = s.strip_prefix("#") {
+        let i = u8::from_str_radix(num.trim(), 10).map_err(|_| {})?;
+        if i >= max { Err(()) } else { Ok((invert, i)) }
+    } else {
+        Err(())
+    }
+}
+
 /// A mux for getting a global wire into a tile
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum GlobalToLocalMux {
@@ -361,6 +385,15 @@ impl Display for GlobalToLocalMux {
             Self::None => write!(f, "<unset>"),
             Self::I(i) => write!(f, "#{i}"),
         }
+    }
+}
+impl FromStr for GlobalToLocalMux {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 6).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
     }
 }
 impl bitmux::BitstreamField for GlobalToLocalMux {
@@ -418,6 +451,18 @@ impl Display for Mux2Inv {
         }
     }
 }
+impl FromStr for Mux2Inv {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("vcc") {
+            Ok(Self::VCC)
+        } else if s.eq_ignore_ascii_case("gnd") {
+            Ok(Self::GND)
+        } else {
+            parse_inv_helper(s, 2).map(|(invert, i)| Self::I { invert, i })
+        }
+    }
+}
 impl bitmux::BitstreamField for Mux2Inv {
     fn get(b: impl bitmux::BitGetter) -> Self {
         let bits = b.get_bits::<3>();
@@ -465,6 +510,18 @@ impl Display for Mux3Inv {
                 }
                 write!(f, "#{i}")
             }
+        }
+    }
+}
+impl FromStr for Mux3Inv {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("vcc") {
+            Ok(Self::VCC)
+        } else if s.eq_ignore_ascii_case("gnd") {
+            Ok(Self::GND)
+        } else {
+            parse_inv_helper(s, 3).map(|(invert, i)| Self::I { invert, i })
         }
     }
 }

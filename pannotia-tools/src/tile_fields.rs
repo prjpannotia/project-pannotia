@@ -130,58 +130,20 @@ macro_rules! _parse_one_tile_field {
         if $field_idx < start || $field_idx >= end {
             return Err(());
         }
-        // for i in $start..$end {
-        //     let setting = $self.$fn_name(i);
-        //     if setting != Default::default() {
-        //         write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
-        //         (&&PrettyPrintWrap(setting)).pretty_print(
-        //             &mut $w,
-        //             $self.family(),
-        //             $self.pos(),
-        //             $self.tile_type(),
-        //             i,
-        //         )?;
-        //         writeln!($w)?;
-        //     }
-        // }
+        // $self.$fn_name($field_idx, std::str::FromStr::from_str($val)?);
     };
     ($self:ident $field_idx:ident $val:ident $fn_name:ident = $count:expr) => {
         let count = $count;
         if $field_idx >= count {
             return Err(());
         }
-        // let count = $count;
-        // for i in 0..count {
-        //     let setting = $self.$fn_name(i);
-        //     if setting != Default::default() {
-        //         write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
-        //         (&&PrettyPrintWrap(setting)).pretty_print(
-        //             &mut $w,
-        //             $self.family(),
-        //             $self.pos(),
-        //             $self.tile_type(),
-        //             i,
-        //         )?;
-        //         writeln!($w)?;
-        //     }
-        // }
+        // $self.$fn_name($field_idx, std::str::FromStr::from_str($val)?);
     };
     ($self:ident $field_idx:ident $val:ident $fn_name:ident ; ) => {
         if $field_idx != 0 {
             return Err(());
         }
-        // let setting = $self.$fn_name();
-        // if setting != Default::default() {
-        //     write!($w, "tile[{}].{} = ", $self.pos(), $fn_str)?;
-        //     (&&PrettyPrintWrap(setting)).pretty_print(
-        //         &mut $w,
-        //         $self.family(),
-        //         $self.pos(),
-        //         $self.tile_type(),
-        //         0,
-        //     )?;
-        //     writeln!($w)?;
-        // }
+        // $self.$fn_name(std::str::FromStr::from_str($val)?);
     };
 
     // bool uses special parsing

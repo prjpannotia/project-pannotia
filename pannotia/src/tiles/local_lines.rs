@@ -75,6 +75,15 @@ impl Display for IMUX {
         }
     }
 }
+impl FromStr for IMUX {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 27).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
+    }
+}
 impl bitmux::BitstreamField for IMUX {
     fn get(b: impl bitmux::BitGetter) -> Self {
         let bits = b.get_bits::<12>();
@@ -154,6 +163,15 @@ impl Display for CtrlMux {
             Self::None => write!(f, "<unset>"),
             Self::I(i) => write!(f, "#{i}"),
         }
+    }
+}
+impl FromStr for CtrlMux {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 32).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
     }
 }
 impl bitmux::BitstreamField for CtrlMux {

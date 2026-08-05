@@ -149,6 +149,15 @@ impl Display for TMUX {
         }
     }
 }
+impl FromStr for TMUX {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 15).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
+    }
+}
 impl bitmux::BitstreamField for TMUX {
     fn get(b: impl bitmux::BitGetter) -> Self {
         let bits = b.get_bits::<8>();
@@ -226,6 +235,18 @@ impl Display for KMUX {
                 }
                 write!(f, "#{i}")
             }
+        }
+    }
+}
+impl FromStr for KMUX {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("vcc") {
+            Ok(Self::VCC)
+        } else if s.eq_ignore_ascii_case("gnd") {
+            Ok(Self::GND)
+        } else {
+            parse_inv_helper(s, 15).map(|(invert, i)| Self::I { invert, i })
         }
     }
 }

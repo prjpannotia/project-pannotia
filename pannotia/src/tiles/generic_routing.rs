@@ -148,6 +148,15 @@ impl Display for RMUX {
         }
     }
 }
+impl FromStr for RMUX {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 21).map(|x| match x {
+            Some(i) => Self::I(i),
+            None => Self::None,
+        })
+    }
+}
 impl bitmux::BitstreamField for RMUX {
     fn get(b: impl bitmux::BitGetter) -> Self {
         let bits = b.get_bits::<10>();
