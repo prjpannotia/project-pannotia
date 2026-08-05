@@ -123,6 +123,91 @@ macro_rules! _dump_one_tile_field {
     };
 }
 
+macro_rules! _parse_one_tile_field {
+    ($self:ident $field_idx:ident $val:ident $fn_name:ident = $start:literal .. $end:literal) => {
+        let start = $start;
+        let end = $end;
+        if $field_idx < start || $field_idx >= end {
+            return Err(());
+        }
+        // for i in $start..$end {
+        //     let setting = $self.$fn_name(i);
+        //     if setting != Default::default() {
+        //         write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+        //         (&&PrettyPrintWrap(setting)).pretty_print(
+        //             &mut $w,
+        //             $self.family(),
+        //             $self.pos(),
+        //             $self.tile_type(),
+        //             i,
+        //         )?;
+        //         writeln!($w)?;
+        //     }
+        // }
+    };
+    ($self:ident $field_idx:ident $val:ident $fn_name:ident = $count:expr) => {
+        let count = $count;
+        if $field_idx >= count {
+            return Err(());
+        }
+        // let count = $count;
+        // for i in 0..count {
+        //     let setting = $self.$fn_name(i);
+        //     if setting != Default::default() {
+        //         write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+        //         (&&PrettyPrintWrap(setting)).pretty_print(
+        //             &mut $w,
+        //             $self.family(),
+        //             $self.pos(),
+        //             $self.tile_type(),
+        //             i,
+        //         )?;
+        //         writeln!($w)?;
+        //     }
+        // }
+    };
+    ($self:ident $field_idx:ident $val:ident $fn_name:ident ; ) => {
+        if $field_idx != 0 {
+            return Err(());
+        }
+        // let setting = $self.$fn_name();
+        // if setting != Default::default() {
+        //     write!($w, "tile[{}].{} = ", $self.pos(), $fn_str)?;
+        //     (&&PrettyPrintWrap(setting)).pretty_print(
+        //         &mut $w,
+        //         $self.family(),
+        //         $self.pos(),
+        //         $self.tile_type(),
+        //         0,
+        //     )?;
+        //     writeln!($w)?;
+        // }
+    };
+
+    // bool uses special parsing
+    ($self:ident $field_idx:ident $val:ident @bool $fn_name:ident = $start:literal .. $end:literal) => {
+        let start = $start;
+        let end = $end;
+        if $field_idx < start || $field_idx >= end {
+            return Err(());
+        }
+        $self.$fn_name($field_idx, crate::PackerParse::try_parse($val)?);
+    };
+    ($self:ident $field_idx:ident $val:ident @bool $fn_name:ident = $count:expr) => {
+        let count = $count;
+        if $field_idx >= count {
+            return Err(());
+        }
+        $self.$fn_name($field_idx, crate::PackerParse::try_parse($val)?);
+    };
+    ($self:ident $field_idx:ident $val:ident @bool $fn_name:ident ; ) => {
+        if $field_idx != 0 {
+            return Err(());
+        }
+        $self.$fn_name(crate::PackerParse::try_parse($val)?);
+    };
+}
+
 macro_rules! make_tile_fields {
     ($self:ident: $($tile_ref:ident)::+ { $($(@$maybe_bool:ident)? $func:ident $human_name:literal $eq_or_semi:tt $($count:literal $(.. $count_range:literal)? )? $({ $($count_complex:tt)* })? $(;)?)* }) => {
         impl<
@@ -134,6 +219,25 @@ macro_rules! make_tile_fields {
                 $({
                     _dump_one_tile_field!{ $self w $(@$maybe_bool)? $func $human_name $eq_or_semi $($count $(.. $count_range)? )? $(_replace_self!{ $self { $($count_complex)* } })? }
                 })*
+
+                Ok(())
+            }
+        }
+
+        impl<
+            D: debug::DebugTracer,
+            Ref: std::borrow::BorrowMut<Bitstream<D>>,
+        > crate::ParseFieldForTile for $($tile_ref)::+<D, Ref>
+        {
+            fn parse(&mut $self, field: &str, field_idx: u8, val: &str) -> Result<(), ()> {
+                mident::mident! {
+                    match field {
+                        $($human_name => {
+                            _parse_one_tile_field!{ $self field_idx val $(@$maybe_bool)? #concat(set_ $func) $eq_or_semi $($count $(.. $count_range)? )? $(_replace_self!{ $self { $($count_complex)* } })? }
+                        })*
+                        _ => return Err(())
+                    }
+                }
 
                 Ok(())
             }

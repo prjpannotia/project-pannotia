@@ -6,7 +6,7 @@ use std::str::FromStr;
 use clap::Parser;
 
 use pannotia::prelude::*;
-use pannotia_tools::PackerParse;
+use pannotia_tools::{PackerParse, ParseFieldForTile};
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -67,7 +67,52 @@ fn try_parse_line(
 
             if let Some(tile) = b.tile_mut(TilePos { y, x }) {
                 let (field, field_idx) = try_parse_field(field.trim_ascii())?;
-                dbg!(x, y, field, field_idx, val);
+                let tile_type = tile.tile_type();
+
+                match tile_type {
+                    TileType::Logic => {
+                        let mut tile = tile.as_logic_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    TileType::RoutingOnly => {
+                        let mut tile = tile.as_routing_only_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    TileType::BRAM => {
+                        let mut tile = tile.as_bram9k_tile();
+
+                        if field == "init_data" {
+                            todo!()
+                        } else {
+                            tile.parse(field, field_idx, val)?;
+                        }
+                    }
+                    TileType::TopBottomIO => {
+                        let mut tile = tile.as_topbottom_io_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    TileType::LeftRightIO => {
+                        let mut tile = tile.as_leftright_io_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    TileType::TopIP => {
+                        let mut tile = tile.as_top_ip_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    TileType::LeftRightIP => {
+                        let mut tile = tile.as_leftright_ip_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    TileType::PLL => {
+                        let mut tile = tile.as_pll_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    TileType::GCLKSW => {
+                        let mut tile = tile.as_gclksw_tile();
+                        tile.parse(field, field_idx, val)?;
+                    }
+                    _ => {}
+                }
             } else {
                 return Err(());
             }
