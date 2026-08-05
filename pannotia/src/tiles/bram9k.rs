@@ -361,6 +361,20 @@ impl Display for PortWidth {
         }
     }
 }
+impl FromStr for PortWidth {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "36" => Ok(Self::X36),
+            "18" => Ok(Self::X18),
+            "9" => Ok(Self::X9),
+            "4" => Ok(Self::X4),
+            "2" => Ok(Self::X2),
+            "1" => Ok(Self::X1),
+            _ => Err(()),
+        }
+    }
+}
 /// (Helper) access to BRAM port A width
 #[derive(Debug)]
 struct PortAWidth {}
@@ -678,6 +692,20 @@ impl Display for ClockMode {
             Self::Independent => write!(f, "independent"),
             Self::InputOutput => write!(f, "input_output"),
             Self::ReadWrite => write!(f, "read_write"),
+        }
+    }
+}
+impl FromStr for ClockMode {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("independent") {
+            Ok(Self::Independent)
+        } else if s.eq_ignore_ascii_case("input_output") {
+            Ok(Self::InputOutput)
+        } else if s.eq_ignore_ascii_case("read_write") {
+            Ok(Self::ReadWrite)
+        } else {
+            Err(())
         }
     }
 }

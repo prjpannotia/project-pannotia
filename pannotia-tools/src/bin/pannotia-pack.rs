@@ -6,7 +6,7 @@ use std::str::FromStr;
 use clap::Parser;
 
 use pannotia::prelude::*;
-use pannotia_tools::{PackerParse, ParseFieldForTile};
+use pannotia_tools::ParseFieldForTile;
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -131,16 +131,16 @@ fn try_parse_line(
 
             match field {
                 "input_en" => {
-                    b.set_pad_input_en(pad_i, PackerParse::try_parse(val)?);
+                    b.set_pad_input_en(pad_i, pannotia_tools::parsing::parse_bool(val)?);
                 }
                 "open_drain" => {
-                    b.set_pad_open_drain(pad_i, PackerParse::try_parse(val)?);
+                    b.set_pad_open_drain(pad_i, pannotia_tools::parsing::parse_bool(val)?);
                 }
                 "reduced_slew" => {
-                    b.set_pad_reduced_slew(pad_i, PackerParse::try_parse(val)?);
+                    b.set_pad_reduced_slew(pad_i, pannotia_tools::parsing::parse_bool(val)?);
                 }
                 "pullup_to_fabric" => {
-                    b.set_pad_pullup_to_fabric(pad_i, PackerParse::try_parse(val)?);
+                    b.set_pad_pullup_to_fabric(pad_i, pannotia_tools::parsing::parse_bool(val)?);
                 }
                 "drive_strength" => {
                     b.set_pad_drive_strength(pad_i, FromStr::from_str(val)?);

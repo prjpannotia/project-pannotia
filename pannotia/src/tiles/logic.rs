@@ -172,7 +172,24 @@ impl Default for InputCMode {
 }
 impl Display for InputCMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        match self {
+            InputCMode::_00 => write!(f, "_00"),
+            InputCMode::_01 => write!(f, "_01"),
+            InputCMode::_10 => write!(f, "_10"),
+            InputCMode::_11 => write!(f, "_11"),
+        }
+    }
+}
+impl FromStr for InputCMode {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "_00" => Ok(Self::_00),
+            "_01" => Ok(Self::_01),
+            "_10" => Ok(Self::_10),
+            "_11" => Ok(Self::_11),
+            _ => Err(()),
+        }
     }
 }
 
@@ -268,6 +285,18 @@ impl Display for OMUX {
         match self {
             Self::Combinatorial => write!(f, "comb"),
             Self::FlipFlop => write!(f, "ff"),
+        }
+    }
+}
+impl FromStr for OMUX {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("comb") {
+            Ok(Self::Combinatorial)
+        } else if s.eq_ignore_ascii_case("ff") {
+            Ok(Self::FlipFlop)
+        } else {
+            Err(())
         }
     }
 }

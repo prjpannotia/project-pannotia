@@ -1123,6 +1123,18 @@ impl Display for RegCtrlMode {
         }
     }
 }
+impl FromStr for RegCtrlMode {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.eq_ignore_ascii_case("r") {
+            Ok(Self::Reset)
+        } else if s.eq_ignore_ascii_case("s") {
+            Ok(Self::Set)
+        } else {
+            Err(())
+        }
+    }
+}
 impl Default for RegCtrlMode {
     fn default() -> Self {
         Self::Reset

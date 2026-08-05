@@ -130,20 +130,20 @@ macro_rules! _parse_one_tile_field {
         if $field_idx < start || $field_idx >= end {
             return Err(());
         }
-        // $self.$fn_name($field_idx, std::str::FromStr::from_str($val)?);
+        $self.$fn_name($field_idx, crate::parsing::PannotiaParse::parse($val)?);
     };
     ($self:ident $field_idx:ident $val:ident $fn_name:ident = $count:expr) => {
         let count = $count;
         if $field_idx >= count {
             return Err(());
         }
-        // $self.$fn_name($field_idx, std::str::FromStr::from_str($val)?);
+        $self.$fn_name($field_idx, crate::parsing::PannotiaParse::parse($val)?);
     };
     ($self:ident $field_idx:ident $val:ident $fn_name:ident ; ) => {
         if $field_idx != 0 {
             return Err(());
         }
-        // $self.$fn_name(std::str::FromStr::from_str($val)?);
+        $self.$fn_name(crate::parsing::PannotiaParse::parse($val)?);
     };
 
     // bool uses special parsing
@@ -153,20 +153,20 @@ macro_rules! _parse_one_tile_field {
         if $field_idx < start || $field_idx >= end {
             return Err(());
         }
-        $self.$fn_name($field_idx, crate::PackerParse::try_parse($val)?);
+        $self.$fn_name($field_idx, crate::parsing::PannotiaParse::parse($val)?);
     };
     ($self:ident $field_idx:ident $val:ident @bool $fn_name:ident = $count:expr) => {
         let count = $count;
         if $field_idx >= count {
             return Err(());
         }
-        $self.$fn_name($field_idx, crate::PackerParse::try_parse($val)?);
+        $self.$fn_name($field_idx, crate::parsing::PannotiaParse::parse($val)?);
     };
     ($self:ident $field_idx:ident $val:ident @bool $fn_name:ident ; ) => {
         if $field_idx != 0 {
             return Err(());
         }
-        $self.$fn_name(crate::PackerParse::try_parse($val)?);
+        $self.$fn_name(crate::parsing::PannotiaParse::parse($val)?);
     };
 }
 

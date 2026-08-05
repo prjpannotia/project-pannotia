@@ -421,6 +421,15 @@ impl Display for GCLKMux4 {
         write!(f, "#{}", self.0)
     }
 }
+impl FromStr for GCLKMux4 {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_noinv_helper(s, 4).map(|x| match x {
+            Some(i) => Self(i),
+            None => Self::default(),
+        })
+    }
+}
 impl bitmux::BitstreamField for GCLKMux4 {
     fn get(b: impl bitmux::BitGetter) -> Self {
         Self(b.get_bits::<2>() as u8)

@@ -1,6 +1,6 @@
 //! Pretty-print muxes
 //!
-//! This crate *relies on* autoderef specialization!
+//! This module *relies on* autoderef specialization!
 
 use std::fmt::Display;
 
