@@ -7,3 +7,6 @@ members = [
     "pannotia",
     "pannotia-tools",
 ]
+
+[profile.release]
+lto = true
