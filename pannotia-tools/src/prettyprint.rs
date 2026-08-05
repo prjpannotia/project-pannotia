@@ -83,7 +83,6 @@ make_specific_prettyprint!(mux::RMUX, val, w, family, tile_pos, tile_type, i {
     write!(w, "{}", val)?;
 
     if let mux::RMUX::I(rmux_inp_i) = val {
-        // normal format
         write!(w, "\t// ")?;
 
         // mux purpose
@@ -118,11 +117,32 @@ make_specific_prettyprint!(mux::RMUX, val, w, family, tile_pos, tile_type, i {
     }
 });
 
+fn print_function_input_source<W: std::fmt::Write>(
+    src: FunctionInputSource,
+    tile_pos: TilePos,
+    mut w: W,
+) -> std::fmt::Result {
+    match src {
+        FunctionInputSource::RMUX(i) => write!(w, "rmux[{i}]")?,
+        FunctionInputSource::LEOutput(i) => write!(w, "this_output[{i}]")?,
+        FunctionInputSource::RightNeighborWire(i) => {
+            let tile_right = tile_pos + Direction::E;
+            write!(w, "tile[{}] T1_W[{}]", tile_right, i)?
+        }
+        FunctionInputSource::LeftNeighborWire(i) => {
+            let tile_right = tile_pos + Direction::W;
+            write!(w, "tile[{}] T1_E[{}]", tile_right, i)?
+        }
+        FunctionInputSource::Unused => write!(w, "vcc")?,
+        _ => unreachable!(),
+    }
+    Ok(())
+}
+
 make_specific_prettyprint!(mux::IMUX, val, w, _family, tile_pos, tile_type, i {
     write!(w, "{}", val)?;
 
     if let mux::IMUX::I(imux_inp_i) = val {
-        // normal format
         write!(w, "\t// ")?;
 
         let imux_src = if tile_type == TileType::BRAM {
@@ -130,25 +150,69 @@ make_specific_prettyprint!(mux::IMUX, val, w, _family, tile_pos, tile_type, i {
         } else {
             logic_imux_input(i / 4, i % 4, imux_inp_i)
         };
-        match imux_src {
-            FunctionInputSource::RMUX(i) => {
-                write!(w, "rmux[{i}]")?
+        print_function_input_source(imux_src, tile_pos, w)?
+    }
+});
+
+make_specific_prettyprint!(mux::CtrlMux, val, w, _family, tile_pos, tile_type, i {
+    write!(w, "{}", val)?;
+
+    if let mux::CtrlMux::I(imux_inp_i) = val {
+        write!(w, "\t// ")?;
+
+        let ctrlmux_src = if tile_type == TileType::BRAM {
+            bram_ctrl_preselect_input(i, imux_inp_i)
+        } else {
+            logic_ctrl_preselect_input(i, imux_inp_i)
+        };
+        print_function_input_source(ctrlmux_src, tile_pos, w)?
+    }
+});
+
+make_specific_prettyprint!(mux::LeftRightIOLocalMux, val, w, family, tile_pos, _tile_type, i {
+    write!(w, "{}", val)?;
+
+    if let mux::LeftRightIOLocalMux::I(mux_inp_i) = val {
+        write!(w, "\t// ")?;
+
+        let mux_src = left_right_io_local_line_input(i, mux_inp_i);
+        match mux_src {
+            IOLocalLineSource::GlobalToLocal(i) => write!(w, "glb2loc[{i}]")?,
+            IOLocalLineSource::RoutingWire { ty, bundle, wire_idx } => {
+                let going_dir = if tile_pos.x == 0 { Direction::W } else { Direction::E };
+                let wire = RoutingWire { ty, bundle, wire_idx, going_dir };
+                let abs_wire = wire.to_absolute(family, tile_pos);
+                write!(
+                    w,
+                    "tile[{}] {}_{}[{}]",
+                    abs_wire.tile, abs_wire.ty, abs_wire.going_dir, abs_wire.wire_idx
+                )?
             }
-            FunctionInputSource::LEOutput(i) => {
-                write!(w, "this_output[{i}]")?
+            _ => unreachable!()
+        }
+    }
+});
+
+make_specific_prettyprint!(mux::TopBottomIOLocalMux, val, w, family, tile_pos, _tile_type, i {
+    write!(w, "{}", val)?;
+
+    if let mux::TopBottomIOLocalMux::I(mux_inp_i) = val {
+        write!(w, "\t// ")?;
+
+        let mux_src = top_bottom_io_local_line_input(i, mux_inp_i);
+        match mux_src {
+            IOLocalLineSource::GlobalToLocal(i) => write!(w, "glb2loc[{i}]")?,
+            IOLocalLineSource::RoutingWire { ty, bundle, wire_idx } => {
+                let going_dir = if tile_pos.y == 0 { Direction::S } else { Direction::N };
+                let wire = RoutingWire { ty, bundle, wire_idx, going_dir };
+                let abs_wire = wire.to_absolute(family, tile_pos);
+                write!(
+                    w,
+                    "tile[{}] {}_{}[{}]",
+                    abs_wire.tile, abs_wire.ty, abs_wire.going_dir, abs_wire.wire_idx
+                )?
             }
-            FunctionInputSource::RightNeighborWire(i) => {
-                let tile_right = tile_pos + Direction::E;
-                write!(w, "tile[{}] T1_W[{}]", tile_right, i)?
-            }
-            FunctionInputSource::LeftNeighborWire(i) => {
-                let tile_right = tile_pos + Direction::W;
-                write!(w, "tile[{}] T1_E[{}]", tile_right, i)?
-            }
-            FunctionInputSource::Unused => {
-                write!(w, "vcc")?
-            }
-            _ => unreachable!(),
+            _ => unreachable!()
         }
     }
 });
