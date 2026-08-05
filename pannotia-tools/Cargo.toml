@@ -13,3 +13,4 @@ mident = { version = "0.0.1", path = "../../mident" }
 bitmux = { path = "../bitmux" }
 pannotia = { path = "../pannotia" }
 png = "0.18"
+parse_int = "0.9"
