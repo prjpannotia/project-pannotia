@@ -3,6 +3,7 @@
 use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Display;
 use std::marker::PhantomData;
+use std::str::FromStr;
 
 use bitmux::BitstreamField;
 
@@ -169,6 +170,20 @@ impl Display for DriveStrength {
         }
     }
 }
+impl FromStr for DriveStrength {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "0 ma" => Ok(Self::_0MA),
+            "2 ma" => Ok(Self::_2MA),
+            "4 ma" => Ok(Self::_4MA),
+            "8 ma" => Ok(Self::_8MA),
+            "16 ma" => Ok(Self::_16MA),
+            "30 ma" => Ok(Self::_30MA),
+            _ => Err(()),
+        }
+    }
+}
 
 struct TerminationBits<D: DebugTracer, Ref: Borrow<Bitstream<D>>> {
     r: Ref,
@@ -210,6 +225,18 @@ impl Display for PullUpDown {
             Self::Down => write!(f, "pulldown"),
             Self::Up => write!(f, "pullup"),
             Self::Keeper => write!(f, "keeper"),
+        }
+    }
+}
+impl FromStr for PullUpDown {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "pulldown" => Ok(Self::Down),
+            "pullup" => Ok(Self::Up),
+            "keeper" => Ok(Self::Keeper),
+            _ => Err(()),
         }
     }
 }

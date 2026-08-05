@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
 use std::process::ExitCode;
+use std::str::FromStr;
 
 use clap::Parser;
 
@@ -81,6 +82,12 @@ fn try_parse_line(
                 }
                 "pullup_to_fabric" => {
                     b.set_pad_pullup_to_fabric(pad_i, PackerParse::try_parse(val)?);
+                }
+                "drive_strength" => {
+                    b.set_pad_drive_strength(pad_i, FromStr::from_str(val)?);
+                }
+                "term" => {
+                    b.set_pad_termination(pad_i, FromStr::from_str(val)?);
                 }
                 _ => return Err(()),
             }
