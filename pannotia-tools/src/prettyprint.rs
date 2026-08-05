@@ -169,6 +169,41 @@ make_specific_prettyprint!(mux::CtrlMux, val, w, _family, tile_pos, tile_type, i
     }
 });
 
+make_specific_prettyprint!(mux::TMUX, val, w, family, tile_pos, _tile_type, i {
+    write!(w, "{}", val)?;
+
+    if let mux::TMUX::I(tmux_inp_i) = val {
+        let tmux_src = TMUX_MAP[i as usize][tmux_inp_i as usize];
+
+        if tmux_src != TMUXSource::Unused {
+            write!(w, "\t// ")?;
+        }
+
+        match tmux_src {
+            TMUXSource::GlobalToLocal(i) => write!(w, "glb2loc[{i}]")?,
+            TMUXSource::RMUX(i) => write!(w, "rmux[{i}]")?,
+            TMUXSource::RoutingWire(src_wire) => {
+                let abs_wire = src_wire.to_absolute(family, tile_pos);
+                write!(
+                    w,
+                    "tile[{}] {}_{}[{}]",
+                    abs_wire.tile, abs_wire.ty, abs_wire.going_dir, abs_wire.wire_idx
+                )?
+            }
+            _ => unreachable!(),
+        }
+    }
+});
+
+make_specific_prettyprint!(mux::KMUX, val, w, _family, _tile_pos, _tile_type, i {
+    write!(w, "{}", val)?;
+
+    if let mux::KMUX::I { i: kmux_inp_i, .. } = val {
+        let kmux_src = kmux_input(i, kmux_inp_i);
+        write!(w, "\t// tmux[{kmux_src}]")?;
+    }
+});
+
 make_specific_prettyprint!(mux::LeftRightIOLocalMux, val, w, family, tile_pos, _tile_type, i {
     write!(w, "{}", val)?;
 
