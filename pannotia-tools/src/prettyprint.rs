@@ -216,3 +216,28 @@ make_specific_prettyprint!(mux::TopBottomIOLocalMux, val, w, family, tile_pos, _
         }
     }
 });
+
+make_specific_prettyprint!(mux::IOLocalToClockMux, val, w, family, tile_pos, _tile_type, i {
+    write!(w, "{}", val)?;
+
+    if let mux::IOLocalToClockMux::I(mux_inp_i) = val {
+        let mux_src = if tile_pos.x == 0 || tile_pos.x == family.tile_dims().0 - 1 {
+            left_right_io_clock_input(i, mux_inp_i)
+        } else {
+            top_bottom_io_clock_input(i, mux_inp_i)
+        };
+        write!(w, "\t// local_line[{mux_src}]")?;
+    }
+});
+make_specific_prettyprint!(mux::LocalToIOMux, val, w, family, tile_pos, _tile_type, i {
+    write!(w, "{}", val)?;
+
+    if let mux::LocalToIOMux::I { i: mux_inp_i, .. } = val {
+        let mux_src = if tile_pos.x == 0 || tile_pos.x == family.tile_dims().0 - 1 {
+            left_right_io_signal_input(i, mux_inp_i)
+        } else {
+            top_bottom_io_signal_input(i, mux_inp_i)
+        };
+        write!(w, "\t// local_line[{mux_src}]")?;
+    }
+});
