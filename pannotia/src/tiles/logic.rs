@@ -160,20 +160,20 @@ impl FieldPositionCalculator for LogicLUT {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 #[bitmux::bitenum]
 pub enum InputCMode {
-    _00 = "00",
+    IMUX = "00",
     _01 = "01",
     _10 = "10",
     _11 = "11",
 }
 impl Default for InputCMode {
     fn default() -> Self {
-        Self::_00
+        Self::IMUX
     }
 }
 impl Display for InputCMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            InputCMode::_00 => write!(f, "_00"),
+            InputCMode::IMUX => write!(f, "imux"),
             InputCMode::_01 => write!(f, "_01"),
             InputCMode::_10 => write!(f, "_10"),
             InputCMode::_11 => write!(f, "_11"),
@@ -183,12 +183,15 @@ impl Display for InputCMode {
 impl FromStr for InputCMode {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "_00" => Ok(Self::_00),
-            "_01" => Ok(Self::_01),
-            "_10" => Ok(Self::_10),
-            "_11" => Ok(Self::_11),
-            _ => Err(()),
+        if s.eq_ignore_ascii_case("imux") {
+            Ok(Self::IMUX)
+        } else {
+            match s {
+                "_01" => Ok(Self::_01),
+                "_10" => Ok(Self::_10),
+                "_11" => Ok(Self::_11),
+                _ => Err(()),
+            }
         }
     }
 }
