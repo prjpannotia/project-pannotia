@@ -25,11 +25,16 @@ macro_rules! _replace_self {
 }
 
 macro_rules! _dump_one_tile_field {
-    ($self:ident $w:ident $fn_name:ident $fn_str:literal = $start:literal .. $end:literal) => {
-        for i in $start..$end {
+    ($self:ident $w:ident $fn_name:ident $fn_str:literal = $start:literal .. $end:literal $(=>$fmt_i:ident { $($refmt_i:tt)* })? ) => {
+        for mut i in $start..$end {
             let setting = $self.$fn_name(i);
             if setting != Default::default() {
                 write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+                i = i; // Silence warnings
+                $({
+                    let $fmt_i = i;
+                    i = { $($refmt_i)* };
+                })?
                 (&&PrettyPrintWrap(setting)).pretty_print(
                     &mut $w,
                     $self.family(),
@@ -41,12 +46,17 @@ macro_rules! _dump_one_tile_field {
             }
         }
     };
-    ($self:ident $w:ident $fn_name:ident $fn_str:literal = $count:expr) => {
+    ($self:ident $w:ident $fn_name:ident $fn_str:literal = $count:expr $(=>$fmt_i:ident { $($refmt_i:tt)* })? ) => {
         let count = $count;
-        for i in 0..count {
+        for mut i in 0..count {
             let setting = $self.$fn_name(i);
             if setting != Default::default() {
                 write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+                i = i; // Silence warnings
+                $({
+                    let $fmt_i = i;
+                    i = { $($refmt_i)* };
+                })?
                 (&&PrettyPrintWrap(setting)).pretty_print(
                     &mut $w,
                     $self.family(),
@@ -74,11 +84,16 @@ macro_rules! _dump_one_tile_field {
     };
 
     // Copypasta for bool, since there's issues with Default
-    ($self:ident $w:ident @bool $fn_name:ident $fn_str:literal = $start:literal .. $end:literal) => {
-        for i in $start..$end {
+    ($self:ident $w:ident @bool $fn_name:ident $fn_str:literal = $start:literal .. $end:literal $(=>$fmt_i:ident { $($refmt_i:tt)* })? ) => {
+        for mut i in $start..$end {
             let setting = $self.$fn_name(i);
             if setting {
                 write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+                i = i; // Silence warnings
+                $({
+                    let $fmt_i = i;
+                    i = { $($refmt_i)* };
+                })?
                 (&&PrettyPrintWrap(setting)).pretty_print(
                     &mut $w,
                     $self.family(),
@@ -90,12 +105,17 @@ macro_rules! _dump_one_tile_field {
             }
         }
     };
-    ($self:ident $w:ident @bool $fn_name:ident $fn_str:literal = $count:expr) => {
+    ($self:ident $w:ident @bool $fn_name:ident $fn_str:literal = $count:expr $(=>$fmt_i:ident { $($refmt_i:tt)* })? ) => {
         let count = $count;
-        for i in 0..count {
+        for mut i in 0..count {
             let setting = $self.$fn_name(i);
             if setting {
                 write!($w, "tile[{}].{}[{}] = ", $self.pos(), $fn_str, i)?;
+                i = i; // Silence warnings
+                $({
+                    let $fmt_i = i;
+                    i = { $($refmt_i)* };
+                })?
                 (&&PrettyPrintWrap(setting)).pretty_print(
                     &mut $w,
                     $self.family(),
@@ -171,7 +191,12 @@ macro_rules! _parse_one_tile_field {
 }
 
 macro_rules! make_tile_fields {
-    ($self:ident: $($tile_ref:ident)::+ { $($(@$maybe_bool:ident)? $func:ident $human_name:literal $eq_or_semi:tt $($count:literal $(.. $count_range:literal)? )? $({ $($count_complex:tt)* })? $(;)?)* }) => {
+    ($self:ident: $($tile_ref:ident)::+ { $(
+        $(@$maybe_bool:ident)? $func:ident $human_name:literal $eq_or_semi:tt
+            $($count:literal $(.. $count_range:literal)? )? $({ $($count_complex:tt)* })?
+            $(#$fmt_i:ident { $($refmt_i:tt)* })?
+            $(;)?
+    )* }) => {
         impl<
             D: debug::DebugTracer,
             Ref: std::borrow::Borrow<Bitstream<D>>,
@@ -179,7 +204,11 @@ macro_rules! make_tile_fields {
         {
             fn dump<W: std::fmt::Write>(&$self, mut w: W) -> std::fmt::Result {
                 $({
-                    _dump_one_tile_field!{ $self w $(@$maybe_bool)? $func $human_name $eq_or_semi $($count $(.. $count_range)? )? $(_replace_self!{ $self { $($count_complex)* } })? }
+                    _dump_one_tile_field!{
+                        $self w $(@$maybe_bool)? $func $human_name $eq_or_semi
+                        $($count $(.. $count_range)? )? $(_replace_self!{ $self { $($count_complex)* } })?
+                        $(=>$fmt_i { $($refmt_i)* } )?
+                    }
                 })*
 
                 Ok(())
@@ -225,10 +254,11 @@ make_tile_fields! {
         control_signal_preselect "ctrl" = 4;
 
         lut "lut" = 16;
-        lut_inp_a "lut_A" = 16;
-        lut_inp_b "lut_B" = 16;
-        lut_inp_c "lut_C" = 16;
-        lut_inp_d "lut_D" = 16;
+        // FIXME: This involves hacky code duplication
+        lut_inp_a "lut_A" = 16 #fmt_i { fmt_i * 4 + 0 };
+        lut_inp_b "lut_B" = 16 #fmt_i { fmt_i * 4 + 1 };
+        lut_inp_c "lut_C" = 16 #fmt_i { fmt_i * 4 + 2 };
+        lut_inp_d "lut_D" = 16 #fmt_i { fmt_i * 4 + 3 };
         lc_input_c_mode "inp_c" = 16;
         lc_carry_en "carry_en" = 16;
         lc_clk_choice "lc_clk" = 16;
@@ -258,11 +288,11 @@ make_tile_fields! {
         global_to_local "glb2loc" = 6;
         control_signal_preselect "ctrl" = 4;
 
-        addr_a "addr_a" = 13;
-        addr_b "addr_b" = 13;
-        data_in_a "data_in_a" = 18;
-        data_in_b "data_in_b" = 18;
-        imux_xtra "imux_xtra" = 2;
+        addr_a "addr_a" = 13 #fmt_i { 12 - fmt_i };
+        addr_b "addr_b" = 13 #fmt_i { 51 + fmt_i };
+        data_in_a "data_in_a" = 18 #fmt_i { 30 - fmt_i };
+        data_in_b "data_in_b" = 18 #fmt_i { 33 + fmt_i };
+        imux_xtra "imux_xtra" = 2 #fmt_i { 31 + fmt_i };
         tmux "tmux" = 16;
         read_en_a "read_en_a";
         read_en_b "read_en_b";
