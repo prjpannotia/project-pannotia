@@ -1,0 +1,9 @@
+// This lights two LEDs on the "AG32VH407RCT6" devboard
+
+// PIN 36
+tile[0, 4].loc_to_io_out[3] = GND
+tile[0, 4].loc_to_io_oe[3] = VCC
+
+// PIN 39
+tile[0, 2].loc_to_io_out[2] = GND
+tile[0, 2].loc_to_io_oe[2] = VCC
