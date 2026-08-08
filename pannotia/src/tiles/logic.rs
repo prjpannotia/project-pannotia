@@ -161,7 +161,7 @@ impl FieldPositionCalculator for LogicLUT {
 #[bitmux::bitenum]
 pub enum InputCMode {
     IMUX = "00",
-    _01 = "01",
+    FlipFlop = "01",
     // Both 10 and 11 seem to work, which matches vendor simulation model
     Carry = "1x",
 }
@@ -174,7 +174,7 @@ impl Display for InputCMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             InputCMode::IMUX => write!(f, "imux"),
-            InputCMode::_01 => write!(f, "_01"),
+            InputCMode::FlipFlop => write!(f, "ff"),
             InputCMode::Carry => write!(f, "carry"),
         }
     }
@@ -184,13 +184,12 @@ impl FromStr for InputCMode {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.eq_ignore_ascii_case("imux") {
             Ok(Self::IMUX)
+        } else if s.eq_ignore_ascii_case("ff") {
+            Ok(Self::FlipFlop)
         } else if s.eq_ignore_ascii_case("carry") {
             Ok(Self::Carry)
         } else {
-            match s {
-                "_01" => Ok(Self::_01),
-                _ => Err(()),
-            }
+            Err(())
         }
     }
 }
