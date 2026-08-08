@@ -264,7 +264,7 @@ make_tile_fields! {
         lc_clk_choice "lc_clk" = 16;
         lc_async_choice "lc_async" = 16;
         @bool lc_shift_reg_mode "lc_shift" = 16;
-        @bool lc_input_c_bypass_mode "lc_bypass" = 16;
+        @bool lc_enable_sync_ctrl "lc_bypass" = 16;
         lc_output_neigh "omux_neigh" = 16;
         lc_output_imux "omux_imux" = 16;
         lc_output_rmux "omux_rmux" = 16;

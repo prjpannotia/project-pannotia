@@ -52,17 +52,163 @@
 //!                                                                     +---------+
 //! ```
 //!
-//! TODO: This following bit of the documentation should be improved
+//! ## Control signals
 //!
-//! A logic tile also has a number of "control signal" wires which are shared by all LEs.
-//! The input to these wires can either come from a global net or from the general routing.
-//! If it comes from a global net, a global net must first be selected via a "global to local" mux.
-//! If it comes from general routing, a signal must be selected with a [CtrlMux],
+//! Control signals for the register (flip-flop) have much more restricted routing,
+//! and many resources must be shared by all LEs within a tile. Specifically, a tile has:
+//! - 2x clock+clock-enable pairs
+//! - 2x async control wires
+//! - 1 sync clear wires
+//! - 1 sync load wires
+//!
+//! Every LE can only pick from amongst these, as follows:
+//! - using one clock+enable pair, or the other
+//! - using one of the async control wires
+//!   (this cannot be disabled, so "not using async reset" consumes one of the tile's wires)
+//! - whether or not to use sync control signals (both load _and_ clear will be used)
+//!
+//! For the clock and async control signals only, the source can come from a global net.
+//! The appropriate global net must first be selected via a "global to local" mux.
+//! Otherwise, for all of of the control signals, the source can come from general routing.
+//! In that case, a signal must be selected with a [CtrlMux],
 //! which is similar to an `IMUX` but with more choices.
+//!
+//! ## Fast paths
+//!
+//! There are two fast paths between logic elements, carry chains and a "shift register" path.
+//! Both of these connect _from_ the logic element above. "Above" means the LE
+//! with an index 1 _smaller_ within the tile (for LEs 1 to 15 inclusive),
+//! or the signals from LE 15 in the tile with a y-coordinate 1 _higher_ (for LE 0).
+//!
+//! The tiles at the top edge of the array do not have fast path inputs,
+//! and these are supposedly hardwired to 0.
 //!
 //! ## Logic elements
 //!
-//! TODO: This documentation should be stolen from Altera and fixed accordingly
+//! Each logic element consists of a LUT4 and a register.
+//!
+//! In the "default" configuration, the register's input comes from the output of the LUT4:
+//!
+//! ```text
+//!                 +------------------>
+//!      +------+   |       +----+
+//! A -->|      |   |       |    |
+//! B -->| LUT4 |---+-------| FF |----->
+//! C -->|      |           |    |
+//! D -->|      |      clk -|>   |
+//!      +------+           +----+
+//! ```
+//!
+//! However, input C to the LUT is special, because it can be used for carry chains:
+//!
+//! ```text
+//!                           +------------------>
+//!                +------+   |       +----+
+//!           A -->|      |   |       |    |
+//! Cin-->|\  B -->| LUT  |---+-------| FF |----->
+//!       | |------|      |           |    |
+//! C---->|/  D -->|      |-+    clk -|>   |
+//!                +------+ |         +----+
+//!                         v
+//!                        Cout
+//! ```
+//!
+//! The carry _out_ from a LUT is computed from inputs `A`, `B`, and `Cin` (not `C`),
+//! using the "bottom" half of the LUT.
+//! This computation is not affected by how LUT input C is configured.
+//! The _data_ out from a LUT is the only thing affected by the input C mode.
+//!
+//! In practice, to implement an adder, the "bottom" half of the LUT implements a majority gate over
+//! `A`, `B`, and `Cin`, and the "top" half of the LUT implements an XOR gate over the same inputs.
+//! Input D is not used. However, other configurations _are_ permitted by the hardware.
+//!
+//! Logic elements also contain a "register feedback" path.
+//! This takes the output of the register and replaces input C with it.
+//!
+//! ```text
+//!                           +------------------>
+//!                +------+   |       +----+
+//!           A -->|      |   |       |    |
+//! Cin-->|\  B -->| LUT  |---+-------| FF |--+-->
+//! C---->| |------|      |           |    |  |
+//!    +--|/  D -->|      |-+    clk -|>   |  |
+//!    |           +------+ |         +----+  |
+//!    |                    v                 |
+//!    |                   Cout               |
+//!    +--------------------------------------+
+//! ```
+//!
+//! This fast path can be used to optimize state machines and similar logic.
+//!
+//! The register can also take its input from the register above, to implement shift registers:
+//!
+//! ```text
+//!                         shift in
+//!                             v
+//!                           +-|---------------->
+//!                +------+   | +-|\  +----+
+//!           A -->|      |   |   | |-|    |
+//! Cin-->|\  B -->| LUT  |---+---|/  | FF |--+-->
+//! C---->| |------|      |           |    |  |
+//!    +--|/  D -->|      |-+    clk -|>   |  |
+//!    |           +------+ |         +----+  |
+//!    |                    v                 |
+//!    |                   Cout               |
+//!    +--------------------------------------+
+//!                                           v
+//!                                     shift out
+//! ```
+//!
+//! When the shift register feature is being used, the LUT output remains available via certain OMUX paths.
+//! The shift register feature can also be combined with the "register feedback" feature.
+//!
+//! The register can be optionally forced to take its input from input C when a "sync load" signal is asserted:
+//!
+//! ```text
+//!                             shift in
+//!                                 v
+//!                               +-|---------------------------------->
+//!                    +------+   | +-|\
+//!               A -->|      |   |   | |-|\
+//!     Cin-->|\  B -->| LUT  |---+---|/  | |--|\        +----+
+//! C-+------>| |------|      |         +-|/   | |-------| FF |--+----->
+//!   |    +--|/  D -->|      |-+       |  | 0-|/        |    |  |
+//!   |    |           +------+ |       |  |    |   clk -|>   |  |
+//!   |    |                    v       |  |    |        +----+  |
+//!   |    |                   Cout     |  |    |                |
+//!   |    +----------------------------|--|----|----------------+
+//!   +---------------------------------+  |    |                |
+//!                             sync load -+    |                v
+//!                             sync clear -----+           shift out
+//! ```
+//!
+//! If sync load is a constant 1, this allows the LUT and register to implement completely unrelated functionality
+//! (at the cost of losing one useful LUT input and tile-wide packing constraints over the sync control signals).
+//!
+//! Finally, the register contains an async reset:
+//!
+//! ```text
+//!                             shift in
+//!                                 v
+//!                               +-|---------------------------------->
+//!                    +------+   | +-|\              async reset
+//!               A -->|      |   |   | |-|\               |
+//!     Cin-->|\  B -->| LUT  |---+---|/  | |--|\        +-V--+
+//! C-+------>| |------|      |         +-|/   | |-------|    |--+----->
+//!   |    +--|/  D -->|      |-+       |  | 0-|/        | FF |  |
+//!   |    |           +------+ |       |  |    |   clk -|>   |  |
+//!   |    |                    v       |  |    |        +----+  |
+//!   |    |                   Cout     |  |    |                |
+//!   |    +----------------------------|--|----|----------------+
+//!   +---------------------------------+  |    |                |
+//!                             sync load -+    |                v
+//!                             sync clear -----+           shift out
+//! ```
+//!
+//! Features that are _not_ present include:
+//! - no async set
+//! - no default power-up state
+//! - cannot be used as distributed RAM
 
 use std::borrow::Borrow;
 
@@ -156,12 +302,19 @@ impl FieldPositionCalculator for LogicLUT {
     }
 }
 
-// FIXME: This needs to be RE'd, cannot figure out how to get vendor tools to generate it
+/// The choice of inputs for LUT input C
+///
+/// This LUT input is used to implement the special functions of:
+/// - carry chains
+/// - "register feedback" mode
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 #[bitmux::bitenum]
 pub enum InputCMode {
+    /// Input C comes from the "normal" path, selected from the local lines via an [IMUX]
     IMUX = "00",
+    /// Input C comes from the output of the register (flip-flop)
     FlipFlop = "01",
+    /// Input C comes from the carry-out of the LUT above
     // Both 10 and 11 seem to work, which matches vendor simulation model
     Carry = "1x",
 }
@@ -335,6 +488,7 @@ impl Default for LUT {
     }
 }
 impl ::bitmux::BitstreamField for LUT {
+    // NOTE: The LUT bits are _inverted_ in the bitstream
     fn get(b: impl BitGetter) -> Self {
         Self((b.get_bits::<16>() as u16) ^ 0xffff)
     }
@@ -376,9 +530,15 @@ magic_tile_impl_gen! {
             }
         }
 
+        /// The logic function implemented in this logic cell
+        ///
+        /// The bit at index `(d << 3) + (c << 2) + (b << 1) + (a << 0)`
+        /// (with the least significant bit being bit 0)
+        /// is chosen by a given set of inputs `abcd`.
         pub fn lut(&self, lc_idx: u8) -> LUT {
             LogicLUT(lc_idx)
         }
+        /// This routes signals from RMUX local lines into each LUT
         pub fn lut_input(&self, lc_idx: u8, inp_idx: u8) -> IMUX {
             IMUXRef {
                 is_bram: false,
@@ -398,6 +558,9 @@ magic_tile_impl_gen! {
             self.lut_input(lc_idx, 3)
         }
 
+        /// This controls whether the LUT combinatorial output or the flip-flop output is used.
+        ///
+        /// Because each logic cell has multiple OMUX, both can be used at the same time.
         pub fn lc_output(&self, lc_idx: u8, out_idx: u8) -> OMUX {
             LogicOut {
                 lc: lc_idx,
@@ -414,9 +577,13 @@ magic_tile_impl_gen! {
             self.lc_output(lc_idx, 2)
         }
 
+        /// The special mux on input C of the LUT.
         pub fn lc_input_c_mode(&self, lc_idx: u8) -> InputCMode {
             LogicInputC(lc_idx)
         }
+        /// Whether or not the carry output of this LUT can be used
+        ///
+        /// This defaults to _enabled_. When disabled, the carry output value is always 1.
         pub fn lc_carry_en(&self, lc_idx: u8) -> bitmux::InvertedBool {
             LogicCarryEn(lc_idx)
         }
@@ -427,10 +594,19 @@ magic_tile_impl_gen! {
         pub fn lc_clk_choice(&self, lc_idx: u8) -> Mux2 {
             LogicClkMux(lc_idx)
         }
+        /// Controls whether the register uses the output from the register above, instead of the LUT
+        ///
+        /// This is used to implement fast shift registers.
         pub fn lc_shift_reg_mode(&self, lc_idx: u8) -> bool {
             LogicShiftMode(lc_idx)
         }
-        pub fn lc_input_c_bypass_mode(&self, lc_idx: u8) -> bool {
+        /// Controls whether the sync load/clear function is enabled for this flip-flop
+        ///
+        /// If it is enabled, and the _tile-wide_ sync load signal is asserted,
+        /// the data to be loaded comes from the same signal that goes into input C of the LUT.
+        ///
+        /// Synchronous clear has priority over synchronous load.
+        pub fn lc_enable_sync_ctrl(&self, lc_idx: u8) -> bool {
             LogicBypassMode(lc_idx)
         }
     }
