@@ -10,6 +10,7 @@ pub use crate::tiles::{
     self, TileRefTrait, TileType,
     generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait},
     io::{IOTileCommon, IOTileCommonMut},
+    logic::LUT,
 };
 
 /// Types that you most likely only need if you want to implement a custom debug tracer

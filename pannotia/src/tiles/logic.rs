@@ -64,7 +64,7 @@
 //!
 //! TODO: This documentation should be stolen from Altera and fixed accordingly
 
-use std::borrow::{Borrow, BorrowMut};
+use std::borrow::Borrow;
 
 use super::generic_routing::{GenericRoutingRefMutTrait, GenericRoutingRefTrait, RMUX, RMUXRef};
 use super::local_lines::{CtrlMux, CtrlMuxRef, IMUX, IMUXRef};
@@ -324,26 +324,21 @@ impl FieldPositionCalculator for LogicOut {
     }
 }
 
-impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn lut(&self, lc_idx: u8) -> u16 {
-        let ref_ = GenericFieldRef {
-            bitstream: self.r.borrow(),
-            tile_pos: self.p,
-            field_pos: LogicLUT(lc_idx),
-            _d: PhantomData,
-        };
-        (ref_.get_bits::<16>() as u16) ^ 0xffff
+/// A LUT value, a `u16` with a modified [Default]
+#[repr(transparent)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
+pub struct LUT(pub u16);
+impl Default for LUT {
+    fn default() -> Self {
+        Self(0xffff)
     }
 }
-impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
-    pub fn set_lut(&mut self, lc_idx: u8, val: u16) {
-        let mut ref_ = GenericFieldRef {
-            bitstream: self.r.borrow_mut(),
-            tile_pos: self.p,
-            field_pos: LogicLUT(lc_idx),
-            _d: PhantomData,
-        };
-        ref_.set_bits::<16>((val ^ 0xffff) as u32)
+impl ::bitmux::BitstreamField for LUT {
+    fn get(b: impl BitGetter) -> Self {
+        Self((b.get_bits::<16>() as u16) ^ 0xffff)
+    }
+    fn set(&self, mut b: impl BitSetter) {
+        b.set_bits::<16>((self.0 ^ 0xffff) as u32)
     }
 }
 
@@ -380,6 +375,9 @@ magic_tile_impl_gen! {
             }
         }
 
+        pub fn lut(&self, lc_idx: u8) -> LUT {
+            LogicLUT(lc_idx)
+        }
         pub fn lut_input(&self, lc_idx: u8, inp_idx: u8) -> IMUX {
             IMUXRef {
                 is_bram: false,

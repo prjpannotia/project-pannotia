@@ -69,6 +69,12 @@ impl_parse_int!(u8);
 impl_parse_int!(u16);
 impl_parse_int!(u32);
 
+impl PannotiaParse for LUT {
+    fn parse(s: &str) -> Result<Self, ()> {
+        Ok(Self(PannotiaParse::parse(s)?))
+    }
+}
+
 pub fn parse_bool(s: &str) -> Result<bool, ()> {
     match s.to_ascii_lowercase().as_str() {
         "0" | "f" | "false" => Ok(false),

@@ -74,9 +74,9 @@ make_specific_prettyprint!(::bitmux::InvertedBool, val, w, _family, _tile_pos, _
     write!(w, "{}", val.0 as u8)?;
 });
 
-make_specific_prettyprint!(u16, val, w, _family, _tile_pos, _tile_type, _i {
-    // print u16s (usually a LUT value) in hex
-    write!(w, "0x{val:04x}")?;
+make_specific_prettyprint!(LUT, val, w, _family, _tile_pos, _tile_type, _i {
+    // print LUT values in hex
+    write!(w, "0x{:04x}", val.0)?;
 });
 
 make_specific_prettyprint!(mux::RMUX, val, w, family, tile_pos, tile_type, i {
