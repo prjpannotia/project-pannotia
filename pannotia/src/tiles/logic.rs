@@ -332,7 +332,7 @@ impl<D: DebugTracer, Ref: Borrow<Bitstream<D>>> LogicTileRef<D, Ref> {
             field_pos: LogicLUT(lc_idx),
             _d: PhantomData,
         };
-        ref_.get_bits::<16>() as u16
+        (ref_.get_bits::<16>() as u16) ^ 0xffff
     }
 }
 impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
@@ -343,7 +343,7 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> LogicTileRef<D, Ref> {
             field_pos: LogicLUT(lc_idx),
             _d: PhantomData,
         };
-        ref_.set_bits::<16>(val as u32)
+        ref_.set_bits::<16>((val ^ 0xffff) as u32)
     }
 }
 
