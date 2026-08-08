@@ -42,10 +42,8 @@
 //! 5. `8`, `10`
 //! 6. `9`, `11`
 //!
-//! Supposedly, `T4X` wires are driven by a `LoopMUX`
-//! which buffers and re-outputs the `T4X` wires terminating in this tile,
-//! but it is not clear if this actually exists
-//! (it doesn't consistently appear in the vendor tool's data model).
+//! The `T4X` wires are driven by a `LoopMUX` which buffers and re-outputs
+//! the corresponding `T4X` wires terminating in this tile.
 //!
 //! ## Top/bottom IOs
 //!

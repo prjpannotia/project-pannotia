@@ -1,0 +1,18 @@
+// This one LEDs on the "AG32VH407RCT6" devboard always
+// and loops the pushbutton to another one
+
+// PIN 35
+pad[0, 4, 2].input_en = 1
+// output available on T1 wires 4, 6
+
+tile[1, 4].rmux[26] = #2    // loop T1 E wire 6 to T4 W wire 1
+tile[1, 4].rmux[12] = #9    // loop T4 W wire 1 (via loopmux?) to T1 W wire 2
+
+// PIN 36
+tile[0, 4].local_line[36] = #2      // T1 W wire 2
+tile[0, 4].loc_to_io_out[3] = #6    // rmux 36
+tile[0, 4].loc_to_io_oe[3] = VCC
+
+// PIN 39
+tile[0, 2].loc_to_io_out[2] = GND
+tile[0, 2].loc_to_io_oe[2] = VCC
