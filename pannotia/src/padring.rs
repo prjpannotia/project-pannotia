@@ -247,14 +247,15 @@ pub trait PadRingExt {
     fn pad_termination(&self, pad_i: u8) -> PullUpDown;
     fn pad_open_drain(&self, pad_i: u8) -> bool;
     fn pad_reduced_slew(&self, pad_i: u8) -> bool;
-    fn pad_pullup_to_fabric(&self, pad_i: u8) -> bool;
+    // FIXME why does this exist? is it not redundant?
+    fn pad_pullup(&self, pad_i: u8) -> bool;
 
     fn set_pad_input_en(&mut self, pad_i: u8, val: bool);
     fn set_pad_drive_strength(&mut self, pad_i: u8, val: DriveStrength);
     fn set_pad_termination(&mut self, pad_i: u8, val: PullUpDown);
     fn set_pad_open_drain(&mut self, pad_i: u8, val: bool);
     fn set_pad_reduced_slew(&mut self, pad_i: u8, val: bool);
-    fn set_pad_pullup_to_fabric(&mut self, pad_i: u8, val: bool);
+    fn set_pad_pullup(&mut self, pad_i: u8, val: bool);
 }
 impl<D: DebugTracer> PadRingExt for Bitstream<D> {
     fn pad_input_en(&self, pad_i: u8) -> bool {
@@ -283,7 +284,7 @@ impl<D: DebugTracer> PadRingExt for Bitstream<D> {
         let biti = pad_i_to_bit_i(pad_i) - 2;
         self.get_aux_array_bit(1, 0, biti)
     }
-    fn pad_pullup_to_fabric(&self, pad_i: u8) -> bool {
+    fn pad_pullup(&self, pad_i: u8) -> bool {
         let biti = pad_i_to_bit_i(pad_i) - 1;
         self.get_aux_array_bit(1, 0, biti)
     }
@@ -314,7 +315,7 @@ impl<D: DebugTracer> PadRingExt for Bitstream<D> {
         let biti = pad_i_to_bit_i(pad_i) - 2;
         self.set_aux_array_bit(1, 0, biti, val);
     }
-    fn set_pad_pullup_to_fabric(&mut self, pad_i: u8, val: bool) {
+    fn set_pad_pullup(&mut self, pad_i: u8, val: bool) {
         let biti = pad_i_to_bit_i(pad_i) - 1;
         self.set_aux_array_bit(1, 0, biti, val);
     }

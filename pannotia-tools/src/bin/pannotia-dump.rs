@@ -126,9 +126,9 @@ fn dump_explain_padring<W: Write>(
         writeln!(wr, "pad[{}, {}].reduced_slew = 1", tile_pos, io_i)?;
     }
 
-    let setting = b.pad_pullup_to_fabric(pad_i);
+    let setting = b.pad_pullup(pad_i);
     if setting {
-        writeln!(wr, "pad[{}, {}].pullup_to_fabric = 1", tile_pos, io_i)?;
+        writeln!(wr, "pad[{}, {}].pullup = 1", tile_pos, io_i)?;
     }
 
     let setting = b.pad_drive_strength(pad_i);

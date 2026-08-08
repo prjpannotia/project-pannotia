@@ -139,8 +139,8 @@ fn try_parse_line(
                 "reduced_slew" => {
                     b.set_pad_reduced_slew(pad_i, pannotia_tools::parsing::parse_bool(val)?);
                 }
-                "pullup_to_fabric" => {
-                    b.set_pad_pullup_to_fabric(pad_i, pannotia_tools::parsing::parse_bool(val)?);
+                "pullup" => {
+                    b.set_pad_pullup(pad_i, pannotia_tools::parsing::parse_bool(val)?);
                 }
                 "drive_strength" => {
                     b.set_pad_drive_strength(pad_i, FromStr::from_str(val)?);
