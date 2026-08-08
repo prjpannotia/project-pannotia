@@ -162,8 +162,8 @@ impl FieldPositionCalculator for LogicLUT {
 pub enum InputCMode {
     IMUX = "00",
     _01 = "01",
-    _10 = "10",
-    _11 = "11",
+    // Both 10 and 11 seem to work, which matches vendor simulation model
+    Carry = "1x",
 }
 impl Default for InputCMode {
     fn default() -> Self {
@@ -175,8 +175,7 @@ impl Display for InputCMode {
         match self {
             InputCMode::IMUX => write!(f, "imux"),
             InputCMode::_01 => write!(f, "_01"),
-            InputCMode::_10 => write!(f, "_10"),
-            InputCMode::_11 => write!(f, "_11"),
+            InputCMode::Carry => write!(f, "carry"),
         }
     }
 }
@@ -185,11 +184,11 @@ impl FromStr for InputCMode {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.eq_ignore_ascii_case("imux") {
             Ok(Self::IMUX)
+        } else if s.eq_ignore_ascii_case("carry") {
+            Ok(Self::Carry)
         } else {
             match s {
                 "_01" => Ok(Self::_01),
-                "_10" => Ok(Self::_10),
-                "_11" => Ok(Self::_11),
                 _ => Err(()),
             }
         }
