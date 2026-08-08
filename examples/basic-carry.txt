@@ -1,0 +1,29 @@
+// This one LEDs on the "AG32VH407RCT6" devboard always
+// and loops the pushbutton to another one, inverting it
+
+// PIN 35
+pad[0, 4, 2].input_en = 1
+// output available on T1 wires 4, 6
+
+
+tile[1, 4].rmux[40] = #0    // T1 E wire 4 to "1 of 2" local line
+
+// first LUT, input A -> Cout
+tile[1, 4].lut_A[0] = #17   // local line to LUT
+tile[1, 4].lut[0] = 0x0004  // testing: an invert here
+// tile[1, 4].carry_en = 0     // carry is normally _enabled_, this can disable it
+
+// second LUT, Cin -> out
+tile[1, 4].lut[1] = 0x0800  // testing: another invert here to cancel it out
+tile[1, 4].inp_c[1] = carry
+tile[1, 4].rmux[0] = #1     // LUT output to T1 W wire 0
+
+
+// PIN 36
+tile[0, 4].local_line[36] = #0      // T1 W wire 0
+tile[0, 4].loc_to_io_out[3] = #6    // rmux 36
+tile[0, 4].loc_to_io_oe[3] = VCC
+
+// PIN 39
+tile[0, 2].loc_to_io_out[2] = GND
+tile[0, 2].loc_to_io_oe[2] = VCC
