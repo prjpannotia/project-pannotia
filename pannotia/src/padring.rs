@@ -209,8 +209,8 @@ impl<D: DebugTracer, Ref: BorrowMut<Bitstream<D>>> bitmux::BitSetter for Termina
 #[bitmux::bitenum]
 pub enum PullUpDown {
     None = "00",
-    Down = "01",
-    Up = "10",
+    Up = "01",
+    Down = "10",
     Keeper = "11",
 }
 impl Default for PullUpDown {
@@ -247,7 +247,11 @@ pub trait PadRingExt {
     fn pad_termination(&self, pad_i: u8) -> PullUpDown;
     fn pad_open_drain(&self, pad_i: u8) -> bool;
     fn pad_reduced_slew(&self, pad_i: u8) -> bool;
-    // FIXME why does this exist? is it not redundant?
+    /// Enable "other" pull-up for this IO pad
+    ///
+    /// This pull-up is slightly stronger than the "termination" pull-up.
+    /// Measured on one sample, the "termination" pull-up measured ~40 kOhm
+    /// whereas this pull-up measured ~36 kOhm.
     fn pad_pullup(&self, pad_i: u8) -> bool;
 
     fn set_pad_input_en(&mut self, pad_i: u8, val: bool);
