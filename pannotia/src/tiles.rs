@@ -265,8 +265,8 @@ pub enum Mux2 {
 impl Display for Mux2 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::_0 => write!(f, "0"),
-            Self::_1 => write!(f, "1"),
+            Self::_0 => write!(f, "#0"),
+            Self::_1 => write!(f, "#1"),
         }
     }
 }
@@ -279,8 +279,8 @@ impl FromStr for Mux2 {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "0" => Ok(Self::_0),
-            "1" => Ok(Self::_1),
+            "0" | "#0" => Ok(Self::_0),
+            "1" | "#1" => Ok(Self::_1),
             _ => Err(()),
         }
     }
