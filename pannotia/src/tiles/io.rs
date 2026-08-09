@@ -16,10 +16,10 @@
 //! Each I/O element thus contains the following inputs:
 //! - data to be output
 //! - output enable
-//! - clock for the output path registers (on data and OE)
-//! - clock for the input path register
-//! - async reset/set
-//! - sync reset/set
+//! - clock enable for the output path registers (shared by data and OE)
+//! - clock enable for the input path register
+//! - async reset/set (only one of the two, not both)
+//! - sync reset/set (only one of the two, not both)
 //!
 //! They _also_ contain the following inputs:
 //! - output clock (shared by the data and OE registers)
@@ -43,7 +43,7 @@
 //! 6. `9`, `11`
 //!
 //! The `T4X` wires are driven by a `LoopMUX` which buffers and re-outputs
-//! the corresponding `T4X` wires terminating in this tile.
+//! the corresponding `T4X` wires originating from the tile next to this tile.
 //!
 //! As a diagram:
 //!
