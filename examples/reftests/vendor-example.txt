@@ -1,0 +1,1408 @@
+// Family: AGRV2K
+USERID 0x0000ffff
+tile[1, 0].out_clk[0] = GND
+tile[1, 0].out_clk[1] = GND
+tile[1, 0].out_clk[2] = GND
+tile[1, 0].out_clk[3] = GND
+tile[1, 0].in_clk[0] = GND
+tile[1, 0].in_clk[1] = GND
+tile[1, 0].in_clk[2] = GND
+tile[1, 0].in_clk[3] = GND
+tile[1, 0].loc_to_io_out[0] = GND
+tile[1, 0].loc_to_io_out[1] = GND
+tile[1, 0].loc_to_io_out[2] = GND
+tile[1, 0].loc_to_io_out[3] = GND
+tile[1, 0].loc_to_io_oe[0] = GND
+tile[1, 0].loc_to_io_oe[1] = GND
+tile[1, 0].loc_to_io_oe[2] = GND
+tile[1, 0].loc_to_io_oe[3] = GND
+tile[1, 0].loc_to_out_cen[0] = GND
+tile[1, 0].loc_to_out_cen[1] = GND
+tile[1, 0].loc_to_out_cen[2] = GND
+tile[1, 0].loc_to_out_cen[3] = GND
+tile[1, 0].loc_to_in_cen[0] = GND
+tile[1, 0].loc_to_in_cen[1] = GND
+tile[1, 0].loc_to_in_cen[2] = GND
+tile[1, 0].loc_to_in_cen[3] = GND
+tile[1, 0].loc_to_async[0] = GND
+tile[1, 0].loc_to_async[1] = GND
+tile[1, 0].loc_to_async[2] = GND
+tile[1, 0].loc_to_async[3] = GND
+tile[1, 0].loc_to_sync[0] = GND
+tile[1, 0].loc_to_sync[1] = GND
+tile[1, 0].loc_to_sync[2] = GND
+tile[1, 0].loc_to_sync[3] = GND
+pad[1, 0, 2].input_en = 1
+tile[2, 0].out_clk[0] = GND
+tile[2, 0].in_clk[0] = GND
+tile[2, 0].loc_to_io_out[0] = GND
+tile[2, 0].loc_to_io_oe[0] = GND
+tile[2, 0].loc_to_out_cen[0] = GND
+tile[2, 0].loc_to_in_cen[0] = GND
+tile[2, 0].loc_to_async[0] = GND
+tile[2, 0].loc_to_sync[0] = GND
+tile[6, 0].out_clk[0] = GND
+tile[6, 0].out_clk[3] = GND
+tile[6, 0].in_clk[0] = GND
+tile[6, 0].in_clk[3] = GND
+tile[6, 0].loc_to_io_out[0] = GND
+tile[6, 0].loc_to_io_out[3] = GND
+tile[6, 0].loc_to_io_oe[0] = GND
+tile[6, 0].loc_to_io_oe[3] = GND
+tile[6, 0].loc_to_out_cen[0] = GND
+tile[6, 0].loc_to_out_cen[3] = GND
+tile[6, 0].loc_to_in_cen[0] = GND
+tile[6, 0].loc_to_in_cen[3] = GND
+tile[6, 0].loc_to_async[0] = GND
+tile[6, 0].loc_to_async[3] = GND
+tile[6, 0].loc_to_sync[0] = GND
+tile[6, 0].loc_to_sync[3] = GND
+tile[7, 0].out_clk[0] = GND
+tile[7, 0].out_clk[1] = GND
+tile[7, 0].out_clk[3] = GND
+tile[7, 0].in_clk[0] = GND
+tile[7, 0].in_clk[1] = GND
+tile[7, 0].in_clk[3] = GND
+tile[7, 0].loc_to_io_out[0] = GND
+tile[7, 0].loc_to_io_out[1] = GND
+tile[7, 0].loc_to_io_out[3] = GND
+tile[7, 0].loc_to_io_oe[0] = GND
+tile[7, 0].loc_to_io_oe[1] = GND
+tile[7, 0].loc_to_io_oe[3] = GND
+tile[7, 0].loc_to_out_cen[0] = GND
+tile[7, 0].loc_to_out_cen[1] = GND
+tile[7, 0].loc_to_out_cen[3] = GND
+tile[7, 0].loc_to_in_cen[0] = GND
+tile[7, 0].loc_to_in_cen[1] = GND
+tile[7, 0].loc_to_in_cen[3] = GND
+tile[7, 0].loc_to_async[0] = GND
+tile[7, 0].loc_to_async[1] = GND
+tile[7, 0].loc_to_async[3] = GND
+tile[7, 0].loc_to_sync[0] = GND
+tile[7, 0].loc_to_sync[1] = GND
+tile[7, 0].loc_to_sync[3] = GND
+tile[8, 0].out_clk[0] = GND
+tile[8, 0].out_clk[1] = GND
+tile[8, 0].out_clk[2] = GND
+tile[8, 0].out_clk[3] = GND
+tile[8, 0].in_clk[0] = GND
+tile[8, 0].in_clk[1] = GND
+tile[8, 0].in_clk[2] = GND
+tile[8, 0].in_clk[3] = GND
+tile[8, 0].loc_to_io_out[0] = GND
+tile[8, 0].loc_to_io_out[1] = GND
+tile[8, 0].loc_to_io_out[2] = GND
+tile[8, 0].loc_to_io_out[3] = GND
+tile[8, 0].loc_to_io_oe[0] = GND
+tile[8, 0].loc_to_io_oe[1] = GND
+tile[8, 0].loc_to_io_oe[2] = GND
+tile[8, 0].loc_to_io_oe[3] = GND
+tile[8, 0].loc_to_out_cen[0] = GND
+tile[8, 0].loc_to_out_cen[1] = GND
+tile[8, 0].loc_to_out_cen[2] = GND
+tile[8, 0].loc_to_out_cen[3] = GND
+tile[8, 0].loc_to_in_cen[0] = GND
+tile[8, 0].loc_to_in_cen[1] = GND
+tile[8, 0].loc_to_in_cen[2] = GND
+tile[8, 0].loc_to_in_cen[3] = GND
+tile[8, 0].loc_to_async[0] = GND
+tile[8, 0].loc_to_async[1] = GND
+tile[8, 0].loc_to_async[2] = GND
+tile[8, 0].loc_to_async[3] = GND
+tile[8, 0].loc_to_sync[0] = GND
+tile[8, 0].loc_to_sync[1] = GND
+tile[8, 0].loc_to_sync[2] = GND
+tile[8, 0].loc_to_sync[3] = GND
+tile[9, 0].out_clk[0] = GND
+tile[9, 0].in_clk[0] = GND
+tile[9, 0].loc_to_io_out[0] = GND
+tile[9, 0].loc_to_io_oe[0] = GND
+tile[9, 0].loc_to_out_cen[0] = GND
+tile[9, 0].loc_to_in_cen[0] = GND
+tile[9, 0].loc_to_async[0] = GND
+tile[9, 0].loc_to_sync[0] = GND
+tile[17, 0].out_clk[0] = GND
+tile[17, 0].out_clk[1] = GND
+tile[17, 0].out_clk[2] = GND
+tile[17, 0].in_clk[0] = GND
+tile[17, 0].in_clk[1] = GND
+tile[17, 0].in_clk[2] = GND
+tile[17, 0].loc_to_io_out[0] = GND
+tile[17, 0].loc_to_io_out[1] = GND
+tile[17, 0].loc_to_io_out[2] = GND
+tile[17, 0].loc_to_io_oe[0] = GND
+tile[17, 0].loc_to_io_oe[1] = GND
+tile[17, 0].loc_to_io_oe[2] = GND
+tile[17, 0].loc_to_out_cen[0] = GND
+tile[17, 0].loc_to_out_cen[1] = GND
+tile[17, 0].loc_to_out_cen[2] = GND
+tile[17, 0].loc_to_in_cen[0] = GND
+tile[17, 0].loc_to_in_cen[1] = GND
+tile[17, 0].loc_to_in_cen[2] = GND
+tile[17, 0].loc_to_async[0] = GND
+tile[17, 0].loc_to_async[1] = GND
+tile[17, 0].loc_to_async[2] = GND
+tile[17, 0].loc_to_sync[0] = GND
+tile[17, 0].loc_to_sync[1] = GND
+tile[17, 0].loc_to_sync[2] = GND
+tile[18, 0].out_clk[0] = GND
+tile[18, 0].out_clk[1] = GND
+tile[18, 0].out_clk[3] = GND
+tile[18, 0].in_clk[0] = GND
+tile[18, 0].in_clk[1] = GND
+tile[18, 0].in_clk[3] = GND
+tile[18, 0].loc_to_io_out[0] = GND
+tile[18, 0].loc_to_io_out[1] = GND
+tile[18, 0].loc_to_io_out[3] = GND
+tile[18, 0].loc_to_io_oe[0] = GND
+tile[18, 0].loc_to_io_oe[1] = GND
+tile[18, 0].loc_to_io_oe[3] = GND
+tile[18, 0].loc_to_out_cen[0] = GND
+tile[18, 0].loc_to_out_cen[1] = GND
+tile[18, 0].loc_to_out_cen[3] = GND
+tile[18, 0].loc_to_in_cen[0] = GND
+tile[18, 0].loc_to_in_cen[1] = GND
+tile[18, 0].loc_to_in_cen[3] = GND
+tile[18, 0].loc_to_async[0] = GND
+tile[18, 0].loc_to_async[1] = GND
+tile[18, 0].loc_to_async[3] = GND
+tile[18, 0].loc_to_sync[0] = GND
+tile[18, 0].loc_to_sync[1] = GND
+tile[18, 0].loc_to_sync[3] = GND
+tile[19, 0].out_clk[1] = GND
+tile[19, 0].out_clk[3] = GND
+tile[19, 0].in_clk[1] = GND
+tile[19, 0].in_clk[3] = GND
+tile[19, 0].loc_to_io_out[1] = GND
+tile[19, 0].loc_to_io_out[3] = GND
+tile[19, 0].loc_to_io_oe[1] = GND
+tile[19, 0].loc_to_io_oe[3] = GND
+tile[19, 0].loc_to_out_cen[1] = GND
+tile[19, 0].loc_to_out_cen[3] = GND
+tile[19, 0].loc_to_in_cen[1] = GND
+tile[19, 0].loc_to_in_cen[3] = GND
+tile[19, 0].loc_to_async[1] = GND
+tile[19, 0].loc_to_async[3] = GND
+tile[19, 0].loc_to_sync[1] = GND
+tile[19, 0].loc_to_sync[3] = GND
+tile[20, 0].local_line[0] = #3	// tile[20, 4] T4_S[0]
+tile[20, 0].local_line[12] = #1	// tile[20, 4] T4_S[4]
+tile[20, 0].local_line[20] = #4	// tile[20, 3] T4_S[8]
+tile[20, 0].local_line[28] = #1	// tile[20, 4] T4_S[10]
+tile[20, 0].out_clk[0] = GND
+tile[20, 0].out_clk[2] = GND
+tile[20, 0].in_clk[0] = GND
+tile[20, 0].in_clk[2] = GND
+tile[20, 0].loc_to_io_out[0] = #3	// local_line[12]
+tile[20, 0].loc_to_io_out[2] = #7	// local_line[28]
+tile[20, 0].loc_to_io_oe[0] = #0	// local_line[0]
+tile[20, 0].loc_to_io_oe[2] = #5	// local_line[20]
+tile[20, 0].loc_to_out_cen[0] = GND
+tile[20, 0].loc_to_out_cen[2] = GND
+tile[20, 0].loc_to_in_cen[0] = GND
+tile[20, 0].loc_to_in_cen[2] = GND
+tile[20, 0].loc_to_async[0] = GND
+tile[20, 0].loc_to_async[2] = GND
+tile[20, 0].loc_to_sync[0] = GND
+tile[20, 0].loc_to_sync[2] = GND
+pad[20, 0, 0].input_en = 1
+tile[0, 1].out_clk[0] = GND
+tile[0, 1].out_clk[2] = GND
+tile[0, 1].out_clk[3] = GND
+tile[0, 1].out_clk[4] = GND
+tile[0, 1].out_clk[5] = GND
+tile[0, 1].in_clk[0] = GND
+tile[0, 1].in_clk[2] = GND
+tile[0, 1].in_clk[3] = GND
+tile[0, 1].in_clk[4] = GND
+tile[0, 1].in_clk[5] = GND
+tile[0, 1].loc_to_io_out[0] = GND
+tile[0, 1].loc_to_io_out[2] = GND
+tile[0, 1].loc_to_io_out[3] = GND
+tile[0, 1].loc_to_io_out[4] = GND
+tile[0, 1].loc_to_io_out[5] = GND
+tile[0, 1].loc_to_io_oe[0] = GND
+tile[0, 1].loc_to_io_oe[2] = GND
+tile[0, 1].loc_to_io_oe[3] = GND
+tile[0, 1].loc_to_io_oe[4] = GND
+tile[0, 1].loc_to_io_oe[5] = GND
+tile[0, 1].loc_to_out_cen[0] = GND
+tile[0, 1].loc_to_out_cen[2] = GND
+tile[0, 1].loc_to_out_cen[3] = GND
+tile[0, 1].loc_to_out_cen[4] = GND
+tile[0, 1].loc_to_out_cen[5] = GND
+tile[0, 1].loc_to_in_cen[0] = GND
+tile[0, 1].loc_to_in_cen[2] = GND
+tile[0, 1].loc_to_in_cen[3] = GND
+tile[0, 1].loc_to_in_cen[4] = GND
+tile[0, 1].loc_to_in_cen[5] = GND
+tile[0, 1].loc_to_async[0] = GND
+tile[0, 1].loc_to_async[2] = GND
+tile[0, 1].loc_to_async[3] = GND
+tile[0, 1].loc_to_async[4] = GND
+tile[0, 1].loc_to_async[5] = GND
+tile[0, 1].loc_to_sync[0] = GND
+tile[0, 1].loc_to_sync[2] = GND
+tile[0, 1].loc_to_sync[3] = GND
+tile[0, 1].loc_to_sync[4] = GND
+tile[0, 1].loc_to_sync[5] = GND
+pad[0, 1, 0].input_en = 1
+tile[1, 1].rmux[15] = #2	// T4_E[8] = tile[0, 1] T1_E[2]
+tile[4, 1].rmux[68] = #11	// T4_E[10] = tile[1, 1] T4_E[8]
+tile[8, 1].rmux[85] = #12	// T4_N[6] = tile[4, 1] T4_E[10]
+tile[14, 1].rmux[1] = #20	// T4_E[0] = tile[14, 5] T4_S[0]
+tile[14, 1].rmux[15] = #20	// T4_E[8] = tile[14, 5] T4_S[2]
+tile[14, 1].rmux[85] = #6	// T4_N[6] = tile[16, 1] T4_W[10]
+tile[15, 1].rmux[31] = #20	// T4_E[3] = tile[15, 5] T4_S[3]
+tile[16, 1].rmux[20] = #8	// T4_W[10] = tile[20, 1] T4_W[2]
+tile[17, 1].rmux[32] = #8	// T4_N[4] = tile[21, 1] T4_W[4]
+tile[17, 1].rmux[39] = #8	// T4_N[8] = tile[21, 1] T4_W[5]
+tile[18, 1].rmux[1] = #12	// T4_E[0] = tile[14, 1] T4_E[0]
+tile[18, 1].rmux[15] = #20	// T4_E[8] = tile[18, 5] T4_S[2]
+tile[18, 1].rmux[45] = #20	// T4_E[11] = tile[18, 5] T4_S[5]
+tile[18, 1].rmux[68] = #12	// T4_E[10] = tile[14, 1] T4_E[8]
+tile[19, 1].rmux[1] = #20	// T4_E[0] = tile[19, 5] T4_S[0]
+tile[19, 1].rmux[31] = #12	// T4_E[3] = tile[15, 1] T4_E[3]
+tile[20, 1].rmux[3] = #13	// T4_W[2] = tile[20, 0] T4_N[1]
+tile[21, 1].rmux[14] = #2	// T4_S[7] = this_output[2]
+tile[21, 1].rmux[32] = #1	// T4_N[4] = this_output[5]
+tile[21, 1].rmux[33] = #2	// T4_W[5] = this_output[6]
+tile[21, 1].rmux[56] = #13	// T4_W[4] = tile[21, 0] T4_N[7]
+tile[22, 1].local_line[0] = #3	// tile[18, 1] T4_E[0]
+tile[22, 1].local_line[1] = #2	// tile[19, 1] T4_E[0]
+tile[22, 1].local_line[6] = #6	// tile[19, 1] T4_E[3]
+tile[22, 1].local_line[24] = #3	// tile[18, 1] T4_E[8]
+tile[22, 1].local_line[30] = #3	// tile[18, 1] T4_E[10]
+tile[22, 1].local_line[31] = #7	// tile[18, 1] T4_E[11]
+tile[22, 1].out_clk[0] = GND
+tile[22, 1].out_clk[2] = GND
+tile[22, 1].out_clk[3] = GND
+tile[22, 1].out_clk[4] = GND
+tile[22, 1].in_clk[0] = GND
+tile[22, 1].in_clk[2] = GND
+tile[22, 1].in_clk[3] = GND
+tile[22, 1].in_clk[4] = GND
+tile[22, 1].loc_to_io_out[0] = #1	// local_line[6]
+tile[22, 1].loc_to_io_out[2] = #5	// local_line[30]
+tile[22, 1].loc_to_io_out[3] = #4	// local_line[24]
+tile[22, 1].loc_to_io_out[4] = GND
+tile[22, 1].loc_to_io_oe[0] = #0	// local_line[0]
+tile[22, 1].loc_to_io_oe[2] = #0	// local_line[0]
+tile[22, 1].loc_to_io_oe[3] = #5	// local_line[30]
+tile[22, 1].loc_to_io_oe[4] = GND
+tile[22, 1].loc_to_out_cen[0] = GND
+tile[22, 1].loc_to_out_cen[2] = GND
+tile[22, 1].loc_to_out_cen[3] = GND
+tile[22, 1].loc_to_out_cen[4] = GND
+tile[22, 1].loc_to_in_cen[0] = GND
+tile[22, 1].loc_to_in_cen[2] = GND
+tile[22, 1].loc_to_in_cen[3] = GND
+tile[22, 1].loc_to_in_cen[4] = GND
+tile[22, 1].loc_to_async[0] = GND
+tile[22, 1].loc_to_async[2] = GND
+tile[22, 1].loc_to_async[3] = GND
+tile[22, 1].loc_to_async[4] = GND
+tile[22, 1].loc_to_sync[0] = GND
+tile[22, 1].loc_to_sync[2] = GND
+tile[22, 1].loc_to_sync[3] = GND
+tile[22, 1].loc_to_sync[4] = GND
+pad[22, 1, 0].input_en = 1
+pad[22, 1, 2].input_en = 1
+pad[22, 1, 3].input_en = 1
+tile[0, 2].local_line[6] = #3	// tile[4, 2] T4_W[2]
+tile[0, 2].local_line[19] = #3	// tile[4, 2] T4_W[6]
+tile[0, 2].local_line[36] = #3	// tile[1, 2] T1_W[3]
+tile[0, 2].local_line[43] = #7	// tile[1, 2] T1_W[15]
+tile[0, 2].out_clk[0] = GND
+tile[0, 2].out_clk[1] = GND
+tile[0, 2].out_clk[2] = GND
+tile[0, 2].out_clk[3] = GND
+tile[0, 2].out_clk[4] = GND
+tile[0, 2].out_clk[5] = GND
+tile[0, 2].in_clk[0] = GND
+tile[0, 2].in_clk[1] = GND
+tile[0, 2].in_clk[2] = GND
+tile[0, 2].in_clk[3] = GND
+tile[0, 2].in_clk[4] = GND
+tile[0, 2].in_clk[5] = GND
+tile[0, 2].loc_to_io_out[0] = GND
+tile[0, 2].loc_to_io_out[1] = GND
+tile[0, 2].loc_to_io_out[2] = GND
+tile[0, 2].loc_to_io_out[3] = GND
+tile[0, 2].loc_to_io_out[4] = #6	// local_line[36]
+tile[0, 2].loc_to_io_out[5] = #1	// local_line[6]
+tile[0, 2].loc_to_io_oe[0] = GND
+tile[0, 2].loc_to_io_oe[1] = GND
+tile[0, 2].loc_to_io_oe[2] = GND
+tile[0, 2].loc_to_io_oe[3] = GND
+tile[0, 2].loc_to_io_oe[4] = #3	// local_line[18]
+tile[0, 2].loc_to_io_oe[5] = #7	// local_line[42]
+tile[0, 2].loc_to_out_cen[0] = GND
+tile[0, 2].loc_to_out_cen[1] = GND
+tile[0, 2].loc_to_out_cen[2] = GND
+tile[0, 2].loc_to_out_cen[3] = GND
+tile[0, 2].loc_to_out_cen[4] = GND
+tile[0, 2].loc_to_out_cen[5] = GND
+tile[0, 2].loc_to_in_cen[0] = GND
+tile[0, 2].loc_to_in_cen[1] = GND
+tile[0, 2].loc_to_in_cen[2] = GND
+tile[0, 2].loc_to_in_cen[3] = GND
+tile[0, 2].loc_to_in_cen[4] = GND
+tile[0, 2].loc_to_in_cen[5] = GND
+tile[0, 2].loc_to_async[0] = GND
+tile[0, 2].loc_to_async[1] = GND
+tile[0, 2].loc_to_async[2] = GND
+tile[0, 2].loc_to_async[3] = GND
+tile[0, 2].loc_to_async[4] = GND
+tile[0, 2].loc_to_async[5] = GND
+tile[0, 2].loc_to_sync[0] = GND
+tile[0, 2].loc_to_sync[1] = GND
+tile[0, 2].loc_to_sync[2] = GND
+tile[0, 2].loc_to_sync[3] = GND
+tile[0, 2].loc_to_sync[4] = GND
+tile[0, 2].loc_to_sync[5] = GND
+pad[0, 2, 0].input_en = 1
+pad[0, 2, 1].input_en = 1
+pad[0, 2, 3].input_en = 1
+tile[1, 2].rmux[9] = #0	// T4_N[5] = tile[0, 2] T1_E[0]
+tile[1, 2].rmux[15] = #3	// T4_E[8] = tile[0, 2] T1_E[3]
+tile[1, 2].rmux[18] = #8	// T1_W[3] = tile[5, 2] T4_W[1]
+tile[1, 2].rmux[45] = #3	// T4_E[11] = tile[0, 2] T1_E[7]
+tile[1, 2].rmux[90] = #8	// T1_W[15] = tile[5, 2] T4_W[10]
+tile[3, 2].rmux[68] = #10	// T4_E[10] = tile[1, 2] T4_E[8]
+tile[4, 2].rmux[3] = #6	// T4_W[2] = tile[6, 2] T4_W[1]
+tile[4, 2].rmux[13] = #19	// T4_W[6] = tile[4, 5] T4_S[1]
+tile[4, 2].rmux[92] = #11	// T4_N[10] = tile[1, 2] T4_E[11]
+tile[5, 2].rmux[20] = #19	// T4_W[10] = tile[5, 5] T4_S[2]
+tile[5, 2].rmux[26] = #19	// T4_W[1] = tile[5, 5] T4_S[4]
+tile[6, 2].rmux[26] = #19	// T4_W[1] = tile[6, 5] T4_S[4]
+tile[7, 2].rmux[85] = #12	// T4_N[6] = tile[3, 2] T4_E[10]
+tile[10, 2].rmux[31] = #19	// T4_E[3] = tile[10, 5] T4_S[3]
+tile[10, 2].rmux[81] = #19	// T4_E[5] = tile[10, 5] T4_S[10]
+tile[14, 2].rmux[1] = #20	// T4_E[0] = tile[14, 6] T4_S[0]
+tile[14, 2].rmux[31] = #12	// T4_E[3] = tile[10, 2] T4_E[3]
+tile[14, 2].rmux[38] = #12	// T4_E[7] = tile[10, 2] T4_E[5]
+tile[17, 2].rmux[2] = #8	// T4_N[1] = tile[21, 2] T4_W[1]
+tile[18, 2].rmux[1] = #12	// T4_E[0] = tile[14, 2] T4_E[0]
+tile[18, 2].rmux[31] = #12	// T4_E[3] = tile[14, 2] T4_E[3]
+tile[18, 2].rmux[51] = #12	// T4_E[2] = tile[14, 2] T4_E[7]
+tile[18, 2].rmux[61] = #20	// T4_E[6] = tile[18, 6] T4_S[7]
+tile[21, 2].rmux[26] = #1	// T4_W[1] = this_output[5]
+tile[22, 2].local_line[0] = #3	// tile[18, 2] T4_E[0]
+tile[22, 2].local_line[6] = #7	// tile[18, 2] T4_E[3]
+tile[22, 2].local_line[7] = #3	// tile[18, 2] T4_E[2]
+tile[22, 2].local_line[19] = #3	// tile[18, 2] T4_E[6]
+tile[22, 2].out_clk[3] = GND
+tile[22, 2].out_clk[5] = GND
+tile[22, 2].in_clk[3] = GND
+tile[22, 2].in_clk[5] = GND
+tile[22, 2].loc_to_io_out[3] = #0	// local_line[0]
+tile[22, 2].loc_to_io_out[5] = #1	// local_line[6]
+tile[22, 2].loc_to_io_oe[3] = #3	// local_line[18]
+tile[22, 2].loc_to_io_oe[5] = #1	// local_line[6]
+tile[22, 2].loc_to_out_cen[3] = GND
+tile[22, 2].loc_to_out_cen[5] = GND
+tile[22, 2].loc_to_in_cen[3] = GND
+tile[22, 2].loc_to_in_cen[5] = GND
+tile[22, 2].loc_to_async[3] = GND
+tile[22, 2].loc_to_async[5] = GND
+tile[22, 2].loc_to_sync[3] = GND
+tile[22, 2].loc_to_sync[5] = GND
+pad[22, 2, 3].input_en = 1
+tile[0, 3].local_line[0] = #2	// tile[3, 3] T4_W[0]
+tile[0, 3].local_line[6] = #7	// tile[4, 3] T4_W[3]
+tile[0, 3].local_line[12] = #2	// tile[3, 3] T4_W[4]
+tile[0, 3].local_line[18] = #7	// tile[4, 3] T4_W[7]
+tile[0, 3].out_clk[0] = GND
+tile[0, 3].out_clk[1] = GND
+tile[0, 3].out_clk[2] = GND
+tile[0, 3].out_clk[3] = GND
+tile[0, 3].out_clk[4] = GND
+tile[0, 3].out_clk[5] = GND
+tile[0, 3].in_clk[0] = GND
+tile[0, 3].in_clk[1] = GND
+tile[0, 3].in_clk[2] = GND
+tile[0, 3].in_clk[3] = GND
+tile[0, 3].in_clk[4] = GND
+tile[0, 3].in_clk[5] = GND
+tile[0, 3].loc_to_io_out[0] = #3	// local_line[18]
+tile[0, 3].loc_to_io_out[1] = #1	// local_line[6]
+tile[0, 3].loc_to_io_out[2] = GND
+tile[0, 3].loc_to_io_out[3] = GND
+tile[0, 3].loc_to_io_out[4] = GND
+tile[0, 3].loc_to_io_out[5] = GND
+tile[0, 3].loc_to_io_oe[0] = #2	// local_line[12]
+tile[0, 3].loc_to_io_oe[1] = #0	// local_line[0]
+tile[0, 3].loc_to_io_oe[2] = GND
+tile[0, 3].loc_to_io_oe[3] = GND
+tile[0, 3].loc_to_io_oe[4] = GND
+tile[0, 3].loc_to_io_oe[5] = GND
+tile[0, 3].loc_to_out_cen[0] = GND
+tile[0, 3].loc_to_out_cen[1] = GND
+tile[0, 3].loc_to_out_cen[2] = GND
+tile[0, 3].loc_to_out_cen[3] = GND
+tile[0, 3].loc_to_out_cen[4] = GND
+tile[0, 3].loc_to_out_cen[5] = GND
+tile[0, 3].loc_to_in_cen[0] = GND
+tile[0, 3].loc_to_in_cen[1] = GND
+tile[0, 3].loc_to_in_cen[2] = GND
+tile[0, 3].loc_to_in_cen[3] = GND
+tile[0, 3].loc_to_in_cen[4] = GND
+tile[0, 3].loc_to_in_cen[5] = GND
+tile[0, 3].loc_to_async[0] = GND
+tile[0, 3].loc_to_async[1] = GND
+tile[0, 3].loc_to_async[2] = GND
+tile[0, 3].loc_to_async[3] = GND
+tile[0, 3].loc_to_async[4] = GND
+tile[0, 3].loc_to_async[5] = GND
+tile[0, 3].loc_to_sync[0] = GND
+tile[0, 3].loc_to_sync[1] = GND
+tile[0, 3].loc_to_sync[2] = GND
+tile[0, 3].loc_to_sync[3] = GND
+tile[0, 3].loc_to_sync[4] = GND
+tile[0, 3].loc_to_sync[5] = GND
+pad[0, 3, 2].input_en = 1
+pad[0, 3, 5].input_en = 1
+tile[1, 3].rmux[38] = #0	// T4_E[7] = tile[0, 3] T1_E[4]
+tile[1, 3].rmux[68] = #1	// T4_E[10] = tile[0, 3] T1_E[9]
+tile[3, 3].rmux[49] = #18	// T4_W[0] = tile[3, 5] T4_S[6]
+tile[3, 3].rmux[56] = #18	// T4_W[4] = tile[3, 5] T4_S[7]
+tile[3, 3].rmux[61] = #10	// T4_E[6] = tile[1, 3] T4_E[7]
+tile[3, 3].rmux[81] = #10	// T4_E[5] = tile[1, 3] T4_E[10]
+tile[4, 3].rmux[75] = #8	// T4_N[2] = tile[8, 3] T4_W[10]
+tile[4, 3].rmux[79] = #18	// T4_W[3] = tile[4, 5] T4_S[9]
+tile[4, 3].rmux[86] = #18	// T4_W[7] = tile[4, 5] T4_S[11]
+tile[7, 3].rmux[9] = #18	// T4_N[5] = tile[7, 5] T4_S[1]
+tile[7, 3].rmux[38] = #19	// T4_E[7] = tile[7, 6] T4_S[5]
+tile[7, 3].rmux[39] = #12	// T4_N[8] = tile[3, 3] T4_E[5]
+tile[7, 3].rmux[45] = #17	// T4_E[11] = tile[7, 4] T4_S[5]
+tile[7, 3].rmux[55] = #12	// T4_N[3] = tile[3, 3] T4_E[6]
+tile[7, 3].rmux[68] = #18	// T4_E[10] = tile[7, 5] T4_S[8]
+tile[8, 3].rmux[20] = #18	// T4_W[10] = tile[8, 5] T4_S[2]
+tile[8, 3].rmux[51] = #18	// T4_E[2] = tile[8, 5] T4_S[7]
+tile[10, 3].rmux[51] = #5	// T4_E[2] = tile[11, 3] T4_W[7]
+tile[10, 3].rmux[68] = #17	// T4_E[10] = tile[10, 4] T4_S[8]
+tile[11, 3].rmux[1] = #18	// T4_E[0] = tile[11, 5] T4_S[0]
+tile[11, 3].rmux[45] = #18	// T4_E[11] = tile[11, 5] T4_S[5]
+tile[11, 3].rmux[51] = #12	// T4_E[2] = tile[7, 3] T4_E[7]
+tile[11, 3].rmux[74] = #12	// T4_E[1] = tile[7, 3] T4_E[10]
+tile[11, 3].rmux[81] = #18	// T4_E[5] = tile[11, 5] T4_S[10]
+tile[11, 3].rmux[85] = #8	// T4_N[6] = tile[15, 3] T4_W[10]
+tile[11, 3].rmux[86] = #18	// T4_W[7] = tile[11, 5] T4_S[11]
+tile[11, 3].rmux[92] = #12	// T4_N[10] = tile[7, 3] T4_E[11]
+tile[12, 3].rmux[15] = #12	// T4_E[8] = tile[8, 3] T4_E[2]
+tile[12, 3].rmux[38] = #18	// T4_E[7] = tile[12, 5] T4_S[5]
+tile[12, 3].rmux[81] = #10	// T4_E[5] = tile[10, 3] T4_E[10]
+tile[14, 3].rmux[1] = #11	// T4_E[0] = tile[11, 3] T4_E[0]
+tile[14, 3].rmux[15] = #12	// T4_E[8] = tile[10, 3] T4_E[2]
+tile[14, 3].rmux[45] = #11	// T4_E[11] = tile[11, 3] T4_E[5]
+tile[14, 3].rmux[51] = #10	// T4_E[2] = tile[12, 3] T4_E[7]
+tile[14, 3].rmux[92] = #11	// T4_N[10] = tile[11, 3] T4_E[11]
+tile[15, 3].rmux[8] = #12	// T4_E[4] = tile[11, 3] T4_E[1]
+tile[15, 3].rmux[15] = #12	// T4_E[8] = tile[11, 3] T4_E[2]
+tile[15, 3].rmux[20] = #8	// T4_W[10] = tile[19, 3] T4_W[2]
+tile[16, 3].rmux[45] = #12	// T4_E[11] = tile[12, 3] T4_E[5]
+tile[16, 3].rmux[69] = #12	// T4_N[11] = tile[12, 3] T4_E[8]
+tile[18, 3].rmux[1] = #12	// T4_E[0] = tile[14, 3] T4_E[0]
+tile[18, 3].rmux[15] = #12	// T4_E[8] = tile[14, 3] T4_E[2]
+tile[18, 3].rmux[69] = #12	// T4_N[11] = tile[14, 3] T4_E[8]
+tile[18, 3].rmux[92] = #12	// T4_N[10] = tile[14, 3] T4_E[11]
+tile[19, 3].rmux[3] = #6	// T4_W[2] = tile[21, 3] T4_W[1]
+tile[19, 3].rmux[32] = #12	// T4_N[4] = tile[15, 3] T4_E[4]
+tile[19, 3].rmux[69] = #12	// T4_N[11] = tile[15, 3] T4_E[8]
+tile[20, 3].rmux[87] = #12	// T4_S[8] = tile[16, 3] T4_E[11]
+tile[21, 3].rmux[26] = #1	// T4_W[1] = this_output[5]
+tile[22, 3].local_line[1] = #3	// tile[18, 3] T4_E[0]
+tile[22, 3].local_line[24] = #3	// tile[18, 3] T4_E[8]
+tile[22, 3].out_clk[0] = GND
+tile[22, 3].out_clk[1] = GND
+tile[22, 3].out_clk[2] = GND
+tile[22, 3].out_clk[3] = GND
+tile[22, 3].in_clk[0] = GND
+tile[22, 3].in_clk[1] = GND
+tile[22, 3].in_clk[2] = GND
+tile[22, 3].in_clk[3] = GND
+tile[22, 3].loc_to_io_out[0] = GND
+tile[22, 3].loc_to_io_out[1] = GND
+tile[22, 3].loc_to_io_out[2] = GND
+tile[22, 3].loc_to_io_out[3] = #4	// local_line[24]
+tile[22, 3].loc_to_io_oe[0] = GND
+tile[22, 3].loc_to_io_oe[1] = GND
+tile[22, 3].loc_to_io_oe[2] = GND
+tile[22, 3].loc_to_io_oe[3] = #0	// local_line[0]
+tile[22, 3].loc_to_out_cen[0] = GND
+tile[22, 3].loc_to_out_cen[1] = GND
+tile[22, 3].loc_to_out_cen[2] = GND
+tile[22, 3].loc_to_out_cen[3] = GND
+tile[22, 3].loc_to_in_cen[0] = GND
+tile[22, 3].loc_to_in_cen[1] = GND
+tile[22, 3].loc_to_in_cen[2] = GND
+tile[22, 3].loc_to_in_cen[3] = GND
+tile[22, 3].loc_to_async[0] = GND
+tile[22, 3].loc_to_async[1] = GND
+tile[22, 3].loc_to_async[2] = GND
+tile[22, 3].loc_to_async[3] = GND
+tile[22, 3].loc_to_sync[0] = GND
+tile[22, 3].loc_to_sync[1] = GND
+tile[22, 3].loc_to_sync[2] = GND
+tile[22, 3].loc_to_sync[3] = GND
+pad[22, 3, 3].input_en = 1
+tile[0, 4].local_line[19] = #6	// tile[3, 4] T4_W[7]
+tile[0, 4].local_line[30] = #2	// tile[3, 4] T4_W[10]
+tile[0, 4].local_line[31] = #3	// tile[4, 4] T4_W[10]
+tile[0, 4].local_line[42] = #4	// tile[1, 4] T1_W[12]
+tile[0, 4].out_clk[0] = GND
+tile[0, 4].out_clk[1] = GND
+tile[0, 4].out_clk[2] = GND
+tile[0, 4].out_clk[3] = GND
+tile[0, 4].out_clk[4] = GND
+tile[0, 4].out_clk[5] = GND
+tile[0, 4].in_clk[0] = GND
+tile[0, 4].in_clk[1] = GND
+tile[0, 4].in_clk[2] = GND
+tile[0, 4].in_clk[3] = GND
+tile[0, 4].in_clk[4] = GND
+tile[0, 4].in_clk[5] = GND
+tile[0, 4].loc_to_io_out[0] = GND
+tile[0, 4].loc_to_io_out[1] = GND
+tile[0, 4].loc_to_io_out[2] = #7	// local_line[42]
+tile[0, 4].loc_to_io_out[3] = #5	// local_line[30]
+tile[0, 4].loc_to_io_out[4] = GND
+tile[0, 4].loc_to_io_out[5] = GND
+tile[0, 4].loc_to_io_oe[0] = GND
+tile[0, 4].loc_to_io_oe[1] = GND
+tile[0, 4].loc_to_io_oe[2] = #5	// local_line[30]
+tile[0, 4].loc_to_io_oe[3] = #3	// local_line[18]
+tile[0, 4].loc_to_io_oe[4] = GND
+tile[0, 4].loc_to_io_oe[5] = GND
+tile[0, 4].loc_to_out_cen[0] = GND
+tile[0, 4].loc_to_out_cen[1] = GND
+tile[0, 4].loc_to_out_cen[2] = GND
+tile[0, 4].loc_to_out_cen[3] = GND
+tile[0, 4].loc_to_out_cen[4] = GND
+tile[0, 4].loc_to_out_cen[5] = GND
+tile[0, 4].loc_to_in_cen[0] = GND
+tile[0, 4].loc_to_in_cen[1] = GND
+tile[0, 4].loc_to_in_cen[2] = GND
+tile[0, 4].loc_to_in_cen[3] = GND
+tile[0, 4].loc_to_in_cen[4] = GND
+tile[0, 4].loc_to_in_cen[5] = GND
+tile[0, 4].loc_to_async[0] = GND
+tile[0, 4].loc_to_async[1] = GND
+tile[0, 4].loc_to_async[2] = GND
+tile[0, 4].loc_to_async[3] = GND
+tile[0, 4].loc_to_async[4] = GND
+tile[0, 4].loc_to_async[5] = GND
+tile[0, 4].loc_to_sync[0] = GND
+tile[0, 4].loc_to_sync[1] = GND
+tile[0, 4].loc_to_sync[2] = GND
+tile[0, 4].loc_to_sync[3] = GND
+tile[0, 4].loc_to_sync[4] = GND
+tile[0, 4].loc_to_sync[5] = GND
+pad[0, 4, 2].input_en = 1
+tile[1, 4].rmux[31] = #0	// T4_E[3] = tile[0, 4] T1_E[4]
+tile[1, 4].rmux[32] = #16	// T4_N[4] = tile[1, 0] T4_N[4]
+tile[1, 4].rmux[38] = #14	// T4_E[7] = tile[1, 2] T4_N[5]
+tile[1, 4].rmux[72] = #8	// T1_W[12] = tile[5, 4] T4_W[9]
+tile[2, 4].rmux[3] = #17	// T4_W[2] = tile[2, 5] T4_S[1]
+tile[2, 4].rmux[61] = #9	// T4_E[6] = tile[1, 4] T4_E[7]
+tile[3, 4].rmux[15] = #12	// T4_E[8] = tile[2, 4] T4_W[2]
+tile[3, 4].rmux[20] = #17	// T4_W[10] = tile[3, 5] T4_S[2]
+tile[3, 4].rmux[38] = #17	// T4_E[7] = tile[3, 5] T4_S[5]
+tile[3, 4].rmux[86] = #17	// T4_W[7] = tile[3, 5] T4_S[11]
+tile[4, 4].rmux[20] = #13	// T4_W[10] = tile[4, 3] T4_N[2]
+tile[4, 4].rmux[51] = #17	// T4_E[2] = tile[4, 5] T4_S[7]
+tile[4, 4].rmux[81] = #14	// T4_E[5] = tile[4, 2] T4_N[10]
+tile[5, 4].rmux[15] = #9	// T4_E[8] = tile[4, 4] T4_E[2]
+tile[5, 4].rmux[31] = #12	// T4_E[3] = tile[1, 4] T4_E[3]
+tile[5, 4].rmux[43] = #8	// T4_W[9] = tile[9, 4] T4_W[4]
+tile[5, 4].rmux[81] = #17	// T4_E[5] = tile[5, 5] T4_S[10]
+tile[6, 4].rmux[25] = #8	// T4_N[0] = tile[10, 4] T4_W[3]
+tile[6, 4].rmux[55] = #12	// T4_N[3] = tile[2, 4] T4_E[6]
+tile[6, 4].rmux[85] = #8	// T4_N[6] = tile[10, 4] T4_W[10]
+tile[7, 4].rmux[25] = #13	// T4_N[0] = tile[7, 3] T4_N[3]
+tile[7, 4].rmux[38] = #17	// T4_E[7] = tile[7, 5] T4_S[5]
+tile[7, 4].rmux[51] = #12	// T4_E[2] = tile[3, 4] T4_E[7]
+tile[7, 4].rmux[55] = #14	// T4_N[3] = tile[7, 2] T4_N[6]
+tile[7, 4].rmux[57] = #17	// T4_S[5] = tile[7, 5] T4_S[7]
+tile[7, 4].rmux[62] = #13	// T4_N[7] = tile[7, 3] T4_N[8]
+tile[7, 4].rmux[65] = #17	// rmux_self[21] = tile[7, 5] T4_S[6]
+tile[7, 4].rmux[68] = #12	// T4_E[10] = tile[3, 4] T4_E[8]
+tile[7, 4].rmux[69] = #8	// T4_N[11] = tile[11, 4] T4_W[8]
+tile[7, 4].lut[14] = 0xff00
+tile[7, 4].lut_D[14] = #21	// rmux[65]
+tile[8, 4].rmux[32] = #8	// T4_N[4] = tile[12, 4] T4_W[4]
+tile[8, 4].rmux[39] = #12	// T4_N[8] = tile[4, 4] T4_E[5]
+tile[8, 4].rmux[51] = #9	// T4_E[2] = tile[7, 4] T4_E[7]
+tile[8, 4].rmux[55] = #15	// T4_N[3] = tile[8, 1] T4_N[6]
+tile[8, 4].rmux[68] = #17	// T4_E[10] = tile[8, 5] T4_S[8]
+tile[8, 4].rmux[69] = #8	// T4_N[11] = tile[12, 4] T4_W[8]
+tile[8, 4].rmux[74] = #2	// T4_E[1] = tile[7, 4] T1_E[14]
+tile[8, 4].rmux[75] = #8	// T4_N[2] = tile[12, 4] T4_W[10]
+tile[8, 4].rmux[81] = #17	// T4_E[5] = tile[8, 5] T4_S[10]
+tile[8, 4].rmux[92] = #8	// T4_N[10] = tile[12, 4] T4_W[11]
+tile[9, 4].rmux[25] = #12	// T4_N[0] = tile[5, 4] T4_E[3]
+tile[9, 4].rmux[38] = #12	// T4_E[7] = tile[5, 4] T4_E[5]
+tile[9, 4].rmux[56] = #17	// T4_W[4] = tile[9, 5] T4_S[7]
+tile[9, 4].rmux[68] = #12	// T4_E[10] = tile[5, 4] T4_E[8]
+tile[10, 4].rmux[1] = #17	// T4_E[0] = tile[10, 5] T4_S[0]
+tile[10, 4].rmux[8] = #17	// T4_E[4] = tile[10, 5] T4_S[1]
+tile[10, 4].rmux[15] = #17	// T4_E[8] = tile[10, 5] T4_S[2]
+tile[10, 4].rmux[20] = #8	// T4_W[10] = tile[14, 4] T4_W[2]
+tile[10, 4].rmux[32] = #8	// T4_N[4] = tile[14, 4] T4_W[4]
+tile[10, 4].rmux[39] = #8	// T4_N[8] = tile[14, 4] T4_W[5]
+tile[10, 4].rmux[45] = #17	// T4_E[11] = tile[10, 5] T4_S[5]
+tile[10, 4].rmux[51] = #17	// T4_E[2] = tile[10, 5] T4_S[7]
+tile[10, 4].rmux[55] = #8	// T4_N[3] = tile[14, 4] T4_W[6]
+tile[10, 4].rmux[68] = #17	// T4_E[10] = tile[10, 5] T4_S[8]
+tile[10, 4].rmux[69] = #8	// T4_N[11] = tile[14, 4] T4_W[8]
+tile[10, 4].rmux[71] = #17	// rmux_self[23] = tile[10, 5] T4_S[6]
+tile[10, 4].rmux[74] = #0	// T4_E[1] = this_output[12]
+tile[10, 4].rmux[79] = #8	// T4_W[3] = tile[14, 4] T4_W[9]
+tile[10, 4].rmux[87] = #17	// T4_S[8] = tile[10, 5] T4_S[11]
+tile[10, 4].rmux[89] = #17	// rmux_self[29] = tile[10, 5] T4_S[9]
+tile[10, 4].rmux[92] = #8	// T4_N[10] = tile[14, 4] T4_W[11]
+tile[10, 4].lut[2] = 0xff00
+tile[10, 4].lut[12] = 0xff00
+tile[10, 4].lut_D[2] = #25	// rmux[89]
+tile[10, 4].lut_D[12] = #22	// rmux[71]
+tile[11, 4].rmux[8] = #2	// T4_E[4] = tile[10, 4] T1_E[2]
+tile[11, 4].rmux[15] = #12	// T4_E[8] = tile[7, 4] T4_E[2]
+tile[11, 4].rmux[25] = #7	// T4_N[0] = tile[14, 4] T4_W[3]
+tile[11, 4].rmux[32] = #8	// T4_N[4] = tile[15, 4] T4_W[4]
+tile[11, 4].rmux[45] = #11	// T4_E[11] = tile[8, 4] T4_E[5]
+tile[11, 4].rmux[51] = #17	// T4_E[2] = tile[11, 5] T4_S[7]
+tile[11, 4].rmux[55] = #13	// T4_N[3] = tile[11, 3] T4_N[6]
+tile[11, 4].rmux[63] = #8	// T4_W[8] = tile[15, 4] T4_W[8]
+tile[11, 4].rmux[68] = #17	// T4_E[10] = tile[11, 5] T4_S[8]
+tile[11, 4].rmux[74] = #13	// T4_E[1] = tile[11, 3] T4_N[10]
+tile[11, 4].rmux[81] = #12	// T4_E[5] = tile[7, 4] T4_E[10]
+tile[12, 4].rmux[8] = #12	// T4_E[4] = tile[8, 4] T4_E[1]
+tile[12, 4].rmux[15] = #12	// T4_E[8] = tile[8, 4] T4_E[2]
+tile[12, 4].rmux[20] = #8	// T4_W[10] = tile[16, 4] T4_W[2]
+tile[12, 4].rmux[56] = #8	// T4_W[4] = tile[16, 4] T4_W[7]
+tile[12, 4].rmux[63] = #8	// T4_W[8] = tile[16, 4] T4_W[8]
+tile[12, 4].rmux[68] = #17	// T4_E[10] = tile[12, 5] T4_S[8]
+tile[12, 4].rmux[74] = #17	// T4_E[1] = tile[12, 5] T4_S[10]
+tile[12, 4].rmux[81] = #12	// T4_E[5] = tile[8, 4] T4_E[10]
+tile[12, 4].rmux[93] = #8	// T4_W[11] = tile[16, 4] T4_W[11]
+tile[13, 4].rmux[8] = #9	// T4_E[4] = tile[12, 4] T4_E[1]
+tile[13, 4].rmux[15] = #10	// T4_E[8] = tile[11, 4] T4_E[2]
+tile[13, 4].rmux[61] = #12	// T4_E[6] = tile[9, 4] T4_E[7]
+tile[13, 4].rmux[68] = #11	// T4_E[10] = tile[10, 4] T4_E[8]
+tile[13, 4].rmux[81] = #12	// T4_E[5] = tile[9, 4] T4_E[10]
+tile[14, 4].rmux[1] = #12	// T4_E[0] = tile[10, 4] T4_E[0]
+tile[14, 4].rmux[3] = #17	// T4_W[2] = tile[14, 5] T4_S[1]
+tile[14, 4].rmux[9] = #12	// T4_N[5] = tile[10, 4] T4_E[1]
+tile[14, 4].rmux[13] = #20	// T4_W[6] = tile[14, 8] T4_S[1]
+tile[14, 4].rmux[15] = #12	// T4_E[8] = tile[10, 4] T4_E[2]
+tile[14, 4].rmux[32] = #12	// T4_N[4] = tile[10, 4] T4_E[4]
+tile[14, 4].rmux[33] = #20	// T4_W[5] = tile[14, 8] T4_S[4]
+tile[14, 4].rmux[43] = #17	// T4_W[9] = tile[14, 5] T4_S[4]
+tile[14, 4].rmux[56] = #17	// T4_W[4] = tile[14, 5] T4_S[7]
+tile[14, 4].rmux[63] = #17	// T4_W[8] = tile[14, 5] T4_S[8]
+tile[14, 4].rmux[68] = #19	// T4_E[10] = tile[14, 7] T4_S[8]
+tile[14, 4].rmux[74] = #12	// T4_E[1] = tile[10, 4] T4_E[10]
+tile[14, 4].rmux[79] = #20	// T4_W[3] = tile[14, 8] T4_S[9]
+tile[14, 4].rmux[81] = #10	// T4_E[5] = tile[12, 4] T4_E[10]
+tile[14, 4].rmux[92] = #12	// T4_N[10] = tile[10, 4] T4_E[11]
+tile[14, 4].rmux[93] = #17	// T4_W[11] = tile[14, 5] T4_S[11]
+tile[15, 4].rmux[9] = #12	// T4_N[5] = tile[11, 4] T4_E[1]
+tile[15, 4].rmux[32] = #12	// T4_N[4] = tile[11, 4] T4_E[4]
+tile[15, 4].rmux[39] = #12	// T4_N[8] = tile[11, 4] T4_E[5]
+tile[15, 4].rmux[56] = #17	// T4_W[4] = tile[15, 5] T4_S[7]
+tile[15, 4].rmux[63] = #17	// T4_W[8] = tile[15, 5] T4_S[8]
+tile[15, 4].rmux[69] = #12	// T4_N[11] = tile[11, 4] T4_E[8]
+tile[15, 4].rmux[85] = #12	// T4_N[6] = tile[11, 4] T4_E[10]
+tile[15, 4].rmux[92] = #12	// T4_N[10] = tile[11, 4] T4_E[11]
+tile[16, 4].rmux[3] = #17	// T4_W[2] = tile[16, 5] T4_S[1]
+tile[16, 4].rmux[32] = #12	// T4_N[4] = tile[12, 4] T4_E[4]
+tile[16, 4].rmux[39] = #12	// T4_N[8] = tile[12, 4] T4_E[5]
+tile[16, 4].rmux[62] = #12	// T4_N[7] = tile[12, 4] T4_E[8]
+tile[16, 4].rmux[63] = #17	// T4_W[8] = tile[16, 5] T4_S[8]
+tile[16, 4].rmux[68] = #19	// T4_E[10] = tile[16, 7] T4_S[8]
+tile[16, 4].rmux[81] = #11	// T4_E[5] = tile[13, 4] T4_E[10]
+tile[16, 4].rmux[86] = #8	// T4_W[7] = tile[20, 4] T4_W[11]
+tile[16, 4].rmux[91] = #10	// T4_E[9] = tile[14, 4] T4_E[10]
+tile[16, 4].rmux[93] = #7	// T4_W[11] = tile[19, 4] T4_W[11]
+tile[17, 4].rmux[32] = #12	// T4_N[4] = tile[13, 4] T4_E[4]
+tile[17, 4].rmux[39] = #12	// T4_N[8] = tile[13, 4] T4_E[5]
+tile[17, 4].rmux[55] = #12	// T4_N[3] = tile[13, 4] T4_E[6]
+tile[17, 4].rmux[69] = #12	// T4_N[11] = tile[13, 4] T4_E[8]
+tile[18, 4].rmux[2] = #12	// T4_N[1] = tile[14, 4] T4_E[1]
+tile[18, 4].rmux[17] = #12	// rmux_self[5] = tile[14, 4] T4_E[0]
+tile[18, 4].rmux[39] = #12	// T4_N[8] = tile[14, 4] T4_E[5]
+tile[18, 4].rmux[69] = #12	// T4_N[11] = tile[14, 4] T4_E[8]
+tile[18, 4].lut[3] = 0xff00
+tile[18, 4].lut_D[3] = #13	// rmux[17]
+tile[19, 4].rmux[2] = #3	// T4_N[1] = tile[18, 4] T1_E[3]
+tile[19, 4].rmux[93] = #17	// T4_W[11] = tile[19, 5] T4_S[11]
+tile[20, 4].rmux[44] = #12	// T4_S[10] = tile[16, 4] T4_E[5]
+tile[20, 4].rmux[73] = #12	// T4_S[0] = tile[16, 4] T4_E[9]
+tile[20, 4].rmux[80] = #12	// T4_S[4] = tile[16, 4] T4_E[10]
+tile[20, 4].rmux[93] = #17	// T4_W[11] = tile[20, 5] T4_S[11]
+tile[22, 4].ce[2] = GND
+tile[22, 4].ce[3] = GND
+tile[22, 4].ce[4] = GND
+tile[22, 4].clock_dist_mux[0] = #2
+tile[22, 4].clock_dist_mux[1] = #1
+tile[1, 5].glb2loc[6] = #1
+tile[1, 5].to_ip[0] = GND
+tile[1, 5].to_ip[1] = GND
+tile[1, 5].to_ip[2] = GND
+tile[1, 5].to_ip[3] = GND
+tile[1, 5].to_ip[4] = GND
+tile[1, 5].to_ip[5] = GND
+tile[1, 5].to_ip[6] = #12
+tile[1, 5].to_ip[7] = #4
+tile[2, 5].to_ip[0] = GND
+tile[2, 5].to_ip[1] = GND
+tile[2, 5].to_ip[2] = GND
+tile[2, 5].to_ip[3] = GND
+tile[2, 5].to_ip[4] = GND
+tile[2, 5].to_ip[5] = GND
+tile[2, 5].to_ip[6] = GND
+tile[2, 5].to_ip[7] = GND
+tile[2, 5].from_ip[1] = #1
+tile[3, 5].to_ip[0] = GND
+tile[3, 5].to_ip[1] = GND
+tile[3, 5].to_ip[2] = GND
+tile[3, 5].to_ip[3] = GND
+tile[3, 5].to_ip[4] = GND
+tile[3, 5].to_ip[5] = GND
+tile[3, 5].to_ip[6] = GND
+tile[3, 5].to_ip[7] = GND
+tile[3, 5].from_ip[7] = #1
+tile[4, 5].to_ip[1] = GND
+tile[4, 5].to_ip[2] = GND
+tile[4, 5].to_ip[3] = GND
+tile[4, 5].to_ip[4] = GND
+tile[4, 5].to_ip[5] = GND
+tile[4, 5].to_ip[6] = GND
+tile[4, 5].to_ip[7] = GND
+tile[4, 5].to_ip[8] = GND
+tile[4, 5].from_ip[7] = #1
+tile[4, 5].from_ip[9] = #1
+tile[5, 5].to_ip[0] = GND
+tile[5, 5].to_ip[1] = GND
+tile[5, 5].to_ip[2] = GND
+tile[5, 5].to_ip[3] = GND
+tile[5, 5].to_ip[4] = GND
+tile[5, 5].to_ip[5] = GND
+tile[5, 5].to_ip[6] = GND
+tile[5, 5].to_ip[7] = GND
+tile[5, 5].from_ip[10] = #1
+tile[6, 5].to_ip[0] = #3
+tile[6, 5].to_ip[1] = GND
+tile[6, 5].to_ip[2] = GND
+tile[6, 5].to_ip[3] = GND
+tile[6, 5].to_ip[4] = #0
+tile[6, 5].to_ip[5] = #6
+tile[6, 5].to_ip[6] = GND
+tile[6, 5].to_ip[7] = GND
+tile[6, 5].from_ip[4] = #1
+tile[7, 5].to_ip[0] = GND
+tile[7, 5].to_ip[1] = GND
+tile[7, 5].to_ip[2] = GND
+tile[7, 5].to_ip[3] = #11
+tile[7, 5].to_ip[4] = #7
+tile[7, 5].to_ip[5] = #0
+tile[7, 5].to_ip[6] = #0
+tile[7, 5].to_ip[7] = #3
+tile[7, 5].from_ip[7] = #1
+tile[8, 5].to_ip[0] = GND
+tile[8, 5].to_ip[1] = #3
+tile[8, 5].to_ip[2] = #11
+tile[8, 5].to_ip[3] = #8
+tile[8, 5].to_ip[4] = #4
+tile[8, 5].to_ip[5] = #10
+tile[8, 5].to_ip[6] = #2
+tile[8, 5].to_ip[7] = GND
+tile[8, 5].from_ip[7] = #1
+tile[8, 5].from_ip[8] = #1
+tile[9, 5].to_ip[0] = GND
+tile[9, 5].to_ip[1] = GND
+tile[9, 5].to_ip[2] = GND
+tile[9, 5].to_ip[3] = GND
+tile[9, 5].to_ip[4] = GND
+tile[9, 5].to_ip[5] = #0
+tile[9, 5].to_ip[6] = GND
+tile[9, 5].to_ip[7] = GND
+tile[10, 5].to_ip[0] = #4
+tile[10, 5].to_ip[1] = #3
+tile[10, 5].to_ip[2] = #8
+tile[10, 5].to_ip[3] = #10
+tile[10, 5].to_ip[4] = #11
+tile[10, 5].to_ip[5] = GND
+tile[10, 5].to_ip[6] = GND
+tile[10, 5].to_ip[7] = GND
+tile[10, 5].from_ip[0] = #1
+tile[10, 5].from_ip[3] = #1
+tile[10, 5].from_ip[5] = #1
+tile[10, 5].from_ip[7] = #1
+tile[10, 5].from_ip[9] = #1
+tile[10, 5].from_ip[10] = #1
+tile[11, 5].to_ip[0] = #3
+tile[11, 5].to_ip[1] = GND
+tile[11, 5].to_ip[2] = GND
+tile[11, 5].to_ip[3] = GND
+tile[11, 5].to_ip[4] = #0
+tile[11, 5].to_ip[5] = #4
+tile[11, 5].to_ip[6] = GND
+tile[11, 5].to_ip[7] = GND
+tile[11, 5].from_ip[0] = #1
+tile[11, 5].from_ip[5] = #1
+tile[11, 5].from_ip[8] = #1
+tile[11, 5].from_ip[11] = #1
+tile[12, 5].to_ip[0] = GND
+tile[12, 5].to_ip[1] = GND
+tile[12, 5].to_ip[2] = GND
+tile[12, 5].to_ip[3] = GND
+tile[12, 5].to_ip[4] = GND
+tile[12, 5].to_ip[5] = GND
+tile[12, 5].to_ip[6] = GND
+tile[12, 5].to_ip[7] = GND
+tile[12, 5].from_ip[5] = #1
+tile[12, 5].from_ip[8] = #1
+tile[13, 5].to_ip_13[0] = #10
+tile[13, 5].to_ip_13[1] = #3
+tile[13, 5].to_ip_13[2] = #8
+tile[13, 5].to_ip_13[3] = #0
+tile[13, 5].to_ip_13[4] = GND
+tile[13, 5].to_ip_13[5] = GND
+tile[13, 5].to_ip_13[6] = GND
+tile[13, 5].to_ip_13[7] = GND
+tile[13, 5].to_ip_13[8] = GND
+tile[13, 5].to_ip_13[9] = GND
+tile[13, 5].to_ip_13[10] = GND
+tile[13, 5].to_ip_13[11] = GND
+tile[13, 5].to_ip_18[0] = #9
+tile[13, 5].to_ip_18[1] = GND
+tile[13, 5].to_ip_18[2] = GND
+tile[13, 5].to_ip_18[3] = GND
+tile[14, 5].rmux[14] = #5	// T4_S[7] = tile[15, 5] T4_W[2]
+tile[14, 5].rmux[20] = #8	// T4_W[10] = tile[18, 5] T4_W[2]
+tile[14, 5].rmux[21] = #20	// T4_S[11] = tile[14, 9] T4_S[2]
+tile[14, 5].rmux[27] = #18	// T4_S[2] = tile[14, 7] T4_S[4]
+tile[14, 5].rmux[38] = #18	// T4_E[7] = tile[14, 7] T4_S[5]
+tile[14, 5].rmux[49] = #16	// T4_W[0] = tile[14, 1] T4_N[6]
+tile[14, 5].rmux[50] = #20	// T4_S[1] = tile[14, 9] T4_S[7]
+tile[14, 5].rmux[54] = #7	// T1_W[9] = tile[17, 5] T4_W[6]
+tile[14, 5].rmux[63] = #7	// T4_W[8] = tile[17, 5] T4_W[8]
+tile[14, 5].rmux[73] = #18	// T4_S[0] = tile[14, 7] T4_S[9]
+tile[14, 5].rmux[74] = #13	// T4_E[1] = tile[14, 4] T4_N[10]
+tile[14, 5].rmux[79] = #7	// T4_W[3] = tile[17, 5] T4_W[9]
+tile[14, 5].rmux[80] = #6	// T4_S[4] = tile[16, 5] T4_W[10]
+tile[14, 5].rmux[87] = #8	// T4_S[8] = tile[18, 5] T4_W[11]
+tile[15, 5].rmux[3] = #20	// T4_W[2] = tile[15, 9] T4_S[1]
+tile[15, 5].rmux[7] = #18	// T4_S[3] = tile[15, 7] T4_S[0]
+tile[15, 5].rmux[9] = #9	// T4_N[5] = tile[14, 5] T4_E[1]
+tile[15, 5].rmux[14] = #20	// T4_S[7] = tile[15, 9] T4_S[2]
+tile[15, 5].rmux[32] = #13	// T4_N[4] = tile[15, 4] T4_N[4]
+tile[15, 5].rmux[39] = #13	// T4_N[8] = tile[15, 4] T4_N[5]
+tile[15, 5].rmux[55] = #13	// T4_N[3] = tile[15, 4] T4_N[6]
+tile[15, 5].rmux[69] = #13	// T4_N[11] = tile[15, 4] T4_N[8]
+tile[15, 5].rmux[74] = #13	// T4_E[1] = tile[15, 4] T4_N[10]
+tile[15, 5].rmux[87] = #6	// T4_S[8] = tile[17, 5] T4_W[11]
+tile[15, 5].rmux[92] = #13	// T4_N[10] = tile[15, 4] T4_N[11]
+tile[16, 5].rmux[20] = #20	// T4_W[10] = tile[16, 9] T4_S[2]
+tile[16, 5].rmux[39] = #11	// T4_N[8] = tile[13, 5] T4_E[5]
+tile[16, 5].rmux[50] = #7	// T4_S[1] = tile[19, 5] T4_W[7]
+tile[16, 5].rmux[61] = #13	// T4_E[6] = tile[16, 4] T4_N[7]
+tile[16, 5].rmux[62] = #13	// T4_N[7] = tile[16, 4] T4_N[8]
+tile[16, 5].rmux[87] = #8	// T4_S[8] = tile[20, 5] T4_W[11]
+tile[16, 5].rmux[92] = #14	// T4_N[10] = tile[16, 3] T4_N[11]
+tile[17, 5].rmux[13] = #15	// T4_W[6] = tile[17, 2] T4_N[1]
+tile[17, 5].rmux[32] = #13	// T4_N[4] = tile[17, 4] T4_N[4]
+tile[17, 5].rmux[38] = #12	// T4_E[7] = tile[13, 5] T4_E[5]
+tile[17, 5].rmux[43] = #16	// T4_W[9] = tile[17, 1] T4_N[4]
+tile[17, 5].rmux[63] = #16	// T4_W[8] = tile[17, 1] T4_N[8]
+tile[17, 5].rmux[69] = #13	// T4_N[11] = tile[17, 4] T4_N[8]
+tile[17, 5].rmux[92] = #13	// T4_N[10] = tile[17, 4] T4_N[11]
+tile[17, 5].rmux[93] = #20	// T4_W[11] = tile[17, 9] T4_S[11]
+tile[18, 5].rmux[2] = #13	// T4_N[1] = tile[18, 4] T4_N[1]
+tile[18, 5].rmux[3] = #7	// T4_W[2] = tile[21, 5] T4_W[1]
+tile[18, 5].rmux[27] = #18	// T4_S[2] = tile[18, 7] T4_S[4]
+tile[18, 5].rmux[57] = #12	// T4_S[5] = tile[14, 5] T4_E[7]
+tile[18, 5].rmux[85] = #14	// T4_N[6] = tile[18, 3] T4_N[10]
+tile[18, 5].rmux[91] = #18	// T4_E[9] = tile[18, 7] T4_S[10]
+tile[18, 5].rmux[92] = #13	// T4_N[10] = tile[18, 4] T4_N[11]
+tile[18, 5].rmux[93] = #20	// T4_W[11] = tile[18, 9] T4_S[11]
+tile[19, 5].rmux[2] = #13	// T4_N[1] = tile[19, 4] T4_N[1]
+tile[19, 5].rmux[9] = #12	// T4_N[5] = tile[15, 5] T4_E[1]
+tile[19, 5].rmux[21] = #20	// T4_S[11] = tile[19, 9] T4_S[2]
+tile[19, 5].rmux[32] = #14	// T4_N[4] = tile[19, 3] T4_N[4]
+tile[19, 5].rmux[73] = #9	// T4_S[0] = tile[18, 5] T4_E[9]
+tile[19, 5].rmux[86] = #20	// T4_W[7] = tile[19, 9] T4_S[11]
+tile[19, 5].rmux[92] = #14	// T4_N[10] = tile[19, 3] T4_N[11]
+tile[20, 5].rmux[21] = #20	// T4_S[11] = tile[20, 9] T4_S[2]
+tile[20, 5].rmux[55] = #12	// T4_N[3] = tile[16, 5] T4_E[6]
+tile[20, 5].rmux[93] = #20	// T4_W[11] = tile[20, 9] T4_S[11]
+tile[21, 5].rmux[26] = #16	// T4_W[1] = tile[21, 1] T4_N[4]
+tile[21, 5].rmux[51] = #12	// T4_E[2] = tile[17, 5] T4_E[7]
+tile[22, 5].to_pll[1] = #2
+tile[22, 5].to_pll[2] = GND
+tile[22, 5].to_pll[3] = GND
+tile[22, 5].to_pll[4] = GND
+tile[22, 5].to_pll[5] = GND
+tile[22, 5].to_pll[6] = GND
+tile[22, 5].to_pll[7] = GND
+tile[22, 5].to_pll[8] = GND
+tile[22, 5].to_pll[9] = GND
+tile[22, 5].to_pll[10] = GND
+tile[22, 5].clock_mux_0 = 2
+tile[22, 5].clock_feedback_mux = 2
+tile[22, 5].feedback_delay = 4
+tile[22, 5].fb_div_lo_time = 149
+tile[22, 5].fb_div_hi_time = 149
+tile[22, 5].out_enable[0] = 1
+tile[22, 5].out_enable[1] = 1
+tile[22, 5].out_enable[2] = 1
+tile[22, 5].out_div_lo_time[0] = 2
+tile[22, 5].out_div_lo_time[1] = 9
+tile[22, 5].out_div_lo_time[2] = 11
+tile[22, 5].out_div_lo_time[3] = 255
+tile[22, 5].out_div_lo_time[4] = 255
+tile[22, 5].out_div_hi_time[0] = 2
+tile[22, 5].out_div_hi_time[1] = 9
+tile[22, 5].out_div_hi_time[2] = 11
+tile[22, 5].out_div_hi_time[3] = 255
+tile[22, 5].out_div_hi_time[4] = 255
+tile[22, 5].enabled = 1
+tile[22, 5].enable_dedicated_out_n = 1
+tile[22, 5].enable_dedicated_out_p = 1
+tile[22, 5].analog_icp = 4
+tile[22, 5].analog_rlpf = 1
+tile[22, 5].analog_rref = 1
+tile[22, 5].analog_rvi = 1
+tile[22, 5].analog_ivco = 2
+tile[13, 6].to_ip_13[0] = GND
+tile[13, 6].to_ip_13[1] = GND
+tile[13, 6].to_ip_13[2] = GND
+tile[13, 6].to_ip_13[3] = GND
+tile[13, 6].to_ip_13[4] = GND
+tile[13, 6].to_ip_13[5] = GND
+tile[13, 6].to_ip_13[6] = GND
+tile[13, 6].to_ip_13[7] = GND
+tile[13, 6].to_ip_13[8] = GND
+tile[13, 6].to_ip_13[9] = GND
+tile[13, 6].to_ip_13[10] = GND
+tile[13, 6].to_ip_13[11] = GND
+tile[13, 6].to_ip_18[0] = GND
+tile[13, 6].to_ip_18[1] = GND
+tile[13, 6].to_ip_18[2] = GND
+tile[13, 6].to_ip_18[3] = GND
+tile[14, 6].rmux[32] = #14	// T4_N[4] = tile[14, 4] T4_N[4]
+tile[14, 6].rmux[51] = #0	// T4_E[2] = tile[13, 6] T1_E[8]
+tile[14, 6].rmux[73] = #9	// T4_S[0] = tile[13, 6] T4_E[9]
+tile[16, 6].rmux[32] = #14	// T4_N[4] = tile[16, 4] T4_N[4]
+tile[17, 6].rmux[25] = #14	// T4_N[0] = tile[17, 4] T4_N[3]
+tile[18, 6].rmux[14] = #12	// T4_S[7] = tile[14, 6] T4_E[2]
+tile[18, 6].rmux[92] = #15	// T4_N[10] = tile[18, 3] T4_N[11]
+tile[13, 7].to_ip_13[0] = GND
+tile[13, 7].to_ip_13[1] = GND
+tile[13, 7].to_ip_13[2] = GND
+tile[13, 7].to_ip_13[3] = GND
+tile[13, 7].to_ip_13[4] = GND
+tile[13, 7].to_ip_13[5] = GND
+tile[13, 7].to_ip_13[6] = GND
+tile[13, 7].to_ip_13[7] = GND
+tile[13, 7].to_ip_13[8] = GND
+tile[13, 7].to_ip_13[9] = GND
+tile[13, 7].to_ip_13[10] = GND
+tile[13, 7].to_ip_13[11] = GND
+tile[13, 7].to_ip_18[0] = GND
+tile[13, 7].to_ip_18[1] = GND
+tile[13, 7].from_ip[9] = #1
+tile[13, 7].from_ip[11] = #1
+tile[14, 7].rmux[57] = #0	// T4_S[5] = tile[13, 7] T1_E[8]
+tile[14, 7].rmux[67] = #2	// T4_S[9] = tile[13, 7] T1_E[10]
+tile[14, 7].rmux[68] = #9	// T4_E[10] = tile[13, 7] T4_E[8]
+tile[14, 7].rmux[74] = #16	// T4_E[1] = tile[14, 3] T4_N[10]
+tile[14, 7].rmux[80] = #9	// T4_S[4] = tile[13, 7] T4_E[10]
+tile[14, 7].rmux[81] = #0	// T4_E[5] = tile[13, 7] T1_E[12]
+tile[14, 7].rmux[87] = #2	// T4_S[8] = tile[13, 7] T1_E[14]
+tile[15, 7].rmux[73] = #10	// T4_S[0] = tile[13, 7] T4_E[9]
+tile[16, 7].rmux[87] = #11	// T4_S[8] = tile[13, 7] T4_E[11]
+tile[18, 7].rmux[2] = #12	// T4_N[1] = tile[14, 7] T4_E[1]
+tile[18, 7].rmux[44] = #12	// T4_S[10] = tile[14, 7] T4_E[5]
+tile[18, 7].rmux[69] = #15	// T4_N[11] = tile[18, 4] T4_N[8]
+tile[18, 7].rmux[80] = #12	// T4_S[4] = tile[14, 7] T4_E[10]
+tile[13, 8].to_ip_13[0] = GND
+tile[13, 8].to_ip_13[1] = GND
+tile[13, 8].to_ip_13[2] = GND
+tile[13, 8].to_ip_13[3] = GND
+tile[13, 8].to_ip_13[4] = GND
+tile[13, 8].to_ip_13[5] = GND
+tile[13, 8].to_ip_13[6] = GND
+tile[13, 8].to_ip_13[7] = GND
+tile[13, 8].to_ip_13[8] = GND
+tile[13, 8].to_ip_13[9] = GND
+tile[13, 8].to_ip_13[10] = GND
+tile[13, 8].to_ip_13[11] = GND
+tile[13, 8].to_ip_18[0] = GND
+tile[13, 8].to_ip_18[1] = GND
+tile[13, 8].to_ip_18[2] = GND
+tile[14, 8].rmux[39] = #16	// T4_N[8] = tile[14, 4] T4_N[5]
+tile[14, 8].rmux[50] = #8	// T4_S[1] = tile[18, 8] T4_W[7]
+tile[14, 8].rmux[67] = #20	// T4_S[9] = tile[14, 12] T4_S[7]
+tile[14, 8].rmux[80] = #17	// T4_S[4] = tile[14, 9] T4_S[10]
+tile[18, 8].rmux[86] = #20	// T4_W[7] = tile[18, 12] T4_S[11]
+tile[13, 9].to_ip_13[0] = GND
+tile[13, 9].to_ip_13[1] = GND
+tile[13, 9].to_ip_13[2] = GND
+tile[13, 9].to_ip_13[3] = GND
+tile[13, 9].to_ip_13[4] = GND
+tile[13, 9].to_ip_13[5] = GND
+tile[13, 9].to_ip_13[6] = GND
+tile[13, 9].to_ip_13[7] = GND
+tile[13, 9].to_ip_13[8] = GND
+tile[13, 9].to_ip_13[9] = GND
+tile[13, 9].to_ip_13[10] = GND
+tile[13, 9].to_ip_13[11] = GND
+tile[13, 9].to_ip_18[0] = GND
+tile[13, 9].to_ip_18[1] = GND
+tile[13, 9].to_ip_18[2] = GND
+tile[14, 9].rmux[14] = #6	// T4_S[7] = tile[16, 9] T4_W[2]
+tile[14, 9].rmux[15] = #17	// T4_E[8] = tile[14, 10] T4_S[2]
+tile[14, 9].rmux[27] = #8	// T4_S[2] = tile[18, 9] T4_W[4]
+tile[14, 9].rmux[44] = #8	// T4_S[10] = tile[18, 9] T4_W[5]
+tile[15, 9].rmux[25] = #16	// T4_N[0] = tile[15, 5] T4_N[3]
+tile[15, 9].rmux[27] = #6	// T4_S[2] = tile[17, 9] T4_W[4]
+tile[15, 9].rmux[33] = #16	// T4_W[5] = tile[15, 5] T4_N[4]
+tile[15, 9].rmux[39] = #16	// T4_N[8] = tile[15, 5] T4_N[5]
+tile[15, 9].rmux[45] = #11	// T4_E[11] = tile[12, 9] T4_E[5]
+tile[15, 9].rmux[50] = #20	// T4_S[1] = tile[15, 13] T4_S[7]
+tile[15, 9].rmux[68] = #16	// T4_E[10] = tile[15, 5] T4_N[8]
+tile[15, 9].rmux[85] = #16	// T4_N[6] = tile[15, 5] T4_N[10]
+tile[15, 9].rmux[92] = #16	// T4_N[10] = tile[15, 5] T4_N[11]
+tile[16, 9].rmux[3] = #20	// T4_W[2] = tile[16, 13] T4_S[1]
+tile[16, 9].rmux[15] = #17	// T4_E[8] = tile[16, 10] T4_S[2]
+tile[16, 9].rmux[27] = #20	// T4_S[2] = tile[16, 13] T4_S[4]
+tile[16, 9].rmux[61] = #16	// T4_E[6] = tile[16, 5] T4_N[7]
+tile[16, 9].rmux[69] = #16	// T4_N[11] = tile[16, 5] T4_N[8]
+tile[16, 9].rmux[74] = #16	// T4_E[1] = tile[16, 5] T4_N[10]
+tile[17, 9].rmux[21] = #20	// T4_S[11] = tile[17, 13] T4_S[2]
+tile[17, 9].rmux[25] = #17	// T4_N[0] = tile[17, 10] T4_S[3]
+tile[17, 9].rmux[32] = #16	// T4_N[4] = tile[17, 5] T4_N[4]
+tile[17, 9].rmux[56] = #20	// T4_W[4] = tile[17, 13] T4_S[7]
+tile[17, 9].rmux[75] = #16	// T4_N[2] = tile[17, 5] T4_N[10]
+tile[17, 9].rmux[92] = #16	// T4_N[10] = tile[17, 5] T4_N[11]
+tile[18, 9].rmux[9] = #16	// T4_N[5] = tile[18, 5] T4_N[1]
+tile[18, 9].rmux[21] = #5	// T4_S[11] = tile[19, 9] T4_W[2]
+tile[18, 9].rmux[33] = #20	// T4_W[5] = tile[18, 13] T4_S[4]
+tile[18, 9].rmux[55] = #16	// T4_N[3] = tile[18, 5] T4_N[6]
+tile[18, 9].rmux[56] = #20	// T4_W[4] = tile[18, 13] T4_S[7]
+tile[18, 9].rmux[69] = #12	// T4_N[11] = tile[14, 9] T4_E[8]
+tile[18, 9].rmux[75] = #16	// T4_N[2] = tile[18, 5] T4_N[10]
+tile[18, 9].rmux[85] = #15	// T4_N[6] = tile[18, 6] T4_N[10]
+tile[19, 9].rmux[3] = #20	// T4_W[2] = tile[19, 13] T4_S[1]
+tile[19, 9].rmux[19] = #16	// T4_N[9] = tile[19, 5] T4_N[1]
+tile[19, 9].rmux[21] = #20	// T4_S[11] = tile[19, 13] T4_S[2]
+tile[19, 9].rmux[27] = #20	// T4_S[2] = tile[19, 13] T4_S[4]
+tile[19, 9].rmux[32] = #16	// T4_N[4] = tile[19, 5] T4_N[4]
+tile[19, 9].rmux[39] = #16	// T4_N[8] = tile[19, 5] T4_N[5]
+tile[19, 9].rmux[75] = #16	// T4_N[2] = tile[19, 5] T4_N[10]
+tile[19, 9].rmux[85] = #12	// T4_N[6] = tile[15, 9] T4_E[10]
+tile[19, 9].rmux[92] = #12	// T4_N[10] = tile[15, 9] T4_E[11]
+tile[20, 9].rmux[9] = #12	// T4_N[5] = tile[16, 9] T4_E[1]
+tile[20, 9].rmux[21] = #20	// T4_S[11] = tile[20, 13] T4_S[2]
+tile[20, 9].rmux[25] = #16	// T4_N[0] = tile[20, 5] T4_N[3]
+tile[20, 9].rmux[27] = #20	// T4_S[2] = tile[20, 13] T4_S[4]
+tile[20, 9].rmux[55] = #12	// T4_N[3] = tile[16, 9] T4_E[6]
+tile[20, 9].rmux[62] = #12	// T4_N[7] = tile[16, 9] T4_E[8]
+tile[13, 10].to_ip_13[0] = GND
+tile[13, 10].to_ip_13[2] = GND
+tile[13, 10].to_ip_13[3] = GND
+tile[13, 10].to_ip_13[4] = GND
+tile[13, 10].to_ip_13[5] = GND
+tile[13, 10].to_ip_13[6] = GND
+tile[13, 10].to_ip_13[7] = GND
+tile[13, 10].to_ip_13[8] = GND
+tile[13, 10].to_ip_13[9] = GND
+tile[13, 10].to_ip_13[10] = GND
+tile[13, 10].to_ip_13[11] = GND
+tile[13, 10].to_ip_18[0] = GND
+tile[13, 10].to_ip_18[1] = GND
+tile[13, 10].to_ip_18[2] = GND
+tile[14, 10].rmux[27] = #16	// T4_S[2] = tile[14, 6] T4_N[4]
+tile[16, 10].rmux[27] = #16	// T4_S[2] = tile[16, 6] T4_N[4]
+tile[17, 10].rmux[7] = #16	// T4_S[3] = tile[17, 6] T4_N[0]
+tile[13, 11].to_ip_13[0] = GND
+tile[13, 11].to_ip_13[1] = GND
+tile[13, 11].to_ip_13[2] = GND
+tile[13, 11].to_ip_13[3] = GND
+tile[13, 11].to_ip_13[4] = GND
+tile[13, 11].to_ip_13[5] = GND
+tile[13, 11].to_ip_13[6] = GND
+tile[13, 11].to_ip_13[7] = GND
+tile[13, 11].to_ip_13[8] = GND
+tile[13, 11].to_ip_13[9] = GND
+tile[13, 11].to_ip_13[10] = GND
+tile[13, 11].to_ip_13[11] = GND
+tile[13, 11].to_ip_18[0] = GND
+tile[13, 11].to_ip_18[1] = GND
+tile[13, 11].to_ip_18[2] = GND
+tile[13, 11].to_ip_18[3] = GND
+tile[13, 11].to_ip_18[4] = GND
+tile[13, 11].to_ip_18[5] = GND
+tile[13, 11].to_ip_18[6] = GND
+tile[18, 11].rmux[2] = #16	// T4_N[1] = tile[18, 7] T4_N[1]
+tile[18, 11].rmux[92] = #16	// T4_N[10] = tile[18, 7] T4_N[11]
+tile[13, 12].to_ip_13[1] = GND
+tile[13, 12].to_ip_13[2] = GND
+tile[13, 12].to_ip_13[3] = GND
+tile[13, 12].to_ip_13[4] = GND
+tile[13, 12].to_ip_13[5] = GND
+tile[13, 12].to_ip_13[6] = GND
+tile[13, 12].to_ip_13[7] = GND
+tile[13, 12].to_ip_13[8] = GND
+tile[13, 12].to_ip_13[9] = GND
+tile[13, 12].to_ip_13[10] = GND
+tile[13, 12].to_ip_13[11] = GND
+tile[13, 12].to_ip_18[0] = GND
+tile[13, 12].to_ip_18[1] = GND
+tile[13, 12].to_ip_18[2] = GND
+tile[14, 12].rmux[14] = #8	// T4_S[7] = tile[18, 12] T4_W[2]
+tile[14, 12].rmux[68] = #16	// T4_E[10] = tile[14, 8] T4_N[8]
+tile[15, 12].rmux[81] = #9	// T4_E[5] = tile[14, 12] T4_E[10]
+tile[18, 12].rmux[3] = #17	// T4_W[2] = tile[18, 13] T4_S[1]
+tile[18, 12].rmux[21] = #17	// T4_S[11] = tile[18, 13] T4_S[2]
+tile[18, 12].rmux[39] = #11	// T4_N[8] = tile[15, 12] T4_E[5]
+tile[14, 13].out_clk[0] = GND
+tile[14, 13].out_clk[2] = GND
+tile[14, 13].in_clk[0] = GND
+tile[14, 13].in_clk[2] = GND
+tile[14, 13].loc_to_io_out[0] = GND
+tile[14, 13].loc_to_io_out[2] = GND
+tile[14, 13].loc_to_io_oe[0] = GND
+tile[14, 13].loc_to_io_oe[2] = GND
+tile[14, 13].loc_to_out_cen[0] = GND
+tile[14, 13].loc_to_out_cen[2] = GND
+tile[14, 13].loc_to_in_cen[0] = GND
+tile[14, 13].loc_to_in_cen[2] = GND
+tile[14, 13].loc_to_async[0] = GND
+tile[14, 13].loc_to_async[2] = GND
+tile[14, 13].loc_to_sync[0] = GND
+tile[14, 13].loc_to_sync[2] = GND
+tile[15, 13].local_line[0] = #3	// tile[15, 9] T4_N[0]
+tile[15, 13].local_line[16] = #3	// tile[15, 9] T4_N[6]
+tile[15, 13].local_line[19] = #3	// tile[15, 9] T4_N[6]
+tile[15, 13].local_line[20] = #5	// tile[15, 9] T4_N[8]
+tile[15, 13].local_line[28] = #1	// tile[15, 9] T4_N[10]
+tile[15, 13].out_clk[0] = GND
+tile[15, 13].out_clk[2] = GND
+tile[15, 13].out_clk[3] = GND
+tile[15, 13].in_loc2clk[3] = #4	// local_line[19]
+tile[15, 13].in_clk[0] = GND
+tile[15, 13].in_clk[2] = GND
+tile[15, 13].in_clk[3] = loc2clk
+tile[15, 13].loc_to_io_out[0] = GND
+tile[15, 13].loc_to_io_out[2] = #4	// local_line[16]
+tile[15, 13].loc_to_io_out[3] = #0	// local_line[0]
+tile[15, 13].loc_to_io_oe[0] = GND
+tile[15, 13].loc_to_io_oe[2] = #7	// local_line[28]
+tile[15, 13].loc_to_io_oe[3] = #5	// local_line[20]
+tile[15, 13].loc_to_out_cen[0] = GND
+tile[15, 13].loc_to_out_cen[2] = GND
+tile[15, 13].loc_to_out_cen[3] = GND
+tile[15, 13].loc_to_in_cen[0] = GND
+tile[15, 13].loc_to_in_cen[2] = GND
+tile[15, 13].loc_to_async[0] = GND
+tile[15, 13].loc_to_async[2] = GND
+tile[15, 13].loc_to_async[3] = GND
+tile[15, 13].loc_to_sync[0] = GND
+tile[15, 13].loc_to_sync[2] = GND
+tile[15, 13].loc_to_sync[3] = GND
+tile[15, 13].omux1[3] = ff
+pad[15, 13, 3].input_en = 1
+tile[16, 13].local_line[24] = #6	// glb2loc[6]
+tile[16, 13].local_line[28] = #5	// tile[16, 9] T4_N[11]
+tile[16, 13].out_glb2loc[3] = #0
+tile[16, 13].out_clk[0] = GND
+tile[16, 13].out_clk[1] = GND
+tile[16, 13].out_clk[2] = GND
+tile[16, 13].out_clk[3] = GND
+tile[16, 13].in_clk[0] = GND
+tile[16, 13].in_clk[1] = GND
+tile[16, 13].in_clk[2] = GND
+tile[16, 13].in_clk[3] = GND
+tile[16, 13].loc_to_io_out[0] = GND
+tile[16, 13].loc_to_io_out[1] = GND
+tile[16, 13].loc_to_io_out[2] = GND
+tile[16, 13].loc_to_io_out[3] = #6	// local_line[24]
+tile[16, 13].loc_to_io_oe[0] = GND
+tile[16, 13].loc_to_io_oe[1] = GND
+tile[16, 13].loc_to_io_oe[2] = GND
+tile[16, 13].loc_to_io_oe[3] = #7	// local_line[28]
+tile[16, 13].loc_to_out_cen[0] = GND
+tile[16, 13].loc_to_out_cen[1] = GND
+tile[16, 13].loc_to_out_cen[2] = GND
+tile[16, 13].loc_to_out_cen[3] = GND
+tile[16, 13].loc_to_in_cen[0] = GND
+tile[16, 13].loc_to_in_cen[1] = GND
+tile[16, 13].loc_to_in_cen[2] = GND
+tile[16, 13].loc_to_in_cen[3] = GND
+tile[16, 13].loc_to_async[0] = GND
+tile[16, 13].loc_to_async[1] = GND
+tile[16, 13].loc_to_async[2] = GND
+tile[16, 13].loc_to_async[3] = GND
+tile[16, 13].loc_to_sync[0] = GND
+tile[16, 13].loc_to_sync[1] = GND
+tile[16, 13].loc_to_sync[2] = GND
+tile[16, 13].loc_to_sync[3] = GND
+pad[16, 13, 0].input_en = 1
+pad[16, 13, 2].input_en = 1
+tile[17, 13].local_line[0] = #3	// tile[17, 9] T4_N[0]
+tile[17, 13].local_line[4] = #5	// tile[17, 9] T4_N[2]
+tile[17, 13].local_line[12] = #1	// tile[17, 9] T4_N[4]
+tile[17, 13].local_line[28] = #1	// tile[17, 9] T4_N[10]
+tile[17, 13].out_clk[0] = GND
+tile[17, 13].out_clk[1] = GND
+tile[17, 13].out_clk[2] = GND
+tile[17, 13].out_clk[3] = GND
+tile[17, 13].in_clk[0] = GND
+tile[17, 13].in_clk[1] = GND
+tile[17, 13].in_clk[2] = GND
+tile[17, 13].in_clk[3] = GND
+tile[17, 13].loc_to_io_out[0] = #0	// local_line[0]
+tile[17, 13].loc_to_io_out[1] = GND
+tile[17, 13].loc_to_io_out[2] = GND
+tile[17, 13].loc_to_io_out[3] = #3	// local_line[12]
+tile[17, 13].loc_to_io_oe[0] = !#7	// local_line[28]
+tile[17, 13].loc_to_io_oe[1] = GND
+tile[17, 13].loc_to_io_oe[2] = GND
+tile[17, 13].loc_to_io_oe[3] = #1	// local_line[4]
+tile[17, 13].loc_to_out_cen[0] = GND
+tile[17, 13].loc_to_out_cen[1] = GND
+tile[17, 13].loc_to_out_cen[2] = GND
+tile[17, 13].loc_to_out_cen[3] = GND
+tile[17, 13].loc_to_in_cen[0] = GND
+tile[17, 13].loc_to_in_cen[1] = GND
+tile[17, 13].loc_to_in_cen[2] = GND
+tile[17, 13].loc_to_in_cen[3] = GND
+tile[17, 13].loc_to_async[0] = GND
+tile[17, 13].loc_to_async[1] = GND
+tile[17, 13].loc_to_async[2] = GND
+tile[17, 13].loc_to_async[3] = GND
+tile[17, 13].loc_to_sync[0] = GND
+tile[17, 13].loc_to_sync[1] = GND
+tile[17, 13].loc_to_sync[2] = GND
+tile[17, 13].loc_to_sync[3] = GND
+pad[17, 13, 1].input_en = 1
+pad[17, 13, 3].input_en = 1
+tile[18, 13].local_line[0] = #5	// tile[18, 11] T4_N[1]
+tile[18, 13].local_line[4] = #5	// tile[18, 9] T4_N[2]
+tile[18, 13].local_line[8] = #3	// tile[18, 9] T4_N[3]
+tile[18, 13].local_line[12] = #5	// tile[18, 9] T4_N[5]
+tile[18, 13].local_line[16] = #3	// tile[18, 9] T4_N[6]
+tile[18, 13].local_line[20] = #2	// tile[18, 12] T4_N[8]
+tile[18, 13].local_line[24] = #5	// tile[18, 11] T4_N[10]
+tile[18, 13].local_line[28] = #5	// tile[18, 9] T4_N[11]
+tile[18, 13].out_clk[0] = GND
+tile[18, 13].out_clk[1] = GND
+tile[18, 13].out_clk[2] = GND
+tile[18, 13].out_clk[3] = GND
+tile[18, 13].in_clk[0] = GND
+tile[18, 13].in_clk[1] = GND
+tile[18, 13].in_clk[2] = GND
+tile[18, 13].in_clk[3] = GND
+tile[18, 13].loc_to_io_out[0] = #6	// local_line[24]
+tile[18, 13].loc_to_io_out[1] = #2	// local_line[8]
+tile[18, 13].loc_to_io_out[2] = #4	// local_line[16]
+tile[18, 13].loc_to_io_out[3] = #7	// local_line[28]
+tile[18, 13].loc_to_io_oe[0] = #0	// local_line[0]
+tile[18, 13].loc_to_io_oe[1] = #5	// local_line[20]
+tile[18, 13].loc_to_io_oe[2] = #1	// local_line[4]
+tile[18, 13].loc_to_io_oe[3] = #3	// local_line[12]
+tile[18, 13].loc_to_out_cen[0] = GND
+tile[18, 13].loc_to_out_cen[1] = GND
+tile[18, 13].loc_to_out_cen[2] = GND
+tile[18, 13].loc_to_out_cen[3] = GND
+tile[18, 13].loc_to_in_cen[0] = GND
+tile[18, 13].loc_to_in_cen[1] = GND
+tile[18, 13].loc_to_in_cen[2] = GND
+tile[18, 13].loc_to_in_cen[3] = GND
+tile[18, 13].loc_to_async[0] = GND
+tile[18, 13].loc_to_async[1] = GND
+tile[18, 13].loc_to_async[2] = GND
+tile[18, 13].loc_to_async[3] = GND
+tile[18, 13].loc_to_sync[0] = GND
+tile[18, 13].loc_to_sync[1] = GND
+tile[18, 13].loc_to_sync[2] = GND
+tile[18, 13].loc_to_sync[3] = GND
+pad[18, 13, 0].input_en = 1
+pad[18, 13, 1].input_en = 1
+pad[18, 13, 2].input_en = 1
+pad[18, 13, 3].input_en = 1
+tile[19, 13].local_line[4] = #5	// tile[19, 9] T4_N[2]
+tile[19, 13].local_line[12] = #1	// tile[19, 9] T4_N[4]
+tile[19, 13].local_line[16] = #3	// tile[19, 9] T4_N[6]
+tile[19, 13].local_line[20] = #5	// tile[19, 9] T4_N[8]
+tile[19, 13].local_line[24] = #3	// tile[19, 9] T4_N[9]
+tile[19, 13].local_line[28] = #1	// tile[19, 9] T4_N[10]
+tile[19, 13].out_clk[0] = GND
+tile[19, 13].out_clk[1] = GND
+tile[19, 13].out_clk[2] = GND
+tile[19, 13].out_clk[3] = GND
+tile[19, 13].in_clk[0] = GND
+tile[19, 13].in_clk[1] = GND
+tile[19, 13].in_clk[2] = GND
+tile[19, 13].in_clk[3] = GND
+tile[19, 13].loc_to_io_out[0] = #6	// local_line[24]
+tile[19, 13].loc_to_io_out[1] = #1	// local_line[4]
+tile[19, 13].loc_to_io_out[2] = #5	// local_line[20]
+tile[19, 13].loc_to_io_out[3] = GND
+tile[19, 13].loc_to_io_oe[0] = #7	// local_line[28]
+tile[19, 13].loc_to_io_oe[1] = #3	// local_line[12]
+tile[19, 13].loc_to_io_oe[2] = #4	// local_line[16]
+tile[19, 13].loc_to_io_oe[3] = GND
+tile[19, 13].loc_to_out_cen[0] = GND
+tile[19, 13].loc_to_out_cen[1] = GND
+tile[19, 13].loc_to_out_cen[2] = GND
+tile[19, 13].loc_to_out_cen[3] = GND
+tile[19, 13].loc_to_in_cen[0] = GND
+tile[19, 13].loc_to_in_cen[1] = GND
+tile[19, 13].loc_to_in_cen[2] = GND
+tile[19, 13].loc_to_in_cen[3] = GND
+tile[19, 13].loc_to_async[0] = GND
+tile[19, 13].loc_to_async[1] = GND
+tile[19, 13].loc_to_async[2] = GND
+tile[19, 13].loc_to_async[3] = GND
+tile[19, 13].loc_to_sync[0] = GND
+tile[19, 13].loc_to_sync[1] = GND
+tile[19, 13].loc_to_sync[2] = GND
+tile[19, 13].loc_to_sync[3] = GND
+pad[19, 13, 0].input_en = 1
+pad[19, 13, 1].input_en = 1
+pad[19, 13, 2].input_en = 1
+tile[20, 13].local_line[0] = #3	// tile[20, 9] T4_N[0]
+tile[20, 13].local_line[8] = #3	// tile[20, 9] T4_N[3]
+tile[20, 13].local_line[12] = #5	// tile[20, 9] T4_N[5]
+tile[20, 13].local_line[20] = #1	// tile[20, 9] T4_N[7]
+tile[20, 13].out_clk[1] = GND
+tile[20, 13].out_clk[2] = GND
+tile[20, 13].out_clk[3] = GND
+tile[20, 13].in_clk[1] = GND
+tile[20, 13].in_clk[2] = GND
+tile[20, 13].in_clk[3] = GND
+tile[20, 13].loc_to_io_out[1] = #3	// local_line[12]
+tile[20, 13].loc_to_io_out[2] = #2	// local_line[8]
+tile[20, 13].loc_to_io_out[3] = GND
+tile[20, 13].loc_to_io_oe[1] = #0	// local_line[0]
+tile[20, 13].loc_to_io_oe[2] = #5	// local_line[20]
+tile[20, 13].loc_to_io_oe[3] = GND
+tile[20, 13].loc_to_out_cen[1] = GND
+tile[20, 13].loc_to_out_cen[2] = GND
+tile[20, 13].loc_to_out_cen[3] = GND
+tile[20, 13].loc_to_in_cen[1] = GND
+tile[20, 13].loc_to_in_cen[2] = GND
+tile[20, 13].loc_to_in_cen[3] = GND
+tile[20, 13].loc_to_async[1] = GND
+tile[20, 13].loc_to_async[2] = GND
+tile[20, 13].loc_to_async[3] = GND
+tile[20, 13].loc_to_sync[1] = GND
+tile[20, 13].loc_to_sync[2] = GND
+tile[20, 13].loc_to_sync[3] = GND
+pad[20, 13, 1].input_en = 1
+pad[20, 13, 2].input_en = 1

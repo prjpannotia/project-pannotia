@@ -1,5 +1,5 @@
 // This one LEDs on the "AG32VH407RCT6" devboard always
-// and loops the pushbutton to another one, inverting it
+// and loops the pushbutton to another one
 
 // PIN 35
 pad[0, 4, 2].input_en = 1
