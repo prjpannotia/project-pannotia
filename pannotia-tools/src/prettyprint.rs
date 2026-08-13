@@ -2,6 +2,7 @@
 //!
 //! This module *relies on* autoderef specialization!
 
+use std::fmt;
 use std::fmt::Display;
 
 use pannotia::prelude::*;
@@ -79,6 +80,19 @@ make_specific_prettyprint!(LUT, val, w, _family, _tile_pos, _tile_type, _i {
     write!(w, "0x{:04x}", val.0)?;
 });
 
+fn print_rmux_purpose<W: fmt::Write>(mut w: W, rmux: RMUXPurpose) -> fmt::Result {
+    match rmux {
+        RMUXPurpose::SelfWire(wire_idx) => write!(w, "rmux_self[{}]", wire_idx)?,
+        RMUXPurpose::LeftNeighbor(wire_idx) => write!(w, "T1_W[{}]", wire_idx)?,
+        RMUXPurpose::Span4 {
+            going_dir,
+            wire_idx,
+        } => write!(w, "T4_{}[{}]", going_dir, wire_idx)?,
+    }
+
+    Ok(())
+}
+
 make_specific_prettyprint!(mux::RMUX, val, w, family, tile_pos, tile_type, i {
     write!(w, "{}", val)?;
 
@@ -86,23 +100,14 @@ make_specific_prettyprint!(mux::RMUX, val, w, family, tile_pos, tile_type, i {
         write!(w, "\t// ")?;
 
         // mux purpose
-        let this_rmux = RMUX_PURPOSE[i as usize];
-        match this_rmux {
-            RMUXPurpose::SelfWire(wire_idx) => write!(w, "rmux_self[{}]", wire_idx)?,
-            RMUXPurpose::LeftNeighbor(wire_idx) => write!(w, "T1_W[{}]", wire_idx)?,
-            RMUXPurpose::Span4 {
-                going_dir,
-                wire_idx,
-            } => write!(w, "T4_{}[{}]", going_dir, wire_idx)?,
-        }
-
+        print_rmux_purpose(&mut w, RMUX_PURPOSE[i as usize])?;
         write!(w, " = ")?;
 
         // mux source (decoded)
         let rmux_src = rmux_input(i, rmux_inp_i, tile_type == TileType::BRAM);
         match rmux_src {
             RMUXSource::GlobalToLocal(i) => write!(w, "glb2loc[{i}]")?,
-            RMUXSource::RMUX(i) => write!(w, "rmux[{i}]")?,
+            RMUXSource::RMUX(i) => print_rmux_purpose(&mut w, RMUX_PURPOSE[i as usize])?,
             RMUXSource::CellOutput(i) => write!(w, "this_output[{i}]")?,
             RMUXSource::RoutingWire(src_wire) => {
                 let abs_wire = src_wire.to_absolute(family, tile_pos);
@@ -123,7 +128,7 @@ fn print_function_input_source<W: std::fmt::Write>(
     mut w: W,
 ) -> std::fmt::Result {
     match src {
-        FunctionInputSource::RMUX(i) => write!(w, "rmux[{i}]")?,
+        FunctionInputSource::RMUX(i) => print_rmux_purpose(&mut w, RMUX_PURPOSE[i as usize])?,
         FunctionInputSource::LEOutput(i) => write!(w, "this_output[{i}]")?,
         FunctionInputSource::RightNeighborWire(i) => {
             let tile_right = tile_pos + Direction::E;
@@ -181,7 +186,7 @@ make_specific_prettyprint!(mux::TMUX, val, w, family, tile_pos, _tile_type, i {
 
         match tmux_src {
             TMUXSource::GlobalToLocal(i) => write!(w, "glb2loc[{i}]")?,
-            TMUXSource::RMUX(i) => write!(w, "rmux[{i}]")?,
+            TMUXSource::RMUX(i) => print_rmux_purpose(&mut w, RMUX_PURPOSE[i as usize])?,
             TMUXSource::RoutingWire(src_wire) => {
                 let abs_wire = src_wire.to_absolute(family, tile_pos);
                 write!(

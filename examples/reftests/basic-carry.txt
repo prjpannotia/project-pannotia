@@ -468,7 +468,7 @@ tile[1, 4].rmux[0] = #1	// T1_W[0] = this_output[1]
 tile[1, 4].rmux[40] = #0	// rmux_self[12] = tile[0, 4] T1_E[4]
 tile[1, 4].lut[0] = 0x0004
 tile[1, 4].lut[1] = 0x0800
-tile[1, 4].lut_A[0] = #17	// rmux[40]
+tile[1, 4].lut_A[0] = #17	// rmux_self[12]
 tile[1, 4].inp_c[1] = carry
 tile[22, 4].ce[0] = GND
 tile[22, 4].ce[1] = GND
