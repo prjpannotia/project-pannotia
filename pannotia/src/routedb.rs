@@ -270,15 +270,27 @@ pub const fn rmux_input(rmux_idx: u8, inp_idx: u8, is_bram: bool) -> RMUXSource 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum RMUXPurpose {
     /// A self-wire into the tile's logic
-    SelfWire,
+    ///
+    /// Index is arbitrary-ish but contiguous, and ranges up to 32 for the currently-supported families
+    SelfWire(u8),
     /// A T1 left-going neighbor wire
-    LeftNeighbor,
+    LeftNeighbor(u8),
     /// A span-4 wire
     Span4 { going_dir: Direction, wire_idx: u8 },
 }
 
 /// Map of RMUX index to what it actually does
 pub use rmux::RMUX_PURPOSE;
+
+/// Map of neighbor wire to the RMUX index that controls it
+pub const fn rmux_idx_for_neighbor(i: u8) -> usize {
+    i as usize * 6
+}
+
+/// Map of self-wire to the RMUX index that controls it
+pub const fn rmux_idx_for_self(i: u8) -> usize {
+    ((i / 2 * 6) + (i % 2) + 4) as usize
+}
 
 /// Map of span-4 wire to the RMUX index that controls it
 pub const fn rmux_idx_for_span4(dir: Direction, wire_idx: u8) -> usize {
@@ -627,6 +639,16 @@ mod tests {
                     }
                 )
             }
+        }
+
+        for i in 0..16 {
+            let rmux_i = rmux_idx_for_neighbor(i);
+            assert_eq!(RMUX_PURPOSE[rmux_i], RMUXPurpose::LeftNeighbor(i));
+        }
+
+        for i in 0..32 {
+            let rmux_i = rmux_idx_for_self(i);
+            assert_eq!(RMUX_PURPOSE[rmux_i], RMUXPurpose::SelfWire(i));
         }
     }
 }

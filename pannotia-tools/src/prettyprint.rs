@@ -88,8 +88,8 @@ make_specific_prettyprint!(mux::RMUX, val, w, family, tile_pos, tile_type, i {
         // mux purpose
         let this_rmux = RMUX_PURPOSE[i as usize];
         match this_rmux {
-            RMUXPurpose::SelfWire => write!(w, "rmux_self[{}]", i / 6 * 2 + i % 6 - 4)?,
-            RMUXPurpose::LeftNeighbor => write!(w, "T1_W[{}]", i / 6)?,
+            RMUXPurpose::SelfWire(wire_idx) => write!(w, "rmux_self[{}]", wire_idx)?,
+            RMUXPurpose::LeftNeighbor(wire_idx) => write!(w, "T1_W[{}]", wire_idx)?,
             RMUXPurpose::Span4 {
                 going_dir,
                 wire_idx,
