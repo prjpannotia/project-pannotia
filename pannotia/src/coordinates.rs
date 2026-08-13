@@ -15,7 +15,7 @@ use crate::container::DebugTracer;
 ///
 /// This has a specific repr to be convenient for the downstream PnR crate
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
 pub struct TilePos {
     pub y: u8,
     pub x: u8,
