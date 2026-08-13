@@ -125,35 +125,28 @@ impl RoutingWire {
         };
         assert!(self.bundle < max_bundle, "invalid wire bundle");
 
-        let mut src_pos = tile_pos;
         let mut dir = self.going_dir.flip();
-        let (tile_w, tile_h) = family.tile_dims();
-        let mut flip_dir = false;
-        for _ in 0..self.bundle + 1 {
+        let mut cur_pos = tile_pos + dir;
+        let mut did_flip_dir = false;
+        // let (tile_w, tile_h) = family.tile_dims();
+        for _ in 0..self.bundle {
             // handle flipping wires around the edges
-            let flip_at_edge = match dir {
-                Direction::N if src_pos.y == tile_h - 1 => true,
-                Direction::S if src_pos.y == 0 => true,
-                Direction::E if src_pos.x == tile_w - 1 => true,
-                Direction::W if src_pos.x == 0 => true,
-                _ => false,
-            };
-            if flip_at_edge {
-                debug_assert!(!flip_dir, "cannot flip twice???");
-                flip_dir = true;
+            if family.get_tile_type(cur_pos).is_boundary() {
+                debug_assert!(!did_flip_dir, "cannot flip twice???");
+                did_flip_dir = true;
                 dir = dir.flip();
                 // because the signals don't go "through" the edge tiles,
                 // we have to do an additional add in order to take that into account
-                src_pos += dir;
+                cur_pos += dir;
             }
 
-            src_pos += dir;
+            cur_pos += dir;
         }
 
         AbsoluteRoutingWire {
-            tile: src_pos,
+            tile: cur_pos,
             ty: self.ty,
-            going_dir: if flip_dir {
+            going_dir: if did_flip_dir {
                 self.going_dir.flip()
             } else {
                 self.going_dir
