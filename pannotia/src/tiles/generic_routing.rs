@@ -85,17 +85,20 @@ impl FieldPositionCalculator for RMUXRef {
         // The middle column also has its bits flipped.
         // Each mux is a 5 wide by 2 high block, so we _can_ start computing the
         // y coordinate now
-        let (mut y_offs, col_of_three) = bitmux::bittable!(
-            ((#y + group_of_24 * 8) * 2, #x),
-            0       2       4,
-            6       8       10,
-            17      13      15,
-            23      19      21,
-            1       3       5,
-            7       9       11,
-            16      12      14,
-            22      18      20,
-        )[group_within_24 as usize];
+        let (y_in_24, col_of_three) = const {
+            bitmux::bittable!(
+                (#y as u8, #x as u8),
+                0       2       4,
+                6       8       10,
+                17      13      15,
+                23      19      21,
+                1       3       5,
+                7       9       11,
+                16      12      14,
+                22      18      20,
+            )
+        }[group_within_24 as usize];
+        let mut y_offs = (y_in_24 as u32 + group_of_24 * 8) * 2;
 
         // These tiles all have a 4-row gap in the middle for global routing bits
         if self.i >= 48 {
@@ -103,17 +106,20 @@ impl FieldPositionCalculator for RMUXRef {
         }
 
         // We can perform a basic lookup of the 5x2 bit block now
-        let (y, xbase) = bitmux::bittable!(
-            (y_offs + #y, #x),
-            7   6   4   2   0,
-            8   9   5   3   1,
-        )[biti];
+        let (y_smol_block, x_smol_block) = const {
+            bitmux::bittable!(
+                (#y as u8, #x as u8),
+                7   6   4   2   0,
+                8   9   5   3   1,
+            )
+        }[biti];
+        let y = y_offs + y_smol_block as u32;
 
         // Finally deal with inverting the middle column
         let mut x = match col_of_three {
-            0 => xbase,
-            1 => 9 - xbase,
-            2 => 10 + xbase,
+            0 => x_smol_block as u32,
+            1 => 9 - x_smol_block as u32,
+            2 => 10 + x_smol_block as u32,
             _ => unreachable!(),
         };
 

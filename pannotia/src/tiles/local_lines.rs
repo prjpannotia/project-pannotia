@@ -31,16 +31,19 @@ impl FieldPositionCalculator for IMUXRef {
         }
 
         // We can perform a basic lookup of the 6x2 bit block now
-        let (y, xbase) = bitmux::bittable!(
-            (y_offs + #y, #x),
-            0   2   4   6   8   9,
-            1   3   5   7   11  10,
-        )[biti];
+        let (y_smol_block, x_smol_block) = const {
+            bitmux::bittable!(
+                (#y as u8, #x as u8),
+                0   2   4   6   8   9,
+                1   3   5   7   11  10,
+            )
+        }[biti];
+        let y = y_offs + y_smol_block as u32;
 
         // Deal with inverting the second column
         let mut x = match imux_col {
-            0 => xbase,
-            1 => 11 - xbase,
+            0 => x_smol_block as u32,
+            1 => 11 - x_smol_block as u32,
             _ => unreachable!(),
         } + 15; // + 15 to skip over RMUX
 
@@ -121,16 +124,19 @@ impl FieldPositionCalculator for CtrlMuxRef {
         let y_offs = 32 + ctrlmux_row * 2;
 
         // We can perform a basic lookup of the 6x2 bit block now
-        let (y, xbase) = bitmux::bittable!(
-            (y_offs + #y, #x),
-            0   2   4   6   8   10,
-            1   3   5   7   9   11,
-        )[biti];
+        let (y_smol_block, x_smol_block) = const {
+            bitmux::bittable!(
+                (#y as u8, #x as u8),
+                0   2   4   6   8   10,
+                1   3   5   7   9   11,
+            )
+        }[biti];
+        let y = y_offs + y_smol_block as u32;
 
         // Deal with inverting the second column
         let mut x = match ctrlmux_col {
-            0 => xbase,
-            1 => 11 - xbase,
+            0 => x_smol_block as u32,
+            1 => 11 - x_smol_block as u32,
             _ => unreachable!(),
         } + 15; // + 15 to skip over RMUX
 

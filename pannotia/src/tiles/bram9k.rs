@@ -119,11 +119,17 @@ impl FieldPositionCalculator for TMUXRef {
             [0, 16, 32 + 4, 48 + 4][group_of_4 as usize] + [2, 6, 8, 12][within_group_4 as usize];
 
         // Now we can look up the main 4x2 block
-        bitmux::bittable!(
-            TileRelativeBitPos { x: 28 + #x, y: y_base + #y },
-            0   2   4   5,
-            1   3   7   6,
-        )[biti]
+        let (x, y) = const {
+            bitmux::bittable!(
+                (28u8 + #x, #y as u8),
+                0   2   4   5,
+                1   3   7   6,
+            )
+        }[biti];
+        TileRelativeBitPos {
+            x: x as u32,
+            y: (y_base + y) as u32,
+        }
     }
 }
 
@@ -199,11 +205,17 @@ impl FieldPositionCalculator for KMUXRef {
             [0, 16, 32 + 4, 48 + 4][group_of_4 as usize] + [0, 4, 10, 14][within_group_4 as usize];
 
         // Now we can look up the main 4x2 block ( + 1 extra invert bit)
-        bitmux::bittable!(
-            TileRelativeBitPos { x: 28 + #x, y: y_base + #y },
-            .   .   .   .   5   4   2   0,
-            .   8   .   .   6   7   3   1,
-        )[biti]
+        let (x, y) = const {
+            bitmux::bittable!(
+                (28u8 + #x, #y as u8),
+                .   .   .   .   5   4   2   0,
+                .   8   .   .   6   7   3   1,
+            )
+        }[biti];
+        TileRelativeBitPos {
+            x: x as u32,
+            y: (y_base + y) as u32,
+        }
     }
 }
 

@@ -191,11 +191,14 @@ impl FieldPositionCalculator for TopIPToExtMux {
         let inst_within_col = self.0 % 6;
 
         // This is the "baseline" shape
-        let (xbase, mut y) = bitmux::bittable!(
-            (#x, 54 + inst_within_col as u32 * 2 + #y),
-            0   2   4   6   .   .   .,
-            1   3   5   7   .   .   8,
-        )[biti];
+        let (xbase, ybase) = const {
+            bitmux::bittable!(
+                (#x as u8, 54u8 + #y),
+                0   2   4   6   .   .   .,
+                1   3   5   7   .   .   8,
+            )
+        }[biti];
+        let mut y = ybase as u32 + inst_within_col as u32 * 2;
 
         // Within each column of 6, there is a gap of 2 rows between the top 3 and bottom 3.
         if inst_within_col >= 3 {
@@ -205,7 +208,7 @@ impl FieldPositionCalculator for TopIPToExtMux {
         // The second column is all the way over here
         let x = if !is_second_col { xbase } else { 29 - xbase };
 
-        TileRelativeBitPos { y, x }
+        TileRelativeBitPos { x: x as u32, y }
     }
 }
 
@@ -294,18 +297,21 @@ impl FieldPositionCalculator for LeftRightIPToExtMux13 {
         assert!(self.0 < 12, "BBMUX index out of range");
 
         // This is the "baseline" shape
-        let (x, mut y) = bitmux::bittable!(
-            (9 + #x, 12 + self.0 as u32 * 2 + #y),
-            8   6   4   2   0,
-            .   7   5   3   1,
-        )[biti];
+        let (x, ybase) = const {
+            bitmux::bittable!(
+                (9u8 + #x, 12u8 + #y),
+                8   6   4   2   0,
+                .   7   5   3   1,
+            )
+        }[biti];
+        let mut y = ybase as u32 + self.0 as u32 * 2;
 
         // These two exist after the mid-tile gap
         if self.0 >= 10 {
             y += 4;
         }
 
-        TileRelativeBitPos { y, x }
+        TileRelativeBitPos { x: x as u32, y }
     }
 }
 
@@ -317,21 +323,23 @@ impl FieldPositionCalculator for LeftRightIPToExtMux17 {
         assert!(self.0 < 8, "BBMUX index out of range");
 
         // This is the "baseline" shape
-        let (x, ybase) = bitmux::bittable!(
-            (9 + #x, #y),
-            9   7   6   3   1,
-            .   .   .   .   .,
-            4   8   5   2   0,
-        )[biti];
+        let (x, ybase) = const {
+            bitmux::bittable!(
+                (9u8 + #x, #y as u8),
+                9   7   6   3   1,
+                .   .   .   .   .,
+                4   8   5   2   0,
+            )
+        }[biti];
 
         // Even and odd instances alternate being mirrored vertically
         let y = if self.0 % 2 == 0 {
-            40 + (self.0 as u32 / 2) * 6 + ybase
+            40 + (self.0 as u32 / 2) * 6 + ybase as u32
         } else {
-            45 + (self.0 as u32 / 2) * 6 - ybase
+            45 + (self.0 as u32 / 2) * 6 - ybase as u32
         };
 
-        TileRelativeBitPos { y, x }
+        TileRelativeBitPos { x: x as u32, y }
     }
 }
 
@@ -363,7 +371,7 @@ impl FieldPositionCalculator for LeftRightIPGlobal2Local {
             12 + self.0 as u32 * 2
         } else {
             // These are scattered around
-            [36, 38, 40, 45, 46, 51, 52, 57, 58, 63][self.0 as usize - 10]
+            (const { [36u8, 38, 40, 45, 46, 51, 52, 57, 58, 63] }[self.0 as usize - 10]) as u32
         };
 
         TileRelativeBitPos { y, x }
