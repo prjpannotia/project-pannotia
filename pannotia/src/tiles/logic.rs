@@ -230,7 +230,7 @@ impl FieldPositionCalculator for TileClk {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 2, "clock index out of range");
-        let x = 30 - biti as u32;
+        let x = 30 - biti as u8;
         let y = [32, 35][self.0 as usize];
         TileRelativeBitPos { y, x }
     }
@@ -242,7 +242,7 @@ impl FieldPositionCalculator for TileClkEn {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 2, "clock enable index out of range");
-        let x = 33 - biti as u32;
+        let x = 33 - biti as u8;
         let y = [32, 35][self.0 as usize];
         TileRelativeBitPos { y, x }
     }
@@ -254,7 +254,7 @@ impl FieldPositionCalculator for TileAsync {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 2, "async index out of range");
-        let x = 30 - biti as u32;
+        let x = 30 - biti as u8;
         let y = [33, 34][self.0 as usize];
         TileRelativeBitPos { y, x }
     }
@@ -265,7 +265,7 @@ struct TileSLoad {}
 impl FieldPositionCalculator for TileSLoad {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
-        let x = 33 - biti as u32;
+        let x = 33 - biti as u8;
         let y = 33;
         TileRelativeBitPos { y, x }
     }
@@ -276,7 +276,7 @@ struct TileSClr {}
 impl FieldPositionCalculator for TileSClr {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
-        let x = 33 - biti as u32;
+        let x = 33 - biti as u8;
         let y = 34;
         TileRelativeBitPos { y, x }
     }
@@ -291,7 +291,7 @@ impl FieldPositionCalculator for LogicLUT {
         assert!(self.0 < 16, "LUT index out of range");
         let (x, y) = const {
             bitmux::bittable!(
-                (27u8 + #x, #y as u8),
+                (27 + #x, #y),
                 1   3   2   0,
                 7   5   4   6,
                 9   11  10  8,
@@ -299,8 +299,8 @@ impl FieldPositionCalculator for LogicLUT {
             )
         }[biti];
         TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+            x,
+            y: y + self.0 * 4 + if self.0 >= 8 { 4 } else { 0 },
         }
     }
 }
@@ -359,7 +359,7 @@ impl FieldPositionCalculator for LogicInputC {
         assert!(self.0 < 16, "LUT index out of range");
         TileRelativeBitPos {
             x: 31,
-            y: [3, 0][biti] + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+            y: [3, 0][biti] + self.0 * 4 + if self.0 >= 8 { 4 } else { 0 },
         }
     }
 }
@@ -372,7 +372,7 @@ impl FieldPositionCalculator for LogicCarryEn {
         assert!(self.0 < 16, "LUT index out of range");
         TileRelativeBitPos {
             x: 31,
-            y: 2 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+            y: 2 + self.0 * 4 + if self.0 >= 8 { 4 } else { 0 },
         }
     }
 }
@@ -386,7 +386,7 @@ impl FieldPositionCalculator for LogicAsyncMux {
         assert!(self.0 < 16, "LUT index out of range");
         TileRelativeBitPos {
             x: 32,
-            y: self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+            y: self.0 * 4 + if self.0 >= 8 { 4 } else { 0 },
         }
     }
 }
@@ -399,7 +399,7 @@ impl FieldPositionCalculator for LogicClkMux {
         assert!(self.0 < 16, "LUT index out of range");
         TileRelativeBitPos {
             x: 32,
-            y: 1 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+            y: 1 + self.0 * 4 + if self.0 >= 8 { 4 } else { 0 },
         }
     }
 }
@@ -412,7 +412,7 @@ impl FieldPositionCalculator for LogicShiftMode {
         assert!(self.0 < 16, "LUT index out of range");
         TileRelativeBitPos {
             x: 32,
-            y: 2 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+            y: 2 + self.0 * 4 + if self.0 >= 8 { 4 } else { 0 },
         }
     }
 }
@@ -425,7 +425,7 @@ impl FieldPositionCalculator for LogicBypassMode {
         assert!(self.0 < 16, "LUT index out of range");
         TileRelativeBitPos {
             x: 32,
-            y: 3 + self.0 as u32 * 4 + if self.0 >= 8 { 4 } else { 0 },
+            y: 3 + self.0 * 4 + if self.0 >= 8 { 4 } else { 0 },
         }
     }
 }
@@ -476,7 +476,7 @@ impl FieldPositionCalculator for LogicOut {
         assert!(self.i < 3, "output index out of range");
         TileRelativeBitPos {
             x: 33,
-            y: [0, 2, 3][self.i as usize] + self.lc as u32 * 4 + if self.lc >= 8 { 4 } else { 0 },
+            y: [0, 2, 3][self.i as usize] + self.lc * 4 + if self.lc >= 8 { 4 } else { 0 },
         }
     }
 }

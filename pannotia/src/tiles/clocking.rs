@@ -53,7 +53,7 @@ impl FieldPositionCalculator for PLLWireTo {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 11, "BBMUX index out of range");
 
-        let mut ybase = 20 + 2 * self.0 as u32;
+        let mut ybase = 20 + 2 * self.0 as u8;
         if self.0 >= 6 {
             // there is a gap in the middle
             ybase += 4;
@@ -61,15 +61,12 @@ impl FieldPositionCalculator for PLLWireTo {
 
         let (x, y) = const {
             bitmux::bittable!(
-                (9u8+ #x, #y as u8),
+                (9 + #x, #y),
                 8   6   4   2   0,
                 .   7   5   3   1,
             )
         }[biti];
-        TileRelativeBitPos {
-            x: x as u32,
-            y: ybase + y as u32,
-        }
+        TileRelativeBitPos { x, y: ybase + y }
     }
 }
 
@@ -80,13 +77,13 @@ impl FieldPositionCalculator for PLLGlobal2Local {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 11, "GlobalToLocalMux index out of range");
 
-        let mut y = 20 + 2 * self.0 as u32;
+        let mut y = 20 + 2 * self.0 as u8;
         if self.0 >= 6 {
             // there is a gap in the middle
             y += 4;
         }
 
-        let x = 19 - biti as u32;
+        let x = 19 - biti as u8;
 
         TileRelativeBitPos { y, x }
     }
@@ -335,7 +332,7 @@ impl FieldPositionCalculator for GCLKSWFabricToClock {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 6, "IOMUX index out of range");
 
-        let mut ybase = 14 + 6 * self.0 as u32;
+        let mut ybase = 14 + 6 * self.0 as u8;
         if self.0 >= 3 {
             // there is a gap in the middle
             ybase += 4;
@@ -343,17 +340,14 @@ impl FieldPositionCalculator for GCLKSWFabricToClock {
 
         let (x, y) = const {
             bitmux::bittable!(
-                (6u8 + #x, #y as u8),
+                (6 + #x, #y),
                 8	7	6	3	1,
                 .	.	.	.	.,
                 9	4	5	2	0,
 
             )
         }[biti];
-        TileRelativeBitPos {
-            x: x as u32,
-            y: ybase + y as u32,
-        }
+        TileRelativeBitPos { x, y: ybase + y }
     }
 }
 
@@ -364,7 +358,7 @@ impl FieldPositionCalculator for GCLKSWEnable {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 6, "IOMUX index out of range");
 
-        let mut ybase = 17 + 6 * self.0 as u32;
+        let mut ybase = 17 + 6 * self.0 as u8;
         if self.0 >= 3 {
             // there is a gap in the middle
             ybase += 4;
@@ -372,17 +366,14 @@ impl FieldPositionCalculator for GCLKSWEnable {
 
         let (x, y) = const {
             bitmux::bittable!(
-                (6u8 + #x, #y as u8),
+                (6 + #x, #y),
                 9	4	5	2	0,
                 .	.	.	.	.,
                 8	7	6	3	1,
 
             )
         }[biti];
-        TileRelativeBitPos {
-            x: x as u32,
-            y: ybase + y as u32,
-        }
+        TileRelativeBitPos { x, y: ybase + y }
     }
 }
 
@@ -393,11 +384,11 @@ impl FieldPositionCalculator for GCLKSWGlobal2Local {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 12, "GlobalToLocalMux index out of range");
 
-        let y: u8 = const { [20, 23, 24, 27, 28, 31, 36, 39, 40, 43, 44, 47] }[self.0 as usize];
+        let y = const { [20, 23, 24, 27, 28, 31, 36, 39, 40, 43, 44, 47] }[self.0 as usize];
 
-        let x = 12 + biti as u32;
+        let x = 12 + biti as u8;
 
-        TileRelativeBitPos { x, y: y as u32 }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -408,9 +399,9 @@ impl FieldPositionCalculator for GCLKSWClock2Fabric {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 12, "output mux index out of range");
 
-        let y: u8 = const { [20, 22, 44, 46] }[self.0 as usize];
+        let y = const { [20, 22, 44, 46] }[self.0 as usize];
 
-        TileRelativeBitPos { x: 0, y: y as u32 }
+        TileRelativeBitPos { x: 0, y }
     }
 }
 
@@ -421,9 +412,9 @@ impl FieldPositionCalculator for GCLKSWClockEnReg {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 6, "clock index out of range");
 
-        let y: u8 = const { [3, 9, 15, 21, 27, 43] }[self.0 as usize];
+        let y = const { [3, 9, 15, 21, 27, 43] }[self.0 as usize];
 
-        TileRelativeBitPos { x: 0, y: y as u32 }
+        TileRelativeBitPos { x: 0, y }
     }
 }
 
@@ -465,7 +456,7 @@ impl FieldPositionCalculator for GCLKSWMux {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 5, "clock index out of range");
 
-        let y = 7 + 6 * self.0 as u32 - biti as u32;
+        let y = 7 + 6 * self.0 as u8 - biti as u8;
 
         TileRelativeBitPos { y, x: 0 }
     }

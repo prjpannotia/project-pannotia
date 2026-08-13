@@ -85,7 +85,7 @@ impl FieldPositionCalculator for InitVal {
     #[inline]
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         // each row contains 144 bits, and there are 64 rows
-        let mut y = biti as u32 / 144;
+        let mut y = (biti / 144) as u8;
         // the bottom half has to jump over the mid-tile gap
         if y >= 32 {
             y += 4;
@@ -95,7 +95,7 @@ impl FieldPositionCalculator for InitVal {
         // 8 instances of "every 18th bit" comes first, starting from bit 0
         // (i.e. 0, 18, 36, ...)
         // this repeats 18 times to fill out all the bits
-        let bitpos_col_before_rearrange = biti as u32 % 144;
+        let bitpos_col_before_rearrange = (biti % 144) as u8;
         let group_of_8 = bitpos_col_before_rearrange % 18;
         let idx_within_8 = bitpos_col_before_rearrange / 18;
         let x = 36 + group_of_8 * 8 + idx_within_8;
@@ -121,15 +121,12 @@ impl FieldPositionCalculator for TMUXRef {
         // Now we can look up the main 4x2 block
         let (x, y) = const {
             bitmux::bittable!(
-                (28u8 + #x, #y as u8),
+                (28 + #x, #y),
                 0   2   4   5,
                 1   3   7   6,
             )
         }[biti];
-        TileRelativeBitPos {
-            x: x as u32,
-            y: (y_base + y) as u32,
-        }
+        TileRelativeBitPos { x, y: y_base + y }
     }
 }
 
@@ -207,15 +204,12 @@ impl FieldPositionCalculator for KMUXRef {
         // Now we can look up the main 4x2 block ( + 1 extra invert bit)
         let (x, y) = const {
             bitmux::bittable!(
-                (28u8 + #x, #y as u8),
+                (28 + #x, #y),
                 .   .   .   .   5   4   2   0,
                 .   8   .   .   6   7   3   1,
             )
         }[biti];
-        TileRelativeBitPos {
-            x: x as u32,
-            y: (y_base + y) as u32,
-        }
+        TileRelativeBitPos { x, y: y_base + y }
     }
 }
 

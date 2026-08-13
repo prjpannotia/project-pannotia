@@ -12,10 +12,13 @@ use crate::container::DebugTracer;
 /// The origin for this coordinate system is at the bottom-left,
 /// with x increasing when moving right and y increasing when moving up
 /// (a "mathematics" convention).
+///
+/// This has a specific repr to be convenient for the downstream PnR crate
+#[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct TilePos {
-    pub y: u32,
-    pub x: u32,
+    pub y: u8,
+    pub x: u8,
 }
 impl Display for TilePos {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -46,8 +49,8 @@ impl Display for GlobalBitPos {
 /// (a "computer graphics" convention).
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct TileRelativeBitPos {
-    pub y: u32,
-    pub x: u32,
+    pub y: u8,
+    pub x: u8,
 }
 impl Display for TileRelativeBitPos {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -64,28 +67,30 @@ impl From<(Family, TilePos, TileRelativeBitPos)> for GlobalBitPos {
         match family {
             Family::AGRV2K => {
                 let x_out = match tile_pos.x {
-                    0 => tile_bit_pos.x,                                     // left-side IO
-                    1..=12 => tile_bit_pos.x + 20 + ((tile_pos.x - 1) * 36), // tiles left of BRAM
+                    0 => tile_bit_pos.x as u32, // left-side IO
+                    1..=12 => tile_bit_pos.x as u32 + 20 + ((tile_pos.x as u32 - 1) * 36), // tiles left of BRAM
                     13 => {
                         // BRAM column
                         if (5..=12).contains(&tile_pos.y) {
                             // a hard-IP tile, which is *right* aligned
-                            tile_bit_pos.x + 20 + 12 * 36 + 180 - 20
+                            tile_bit_pos.x as u32 + 20 + 12 * 36 + 180 - 20
                         } else {
                             // normal BRAM
-                            tile_bit_pos.x + 20 + 12 * 36
+                            tile_bit_pos.x as u32 + 20 + 12 * 36
                         }
                     }
-                    14..=20 => tile_bit_pos.x + 20 + 12 * 36 + 180 + ((tile_pos.x - 14) * 36), // tiles right of BRAM
-                    21 => tile_bit_pos.x + 20 + 12 * 36 + 180 + 7 * 36, // routing-only column
-                    22 => tile_bit_pos.x + 20 + 12 * 36 + 180 + 7 * 36 + 16, // right-side IO
+                    14..=20 => {
+                        tile_bit_pos.x as u32 + 20 + 12 * 36 + 180 + ((tile_pos.x as u32 - 14) * 36)
+                    } // tiles right of BRAM
+                    21 => tile_bit_pos.x as u32 + 20 + 12 * 36 + 180 + 7 * 36, // routing-only column
+                    22 => tile_bit_pos.x as u32 + 20 + 12 * 36 + 180 + 7 * 36 + 16, // right-side IO
                     _ => unreachable!(),
                 };
                 // NOTE: the tile position's y-axis and the bit coordinate y-axis go in opposite directions
                 let y_out = match tile_pos.y {
-                    13 => tile_bit_pos.y,                                     // top-side IO
-                    1..=12 => tile_bit_pos.y + 22 + ((12 - tile_pos.y) * 68), // central portion
-                    0 => tile_bit_pos.y + 22 + 12 * 68,                       // bottom-side IO
+                    13 => tile_bit_pos.y as u32, // top-side IO
+                    1..=12 => tile_bit_pos.y as u32 + 22 + ((12 - tile_pos.y as u32) * 68), // central portion
+                    0 => tile_bit_pos.y as u32 + 22 + 12 * 68, // bottom-side IO
                     _ => unreachable!(),
                 };
 

@@ -21,7 +21,7 @@ impl FieldPositionCalculator for IMUXRef {
         // There are 64 IMUXes per tile, which we _logically_ group as 16x 4 in logic tiles,
         // but which are _physically_ grouped as 2 columns of 32 (with a gap in the middle).
         // The second column also has its bits mirrored relative to the first column.
-        let imux_row = (self.i / 2) as u32;
+        let imux_row = self.i / 2;
         let imux_col = self.i % 2;
 
         let mut y_offs = imux_row * 2;
@@ -33,17 +33,17 @@ impl FieldPositionCalculator for IMUXRef {
         // We can perform a basic lookup of the 6x2 bit block now
         let (y_smol_block, x_smol_block) = const {
             bitmux::bittable!(
-                (#y as u8, #x as u8),
+                (#y, #x),
                 0   2   4   6   8   9,
                 1   3   5   7   11  10,
             )
         }[biti];
-        let y = y_offs + y_smol_block as u32;
+        let y = y_offs + y_smol_block;
 
         // Deal with inverting the second column
         let mut x = match imux_col {
-            0 => x_smol_block as u32,
-            1 => 11 - x_smol_block as u32,
+            0 => x_smol_block,
+            1 => 11 - x_smol_block,
             _ => unreachable!(),
         } + 15; // + 15 to skip over RMUX
 
@@ -118,7 +118,7 @@ impl FieldPositionCalculator for CtrlMuxRef {
         assert!(self.i < 4, "CtrlMux index out of range");
         // There are 4 CtrlMux per tile, which fit into the "gap" between the
         // top half and the bottom half. They are arranged into a 2x2 block.
-        let ctrlmux_row = (self.i / 2) as u32;
+        let ctrlmux_row = self.i / 2;
         let ctrlmux_col = self.i % 2;
 
         let y_offs = 32 + ctrlmux_row * 2;
@@ -126,17 +126,17 @@ impl FieldPositionCalculator for CtrlMuxRef {
         // We can perform a basic lookup of the 6x2 bit block now
         let (y_smol_block, x_smol_block) = const {
             bitmux::bittable!(
-                (#y as u8, #x as u8),
+                (#y, #x),
                 0   2   4   6   8   10,
                 1   3   5   7   9   11,
             )
         }[biti];
-        let y = y_offs + y_smol_block as u32;
+        let y = y_offs + y_smol_block;
 
         // Deal with inverting the second column
         let mut x = match ctrlmux_col {
-            0 => x_smol_block as u32,
-            1 => 11 - x_smol_block as u32,
+            0 => x_smol_block,
+            1 => 11 - x_smol_block,
             _ => unreachable!(),
         } + 15; // + 15 to skip over RMUX
 

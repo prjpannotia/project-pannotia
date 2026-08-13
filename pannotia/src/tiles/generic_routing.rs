@@ -78,7 +78,7 @@ impl FieldPositionCalculator for RMUXRef {
         assert!(self.i < 96, "RMUX index out of range");
         // There are 96 RMUXes per tile, which we _logically_ group as 16x 6,
         // but which are _physically_ grouped more like 4x 24.
-        let group_of_24 = (self.i / 24) as u32;
+        let group_of_24 = self.i / 24;
         let group_within_24 = self.i % 24;
 
         // Each sub-group of 24 is 3 columns of 8 in this strange order.
@@ -87,7 +87,7 @@ impl FieldPositionCalculator for RMUXRef {
         // y coordinate now
         let (y_in_24, col_of_three) = const {
             bitmux::bittable!(
-                (#y as u8, #x as u8),
+                (#y, #x),
                 0       2       4,
                 6       8       10,
                 17      13      15,
@@ -98,7 +98,7 @@ impl FieldPositionCalculator for RMUXRef {
                 22      18      20,
             )
         }[group_within_24 as usize];
-        let mut y_offs = (y_in_24 as u32 + group_of_24 * 8) * 2;
+        let mut y_offs = (y_in_24 + group_of_24 * 8) * 2;
 
         // These tiles all have a 4-row gap in the middle for global routing bits
         if self.i >= 48 {
@@ -108,18 +108,18 @@ impl FieldPositionCalculator for RMUXRef {
         // We can perform a basic lookup of the 5x2 bit block now
         let (y_smol_block, x_smol_block) = const {
             bitmux::bittable!(
-                (#y as u8, #x as u8),
+                (#y, #x),
                 7   6   4   2   0,
                 8   9   5   3   1,
             )
         }[biti];
-        let y = y_offs + y_smol_block as u32;
+        let y = y_offs + y_smol_block;
 
         // Finally deal with inverting the middle column
         let mut x = match col_of_three {
-            0 => x_smol_block as u32,
-            1 => 9 - x_smol_block as u32,
-            2 => 10 + x_smol_block as u32,
+            0 => x_smol_block,
+            1 => 9 - x_smol_block,
+            2 => 10 + x_smol_block,
             _ => unreachable!(),
         };
 

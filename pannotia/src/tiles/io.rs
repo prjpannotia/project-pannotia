@@ -217,7 +217,7 @@ impl FieldPositionCalculator for TopBottomIOLocalLine {
 
         // there are 4 columns of 8 muxes
         let col_of_8 = self.i / 8;
-        let idx_within_8 = (self.i % 8) as u32;
+        let idx_within_8 = self.i % 8;
 
         // within each column, the entries count down for the first 4,
         // then the entries count *up* for the second 4,
@@ -232,20 +232,20 @@ impl FieldPositionCalculator for TopBottomIOLocalLine {
         // now we can look up the basic shape
         let (xbase, y) = const {
             bitmux::bittable!(
-                (#x as u8, #y as u8),
+                (#x, #y),
                 3   2   0,
                 5   4   1,
             )
         }[biti];
-        let mut y = ybase + y as u32;
+        let mut y = ybase + y;
 
         // the odd columns are mirrored horizontally,
         // and there's a 1-column gap between cols 1 and 2
         let x = match col_of_8 {
-            0 => xbase as u32,
-            1 => 5 - xbase as u32,
-            2 => 7 + xbase as u32,
-            3 => 12 - xbase as u32,
+            0 => xbase,
+            1 => 5 - xbase,
+            2 => 7 + xbase,
+            3 => 12 - xbase,
             _ => unreachable!(),
         };
 
@@ -268,11 +268,11 @@ impl FieldPositionCalculator for LeftRightIOLocalLine {
         // there are 2 columns of 24, where the bits flip horizontally,
         // but they are in a slightly rearranged order
         let (is_rhs_column, row_within_column) = match self.0 {
-            0..=11 => (true, self.0 as u32),
-            12..=23 => (false, self.0 as u32 - 6),
-            24..=35 => (true, self.0 as u32 - 12),
-            36..=41 => (false, self.0 as u32 - 36),
-            42..=47 => (false, self.0 as u32 - 24),
+            0..=11 => (true, self.0),
+            12..=23 => (false, self.0 - 6),
+            24..=35 => (true, self.0 - 12),
+            36..=41 => (false, self.0 - 36),
+            42..=47 => (false, self.0 - 24),
             _ => unreachable!(),
         };
 
@@ -282,18 +282,18 @@ impl FieldPositionCalculator for LeftRightIOLocalLine {
         // now look up the basic shape
         let (xbase, y) = const {
             bitmux::bittable!(
-                (#x as u8, #y as u8),
+                (#x, #y),
                 0   2   4   6,
                 1   3   5   .,
             )
         }[biti];
-        let y = ybase + y as u32;
+        let y = ybase + y;
 
         // finally deal with the columns
         let x = if is_rhs_column {
-            16 + xbase as u32
+            16 + xbase
         } else {
-            15 - xbase as u32
+            15 - xbase
         };
 
         TileRelativeBitPos { y, x }
@@ -313,7 +313,7 @@ impl FieldPositionCalculator for TopBottomIOGlobal2Local {
         // these muxes are permuted in the following order
         let (xbase, mut y) = const {
             [
-                (15u8, 10u8),
+                (15, 10),
                 (15, 13),
                 (15, 11),
                 (15, 12),
@@ -325,14 +325,14 @@ impl FieldPositionCalculator for TopBottomIOGlobal2Local {
         }[self.i as usize];
 
         // bits are otherwise just linear
-        let x = xbase as u32 + biti as u32;
+        let x = xbase + biti as u8;
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos { x, y: y as u32 }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -352,12 +352,12 @@ impl FieldPositionCalculator for LeftRightIOGlobal2Local {
 
         // straight line blocks, "fanning out" from the center
         let x = if is_rhs_column {
-            12 + biti as u32
+            12 + biti as u8
         } else {
-            11 - biti as u32
+            11 - biti as u8
         };
 
-        TileRelativeBitPos { x, y: y as u32 }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -422,7 +422,7 @@ impl FieldPositionCalculator for TopBottomIOLocal2Clk {
         // and there's a 1-column gap between cols 1 and 2
         let (xbase, ybase, need_xflip) = const {
             [
-                (0u8, 10u8, false),
+                (0, 10, false),
                 (0, 12, false),
                 (7, 10, false),
                 (7, 12, false),
@@ -436,17 +436,17 @@ impl FieldPositionCalculator for TopBottomIOLocal2Clk {
         // now we can look up the basic shape
         let (xoffs, y) = const {
             bitmux::bittable!(
-                (#x as u8, #y as u8),
+                (#x, #y),
                 4   2   0,
                 5   3   1,
             )
         }[biti];
-        let mut y = (ybase + y) as u32;
+        let mut y = ybase + y;
 
         let x = if !need_xflip {
-            (xbase + xoffs) as u32
+            xbase + xoffs
         } else {
-            (xbase - xoffs) as u32
+            xbase - xoffs
         };
 
         // a bottom IO is entirely mirrored
@@ -467,26 +467,26 @@ impl FieldPositionCalculator for LeftRightIOLocal2Clk {
 
         // there are *3* (yes, an odd number) chunks of these muxes
         let (xbase, ybase, need_xflip) = match self.0 {
-            0..=3 => (10, 16 + 2 * (self.0 as u32), true),
-            4..=7 => (5, 16 + 2 * (self.0 as u32 - 4), false),
-            8..=11 => (5, 44 + 2 * (self.0 as u32 - 8), false),
+            0..=3 => (10, 16 + 2 * (self.0), true),
+            4..=7 => (5, 16 + 2 * (self.0 - 4), false),
+            8..=11 => (5, 44 + 2 * (self.0 - 8), false),
             _ => unreachable!(),
         };
 
         // now we can look up the basic shape
         let (xoffs, y) = const {
             bitmux::bittable!(
-                (#x as u8, #y as u8),
+                (#x, #y),
                 4   2   0,
                 5   3   1,
             )
         }[biti];
-        let y = ybase + y as u32;
+        let y = ybase + y;
 
         let x = if !need_xflip {
-            xbase + xoffs as u32
+            xbase + xoffs
         } else {
-            xbase - xoffs as u32
+            xbase - xoffs
         };
 
         TileRelativeBitPos { y, x }
@@ -567,7 +567,7 @@ impl FieldPositionCalculator for TopBottomIOLocal2IO {
 
         // there are 3 columns of 8 muxes
         let col_of_8 = self.i / 8;
-        let idx_within_8 = (self.i % 8) as u32;
+        let idx_within_8 = self.i % 8;
 
         // we are using our own custom numbering,
         // so each column just counts down.
@@ -577,18 +577,18 @@ impl FieldPositionCalculator for TopBottomIOLocal2IO {
         // now we can look up the basic shape
         let (xbase, y) = const {
             bitmux::bittable!(
-                (#x as u8, #y as u8),
+                (#x, #y),
                 .   4   2   0,
                 6   5   3   1,
             )
         }[biti];
-        let mut y = ybase + y as u32;
+        let mut y = ybase + y;
 
         // the middle column is mirrored horizontally
         let x = match col_of_8 {
-            0 => 15 + xbase as u32,
-            1 => 22 - xbase as u32,
-            2 => 23 + xbase as u32,
+            0 => 15 + xbase,
+            1 => 22 - xbase,
+            2 => 23 + xbase,
             _ => unreachable!(),
         };
 
@@ -613,28 +613,28 @@ impl FieldPositionCalculator for LeftRightIOLocal2IO {
         // except the rhs column has a bonus 4 more
         // this is all simplified because of our custom numbering
         let (is_rhs_column, ybase) = match self.0 {
-            0..=7 => (false, 2 * (self.0 as u32)),
-            8..=15 => (false, 52 + 2 * (self.0 as u32 - 8)),
-            16..=23 => (true, 2 * (self.0 as u32 - 16)),
-            24..=35 => (true, 44 + 2 * (self.0 as u32 - 24)),
+            0..=7 => (false, 2 * (self.0)),
+            8..=15 => (false, 52 + 2 * (self.0 - 8)),
+            16..=23 => (true, 2 * (self.0 - 16)),
+            24..=35 => (true, 44 + 2 * (self.0 - 24)),
             _ => unreachable!(),
         };
 
         // now we can look up the basic shape
         let (xbase, y) = const {
             bitmux::bittable!(
-                (#x as u8, #y as u8),
+                (#x, #y),
                 .   4   2   0,
                 6   5   3   1,
             )
         }[biti];
-        let y = ybase + y as u32;
+        let y = ybase + y;
 
         // the right column is mirrored horizontally
         let x = if !is_rhs_column {
-            4 + xbase as u32
+            4 + xbase
         } else {
-            11 - xbase as u32
+            11 - xbase
         };
 
         TileRelativeBitPos { y, x }
@@ -734,7 +734,7 @@ impl FieldPositionCalculator for TopBottomIOClockMux {
         // We just have this giant bag of bits
         let (x, mut y) = const {
             bitmux::bittable!(
-                (27u8 + #x, #y as u8),
+                (27 + #x, #y),
                 .   .   .   .   .   .   .,
                 .   .   .   .   .   .   .,
                 .   .   .   .   .   .   .,
@@ -765,10 +765,7 @@ impl FieldPositionCalculator for TopBottomIOClockMux {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -782,7 +779,7 @@ impl FieldPositionCalculator for LeftRightIOClockMux {
         // We just have this giant bag of bits
         let (x, y) = const {
             bitmux::bittable!(
-                (2u8 + #x, 24u8 + #y),
+                (2 + #x, 24 + #y),
                 0   1   2   5,
                 3   4   .   .,
                 6   7   .   .,
@@ -805,10 +802,7 @@ impl FieldPositionCalculator for LeftRightIOClockMux {
                 33  34  35  32,
             )
         }[self.0 as usize * 3 + biti];
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -824,7 +818,7 @@ impl FieldPositionCalculator for TopBottomIOOutMux {
 
         let (x, mut y) = const {
             [
-                (27u8, 0u8),
+                (27, 0),
                 (27, 1),
                 (33, 0),
                 (32, 0),
@@ -840,10 +834,7 @@ impl FieldPositionCalculator for TopBottomIOOutMux {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -854,9 +845,9 @@ impl FieldPositionCalculator for LeftRightIOOutMux {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.0 < 12, "out mux index out of range");
 
-        let y = const { [0u8, 2, 10, 12, 18, 20, 44, 46, 48, 50, 58, 60] }[self.0 as usize];
+        let y = const { [0, 2, 10, 12, 18, 20, 44, 46, 48, 50, 58, 60] }[self.0 as usize];
 
-        TileRelativeBitPos { x: 3, y: y as u32 }
+        TileRelativeBitPos { x: 3, y }
     }
 }
 
@@ -870,16 +861,16 @@ impl FieldPositionCalculator for TopBottomIOInDaDelay {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (xbase, mut y) = const { [(4u8, 0u8), (4, 1), (21, 0), (21, 1)] }[self.i as usize];
+        let (xbase, mut y) = const { [(4, 0), (4, 1), (21, 0), (21, 1)] }[self.i as usize];
 
-        let x = (xbase as usize - biti) as u32;
+        let x = xbase - biti as u8;
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos { x, y: y as u32 }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -891,7 +882,7 @@ impl FieldPositionCalculator for LeftRightIOInDaDelay {
         assert!(self.0 < 6, "io instance index out of range");
 
         bitmux::bittable!(
-            TileRelativeBitPos { x: #x, y: self.0 as u32 * 10 + #y },
+            TileRelativeBitPos { x: #x, y: self.0 * 10 + #y },
             .   .,
             .   .,
             .   .,
@@ -916,12 +907,12 @@ impl FieldPositionCalculator for TopBottomIOInRegDelay {
     fn get_bit_pos(&self, biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (xbase, mut y) = const { [(6u8, 0u8), (6, 1), (23, 0), (23, 1)] }[self.i as usize];
+        let (xbase, mut y) = const { [(6, 0), (6, 1), (23, 0), (23, 1)] }[self.i as usize];
 
         let x = if self.i < 2 {
-            (xbase as usize + biti) as u32
+            xbase + biti as u8
         } else {
-            xbase as u32 + [1, 0, 2][biti]
+            xbase + [1, 0, 2][biti]
         };
 
         // a bottom IO is entirely mirrored
@@ -929,7 +920,7 @@ impl FieldPositionCalculator for TopBottomIOInRegDelay {
             y = 21 - y;
         }
 
-        TileRelativeBitPos { x, y: y as u32 }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -941,7 +932,7 @@ impl FieldPositionCalculator for LeftRightIOInRegDelay {
         assert!(self.0 < 6, "io instance index out of range");
 
         bitmux::bittable!(
-            TileRelativeBitPos { x: #x, y: self.0 as u32 * 10 + #y },
+            TileRelativeBitPos { x: #x, y: self.0 * 10 + #y },
             .   .,
             .   .,
             .   .,
@@ -966,17 +957,14 @@ impl FieldPositionCalculator for TopBottomOutDelay {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(15u8, 0u8), (15, 1), (26, 0), (26, 1)] }[self.i as usize];
+        let (x, mut y) = const { [(15, 0), (15, 1), (26, 0), (26, 1)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -989,7 +977,7 @@ impl FieldPositionCalculator for LeftRightOutDelay {
 
         TileRelativeBitPos {
             x: 0,
-            y: self.0 as u32 * 10 + 9,
+            y: self.0 * 10 + 9,
         }
     }
 }
@@ -1004,17 +992,14 @@ impl FieldPositionCalculator for TopBottomOutReg {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(28u8, 7u8), (32, 7), (28, 16), (32, 16)] }[self.i as usize];
+        let (x, mut y) = const { [(28, 7), (32, 7), (28, 16), (32, 16)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1027,7 +1012,7 @@ impl FieldPositionCalculator for LeftRightOutReg {
 
         TileRelativeBitPos {
             x: 0,
-            y: self.0 as u32 * 10 + 5,
+            y: self.0 * 10 + 5,
         }
     }
 }
@@ -1042,17 +1027,14 @@ impl FieldPositionCalculator for TopBottomOEReg {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(28u8, 5u8), (32, 5), (28, 18), (32, 18)] }[self.i as usize];
+        let (x, mut y) = const { [(28, 5), (32, 5), (28, 18), (32, 18)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1065,7 +1047,7 @@ impl FieldPositionCalculator for LeftRightOEReg {
 
         TileRelativeBitPos {
             x: 0,
-            y: self.0 as u32 * 10 + 3,
+            y: self.0 * 10 + 3,
         }
     }
 }
@@ -1080,17 +1062,14 @@ impl FieldPositionCalculator for TopBottomInPU {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(27u8, 3u8), (33, 3), (27, 20), (33, 20)] }[self.i as usize];
+        let (x, mut y) = const { [(27, 3), (33, 3), (27, 20), (33, 20)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1104,17 +1083,14 @@ impl FieldPositionCalculator for TopBottomOutPU {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(27u8, 5u8), (33, 5), (27, 18), (33, 18)] }[self.i as usize];
+        let (x, mut y) = const { [(27, 5), (33, 5), (27, 18), (33, 18)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1128,17 +1104,14 @@ impl FieldPositionCalculator for TopBottomOEPU {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(27u8, 7u8), (33, 7), (27, 16), (33, 16)] }[self.i as usize];
+        let (x, mut y) = const { [(27, 7), (33, 7), (27, 16), (33, 16)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1151,7 +1124,7 @@ impl FieldPositionCalculator for LeftRightInPU {
 
         TileRelativeBitPos {
             x: 1,
-            y: self.0 as u32 * 10 + 1,
+            y: self.0 * 10 + 1,
         }
     }
 }
@@ -1165,7 +1138,7 @@ impl FieldPositionCalculator for LeftRightOutPU {
 
         TileRelativeBitPos {
             x: 1,
-            y: self.0 as u32 * 10 + 3,
+            y: self.0 * 10 + 3,
         }
     }
 }
@@ -1179,7 +1152,7 @@ impl FieldPositionCalculator for LeftRightOEPU {
 
         TileRelativeBitPos {
             x: 1,
-            y: self.0 as u32 * 10 + 5,
+            y: self.0 * 10 + 5,
         }
     }
 }
@@ -1243,17 +1216,14 @@ impl FieldPositionCalculator for TopBottomInSMode {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(27u8, 2u8), (33, 2), (27, 21), (33, 21)] }[self.i as usize];
+        let (x, mut y) = const { [(27, 2), (33, 2), (27, 21), (33, 21)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1267,17 +1237,14 @@ impl FieldPositionCalculator for TopBottomInAMode {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(28u8, 2u8), (32, 2), (28, 21), (32, 21)] }[self.i as usize];
+        let (x, mut y) = const { [(28, 2), (32, 2), (28, 21), (32, 21)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1291,17 +1258,14 @@ impl FieldPositionCalculator for TopBottomOutSMode {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(27u8, 4u8), (33, 4), (27, 19), (33, 19)] }[self.i as usize];
+        let (x, mut y) = const { [(27, 4), (33, 4), (27, 19), (33, 19)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1315,17 +1279,14 @@ impl FieldPositionCalculator for TopBottomOutAMode {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(28u8, 4u8), (32, 4), (28, 19), (32, 19)] }[self.i as usize];
+        let (x, mut y) = const { [(28, 4), (32, 4), (28, 19), (32, 19)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1339,17 +1300,14 @@ impl FieldPositionCalculator for TopBottomOESMode {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(27u8, 6u8), (33, 6), (27, 17), (33, 17)] }[self.i as usize];
+        let (x, mut y) = const { [(27, 6), (33, 6), (27, 17), (33, 17)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1363,17 +1321,14 @@ impl FieldPositionCalculator for TopBottomOEAMode {
     fn get_bit_pos(&self, _biti: usize) -> TileRelativeBitPos {
         assert!(self.i < 4, "io instance index out of range");
 
-        let (x, mut y) = const { [(28u8, 6u8), (32, 6), (28, 17), (32, 17)] }[self.i as usize];
+        let (x, mut y) = const { [(28, 6), (32, 6), (28, 17), (32, 17)] }[self.i as usize];
 
         // a bottom IO is entirely mirrored
         if self.is_bottom {
             y = 21 - y;
         }
 
-        TileRelativeBitPos {
-            x: x as u32,
-            y: y as u32,
-        }
+        TileRelativeBitPos { x, y }
     }
 }
 
@@ -1386,7 +1341,7 @@ impl FieldPositionCalculator for LeftRightInSMode {
 
         TileRelativeBitPos {
             x: 1,
-            y: self.0 as u32 * 10 + 0,
+            y: self.0 * 10 + 0,
         }
     }
 }
@@ -1400,7 +1355,7 @@ impl FieldPositionCalculator for LeftRightInAMode {
 
         TileRelativeBitPos {
             x: 0,
-            y: self.0 as u32 * 10 + 0,
+            y: self.0 * 10 + 0,
         }
     }
 }
@@ -1414,7 +1369,7 @@ impl FieldPositionCalculator for LeftRightOutSMode {
 
         TileRelativeBitPos {
             x: 1,
-            y: self.0 as u32 * 10 + 2,
+            y: self.0 * 10 + 2,
         }
     }
 }
@@ -1428,7 +1383,7 @@ impl FieldPositionCalculator for LeftRightOutAMode {
 
         TileRelativeBitPos {
             x: 0,
-            y: self.0 as u32 * 10 + 2,
+            y: self.0 * 10 + 2,
         }
     }
 }
@@ -1442,7 +1397,7 @@ impl FieldPositionCalculator for LeftRightOESMode {
 
         TileRelativeBitPos {
             x: 1,
-            y: self.0 as u32 * 10 + 4,
+            y: self.0 * 10 + 4,
         }
     }
 }
@@ -1456,7 +1411,7 @@ impl FieldPositionCalculator for LeftRightOEAMode {
 
         TileRelativeBitPos {
             x: 0,
-            y: self.0 as u32 * 10 + 4,
+            y: self.0 * 10 + 4,
         }
     }
 }

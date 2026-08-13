@@ -53,7 +53,7 @@ impl Family {
     }
 
     /// Returns the size of the logic array in tiles, `(W, H)`
-    pub const fn tile_dims(self) -> (u32, u32) {
+    pub const fn tile_dims(self) -> (u8, u8) {
         match self {
             Family::AGRV2K => (23, 14),
         }

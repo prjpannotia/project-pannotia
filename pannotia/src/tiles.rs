@@ -311,7 +311,7 @@ impl FieldPositionCalculator for GlobalToLocalMuxRef {
             };
 
             let mut x = 2
-                + biti as u32
+                + biti as u8
                 + match self.i {
                     0 | 1 => 0,
                     2 | 3 => 6,
@@ -329,8 +329,8 @@ impl FieldPositionCalculator for GlobalToLocalMuxRef {
             // They sit in the leftmost column (the one which causes everything else to need to scoot over).
 
             let y = match self.i {
-                4 => biti as u32 + 26,
-                5 => 41 - biti as u32,
+                4 => biti as u8 + 26,
+                5 => 41 - biti as u8,
                 _ => unreachable!(),
             };
 

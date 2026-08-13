@@ -63,8 +63,8 @@ fn try_parse_line(
             if coord.len() != 2 {
                 return Err(());
             }
-            let x = u32::from_str_radix(coord[0].trim_ascii(), 10).map_err(|_| {})?;
-            let y = u32::from_str_radix(coord[1].trim_ascii(), 10).map_err(|_| {})?;
+            let x = u8::from_str_radix(coord[0].trim_ascii(), 10).map_err(|_| {})?;
+            let y = u8::from_str_radix(coord[1].trim_ascii(), 10).map_err(|_| {})?;
 
             if let Some(tile) = b.tile_mut(TilePos { y, x }) {
                 let (field, field_idx) = try_parse_field(field.trim_ascii())?;
@@ -123,8 +123,8 @@ fn try_parse_line(
             if coord.len() != 3 {
                 return Err(());
             }
-            let x = u32::from_str_radix(coord[0].trim_ascii(), 10).map_err(|_| {})?;
-            let y = u32::from_str_radix(coord[1].trim_ascii(), 10).map_err(|_| {})?;
+            let x = u8::from_str_radix(coord[0].trim_ascii(), 10).map_err(|_| {})?;
+            let y = u8::from_str_radix(coord[1].trim_ascii(), 10).map_err(|_| {})?;
             let n = u8::from_str_radix(coord[2].trim_ascii(), 10).map_err(|_| {})?;
 
             let pad_i = *tile_to_padring_map.get(&(TilePos { x, y }, n)).ok_or(())?;
