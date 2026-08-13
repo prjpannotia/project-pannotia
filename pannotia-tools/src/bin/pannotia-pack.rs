@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use std::io::{BufRead, BufReader};
+use std::fmt::Display;
+use std::io::{self, BufRead, BufReader};
 use std::process::ExitCode;
 use std::str::FromStr;
 
@@ -158,6 +159,65 @@ fn try_parse_line(
     Ok(())
 }
 
+#[derive(Debug)]
+enum PackError {
+    SyntaxError(String),
+    IoError(io::Error),
+}
+impl Display for PackError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SyntaxError(e) => write!(f, "syntax error: {}", e),
+            Self::IoError(e) => e.fmt(f),
+        }
+    }
+}
+impl std::error::Error for PackError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::IoError(error) => Some(error),
+            _ => None,
+        }
+    }
+}
+impl From<io::Error> for PackError {
+    fn from(value: io::Error) -> Self {
+        Self::IoError(value)
+    }
+}
+
+struct Packer {
+    family: Family,
+    tile_to_padring_map: HashMap<(TilePos, u8), u8>,
+}
+impl Packer {
+    pub fn new(family: Family) -> Self {
+        let tile_to_padring_map = padring::PADRING_TO_TILE
+            .iter()
+            .enumerate()
+            .map(|(pad_i, tile_pos)| (*tile_pos, pad_i as u8))
+            .collect::<HashMap<_, _>>();
+
+        Self {
+            family,
+            tile_to_padring_map,
+        }
+    }
+
+    pub fn pack<R: io::Read>(&self, r: R) -> Result<Bitstream, PackError> {
+        let r = BufReader::new(r);
+        let mut b = Bitstream::new(self.family);
+
+        for l in r.lines() {
+            let l = l?;
+            try_parse_line(&mut b, &l, &self.tile_to_padring_map)
+                .map_err(|_| PackError::SyntaxError(l))?;
+        }
+
+        Ok(b)
+    }
+}
+
 fn main() -> ExitCode {
     env_logger::init();
 
@@ -170,29 +230,15 @@ fn main() -> ExitCode {
         return ExitCode::FAILURE;
     };
 
-    let tile_to_padring_map = padring::PADRING_TO_TILE
-        .iter()
-        .enumerate()
-        .map(|(pad_i, tile_pos)| (*tile_pos, pad_i as u8))
-        .collect::<HashMap<_, _>>();
+    let p = Packer::new(family);
 
-    let mut b = Bitstream::new(family);
-
-    let r = BufReader::new(cli.textfile);
-    for l in r.lines() {
-        match l {
-            Ok(l) => {
-                if try_parse_line(&mut b, &l, &tile_to_padring_map).is_err() {
-                    eprintln!("syntax error: {}", l);
-                    return ExitCode::FAILURE;
-                }
-            }
-            Err(e) => {
-                eprintln!("{}", e);
-                return ExitCode::FAILURE;
-            }
+    let b = match p.pack(cli.textfile) {
+        Ok(b) => b,
+        Err(e) => {
+            eprintln!("{}", e);
+            return ExitCode::FAILURE;
         }
-    }
+    };
 
     let e = b.save(cli.output);
     match e {
@@ -205,3 +251,6 @@ fn main() -> ExitCode {
 
     ExitCode::SUCCESS
 }
+
+#[cfg(test)]
+mod pack_test;
