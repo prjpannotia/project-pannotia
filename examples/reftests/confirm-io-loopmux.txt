@@ -464,7 +464,7 @@ tile[0, 4].loc_to_sync[3] = GND
 tile[0, 4].loc_to_sync[4] = GND
 tile[0, 4].loc_to_sync[5] = GND
 pad[0, 4, 2].input_en = 1
-tile[1, 4].rmux[12] = #9	// T1_W[2] = tile[0, 4] T4_E[1]
+tile[1, 4].rmux[12] = #9	// T1_W[2] = tile[1, 4] T4_W[1]
 tile[1, 4].rmux[26] = #2	// T4_W[1] = tile[0, 4] T1_E[6]
 tile[22, 4].ce[0] = GND
 tile[22, 4].ce[1] = GND

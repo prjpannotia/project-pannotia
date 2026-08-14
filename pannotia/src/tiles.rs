@@ -115,6 +115,24 @@ impl TileType {
     pub fn is_boundary(self) -> bool {
         self.is_lr_boundary() || self.is_tb_boundary()
     }
+
+    #[inline]
+    /// Does this tile have T1 loop wires?
+    pub fn has_loop1(self) -> bool {
+        match self {
+            TileType::PLL => true,
+            _ => false,
+        }
+    }
+
+    #[inline]
+    /// Does this tile have T4 loop wires?
+    pub fn has_loop4(self) -> bool {
+        match self {
+            TileType::LeftRightIO | TileType::GCLKSW => true,
+            _ => false,
+        }
+    }
 }
 
 /// Functions common to all tile references

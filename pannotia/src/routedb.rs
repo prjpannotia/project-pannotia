@@ -143,14 +143,27 @@ impl RoutingWire {
             cur_pos += dir;
         }
 
+        // Handle looping through buffers
+        let tile_type = family.get_tile_type(cur_pos);
+        if tile_type.is_boundary() && self.bundle == 0 {
+            let via_loop = match self.ty {
+                WireType::T1 => tile_type.has_loop1(),
+                WireType::T4 => tile_type.has_loop4(),
+            };
+            if via_loop {
+                return AbsoluteRoutingWire {
+                    tile: cur_pos + dir.flip(), // back up one tile
+                    ty: self.ty,
+                    going_dir: dir,
+                    wire_idx: self.wire_idx,
+                };
+            }
+        }
+
         AbsoluteRoutingWire {
             tile: cur_pos,
             ty: self.ty,
-            going_dir: if did_flip_dir {
-                self.going_dir.flip()
-            } else {
-                self.going_dir
-            },
+            going_dir: dir.flip(), // flip again to get the original going direction
             wire_idx: self.wire_idx,
         }
     }
