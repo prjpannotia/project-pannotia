@@ -96,29 +96,18 @@ pub enum TileType {
 
 impl TileType {
     #[inline]
-    /// Is this a left/right boundary tile?
-    pub fn is_lr_boundary(self) -> bool {
-        match self {
-            TileType::LeftRightIO | TileType::LeftRightIP | TileType::PLL | TileType::GCLKSW => {
-                true
-            }
-            _ => false,
-        }
-    }
-
-    #[inline]
-    /// Is this a top/bottom boundary tile?
-    pub fn is_tb_boundary(self) -> bool {
-        match self {
-            TileType::TopBottomIO | TileType::TopIP | TileType::EmptyLoop => true,
-            _ => false,
-        }
-    }
-
-    #[inline]
     /// Is this any kind of boundary tile?
     pub fn is_boundary(self) -> bool {
-        self.is_lr_boundary() || self.is_tb_boundary()
+        match self {
+            TileType::LeftRightIO
+            | TileType::LeftRightIP
+            | TileType::PLL
+            | TileType::GCLKSW
+            | TileType::TopBottomIO
+            | TileType::TopIP
+            | TileType::EmptyLoop => true,
+            _ => false,
+        }
     }
 
     #[inline]
