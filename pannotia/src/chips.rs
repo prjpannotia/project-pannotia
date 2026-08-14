@@ -74,6 +74,8 @@ impl Family {
                     TileType::Logic // right block of logic
                 } else if pos.x == 21 && pos.y >= 1 && pos.y <= 12 {
                     TileType::RoutingOnly
+                } else if pos.x == 21 && (pos.y == 0 || pos.y == 13) {
+                    TileType::EmptyLoop
                 } else if pos.x == 22 && pos.y == 4 {
                     TileType::GCLKSW
                 } else if pos.x == 22 && pos.y == 5 {
