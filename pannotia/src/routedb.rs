@@ -128,10 +128,16 @@ impl RoutingWire {
         let mut dir = self.going_dir.flip();
         let mut cur_pos = tile_pos + dir;
         let mut did_flip_dir = false;
-        // let (tile_w, tile_h) = family.tile_dims();
+        let (tile_w, tile_h) = family.tile_dims();
         for _ in 0..self.bundle {
             // handle flipping wires around the edges
-            if family.get_tile_type(cur_pos).is_boundary() {
+            if family.get_tile_type(cur_pos).is_boundary()
+                // Apparently, there are loop wires in the empty tile below the BRAM
+                || cur_pos.x == 0
+                || cur_pos.x == tile_w - 1
+                || cur_pos.y == 0
+                || cur_pos.y == tile_h - 1
+            {
                 debug_assert!(!did_flip_dir, "cannot flip twice???");
                 did_flip_dir = true;
                 dir = dir.flip();
