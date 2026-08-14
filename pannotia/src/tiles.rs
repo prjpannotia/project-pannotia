@@ -43,6 +43,11 @@ pub enum TileType {
     /// such as a "clock distribution" tile.
     None,
 
+    /// There is no tile here, but there are loop wires
+    ///
+    /// This apparently exists below the BRAM
+    EmptyLoop,
+
     /// A logic tile, containing LUTs
     Logic,
 
@@ -105,7 +110,7 @@ impl TileType {
     /// Is this a top/bottom boundary tile?
     pub fn is_tb_boundary(self) -> bool {
         match self {
-            TileType::TopBottomIO | TileType::TopIP => true,
+            TileType::TopBottomIO | TileType::TopIP | TileType::EmptyLoop => true,
             _ => false,
         }
     }
@@ -129,7 +134,7 @@ impl TileType {
     /// Does this tile have T4 loop wires?
     pub fn has_loop4(self) -> bool {
         match self {
-            TileType::LeftRightIO | TileType::GCLKSW => true,
+            TileType::LeftRightIO | TileType::GCLKSW | TileType::EmptyLoop => true,
             _ => false,
         }
     }

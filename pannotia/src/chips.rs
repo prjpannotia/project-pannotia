@@ -78,6 +78,8 @@ impl Family {
                     TileType::GCLKSW
                 } else if pos.x == 22 && pos.y == 5 {
                     TileType::PLL
+                } else if pos.x == 13 && pos.y == 0 {
+                    TileType::EmptyLoop
                 } else if pos.x == 13 && pos.y >= 1 && pos.y <= 4 {
                     TileType::BRAM
                 } else if pos.x == 13 && pos.y >= 5 && pos.y <= 12 {

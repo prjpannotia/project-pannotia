@@ -658,14 +658,18 @@ impl<D: DebugTracer> Bitstream<D> {
 
     #[inline]
     pub fn tile(&self, pos: TilePos) -> Option<TileRef<D, &Self>> {
-        if self.family.get_tile_type(pos) == TileType::None {
+        if self.family.get_tile_type(pos) == TileType::None
+            || self.family.get_tile_type(pos) == TileType::EmptyLoop
+        {
             return None;
         }
         Some(TileRef::new(self, pos))
     }
     #[inline]
     pub fn tile_mut(&mut self, pos: TilePos) -> Option<TileRef<D, &mut Self>> {
-        if self.family.get_tile_type(pos) == TileType::None {
+        if self.family.get_tile_type(pos) == TileType::None
+            || self.family.get_tile_type(pos) == TileType::EmptyLoop
+        {
             return None;
         }
         Some(TileRef::new(self, pos))
