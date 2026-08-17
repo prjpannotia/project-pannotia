@@ -31,7 +31,7 @@ use crate::coordinates::*;
 ///
 ///
 #[non_exhaustive]
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
 #[repr(u8)]
 pub enum TileType {
     /// There is no tile here
@@ -93,6 +93,11 @@ pub enum TileType {
 
     /// Tile controlling global clock distribution
     GCLKSW,
+}
+impl Default for TileType {
+    fn default() -> Self {
+        Self::None
+    }
 }
 
 impl TileType {
