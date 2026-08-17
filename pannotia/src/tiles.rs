@@ -32,6 +32,7 @@ use crate::coordinates::*;
 ///
 #[non_exhaustive]
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[repr(u8)]
 pub enum TileType {
     /// There is no tile here
     ///
